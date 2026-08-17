@@ -2,15 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import {
-  ArrowLeft,
   Columns2,
   Columns3,
   Columns4,
   Filter,
-  Menu,
   Plus,
   Search,
-  X,
 } from "lucide-react";
 import {
   EMPTY_FILTERS,
@@ -19,8 +16,7 @@ import {
   type NavView,
   type Reference,
 } from "@/lib/storage/types";
-import { cn } from "@/lib/utils";
-import { uid } from "@/lib/utils";
+import { cn, uid } from "@/lib/utils";
 import { AddMenu, EditorDialog, type EditorState } from "./editor-dialog";
 import { DetailView, collectionNameOf } from "./detail-view";
 import { FilterChips, FilterPanel } from "./filter-panel";
@@ -28,7 +24,7 @@ import { Gallery } from "./gallery";
 import { useBreakpoint } from "./hooks";
 import { LibraryNav } from "./library-nav";
 import { useLibrary } from "./library-provider";
-import { Modal, Sheet } from "./sheet";
+import { Modal } from "./sheet";
 import { IconButton, inputClass, useClickOutside } from "./ui";
 
 const RECENT_MS = 14 * 24 * 60 * 60 * 1000;
@@ -102,10 +98,8 @@ export function AppShell() {
 
   const [view, setView] = useState<NavView>({ type: "all" });
   const [search, setSearch] = useState("");
-  const [searchOpen, setSearchOpen] = useState(false);
   const [filters, setFilters] = useState<ActiveFilters>(EMPTY_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -234,160 +228,109 @@ export function AppShell() {
       0;
 
   return (
-    <div className="flex h-dvh min-h-0 overflow-hidden bg-[var(--bg)]">
-      <aside className="hidden h-full w-[var(--sidebar-w)] shrink-0 border-r border-[var(--border)] bg-[var(--bg)] md:flex md:flex-col">
-        <LibraryNav view={view} onViewChange={setView} />
-      </aside>
+    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-[var(--bg)]">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-[var(--border)] px-3 pt-[env(safe-area-inset-top)] md:px-4">
+        <button
+          type="button"
+          onClick={() => setView({ type: "all" })}
+          className="flex shrink-0 items-center gap-2"
+          aria-label="All references"
+        >
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--text)] text-[11px] font-semibold text-white">
+            L
+          </span>
+          <span className="hidden text-[14px] font-semibold tracking-tight sm:inline">
+            Library
+          </span>
+        </button>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        {mobile ? (
-          <header className="flex h-[var(--header-h)] items-center gap-0.5 border-b border-[var(--border)] bg-[var(--bg)] px-1 pt-[env(safe-area-inset-top)]">
-            {searchOpen ? (
-              <>
-                <IconButton label="Back" onClick={() => setSearchOpen(false)}>
-                  <ArrowLeft size={16} strokeWidth={1.75} />
-                </IconButton>
-                <input
-                  autoFocus
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search references…"
-                  className={cn(inputClass, "h-10 border-transparent bg-transparent")}
-                />
-                {search && (
-                  <IconButton label="Clear" onClick={() => setSearch("")}>
-                    <X size={16} />
-                  </IconButton>
-                )}
-              </>
-            ) : (
-              <>
-                <div className="min-w-0 flex-1 px-3 text-[14px] font-medium tracking-tight">
-                  Library
-                </div>
-                <IconButton label="Search" onClick={() => setSearchOpen(true)}>
-                  <Search size={16} strokeWidth={1.75} />
-                </IconButton>
-                <IconButton
-                  label="Filter"
-                  className={filterActive ? "text-[var(--text)]" : undefined}
-                  onClick={() => setFilterOpen(true)}
-                >
-                  <Filter size={16} strokeWidth={1.75} />
-                </IconButton>
-                <IconButton
-                  label="Add reference"
-                  onClick={() => setAddOpen(true)}
-                >
-                  <Plus size={18} strokeWidth={1.75} />
-                </IconButton>
-                <IconButton label="Menu" onClick={() => setMenuOpen(true)}>
-                  <Menu size={16} strokeWidth={1.75} />
-                </IconButton>
-              </>
-            )}
-          </header>
-        ) : (
-          <header className="flex h-[var(--header-h)] items-center gap-2 border-b border-[var(--border)] px-3">
-            <div className="relative min-w-0 flex-1">
-              <Search
-                size={14}
-                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[var(--muted-2)]"
-              />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search references…"
-                className={cn(inputClass, "h-10 pl-8")}
-              />
-            </div>
-            <div className="relative" ref={filterRef}>
-              <IconButton
-                label="Filter"
-                className={cn("h-10 w-10", filterActive && "text-[var(--text)]")}
-                onClick={() => setFilterOpen((v) => !v)}
-              >
-                <Filter size={16} strokeWidth={1.75} />
-              </IconButton>
-              <FilterPanel
-                open={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                filters={filters}
-                onChange={setFilters}
-                tags={tags}
-                mobile={false}
-              />
-            </div>
-            <DensityToggle density={density} onChange={setDensity} />
-            <div className="relative" ref={addRef}>
-              <IconButton
-                label="Add reference"
-                className="h-10 w-10"
-                onClick={() => setAddOpen((v) => !v)}
-              >
-                <Plus size={18} strokeWidth={1.75} />
-              </IconButton>
-              <AddMenu
-                open={addOpen}
-                onClose={() => setAddOpen(false)}
-                mobile={false}
-                onLink={() => {
-                  setAddOpen(false);
-                  setEditor({ mode: "link" });
-                }}
-                onUpload={() => {
-                  setAddOpen(false);
-                  setEditor({ mode: "upload" });
-                }}
-                onPaste={() => {
-                  setAddOpen(false);
-                  void pasteImage();
-                }}
-              />
-            </div>
-          </header>
-        )}
-
-        <FilterChips
-          filters={filters}
-          onChange={setFilters}
-          collectionNames={collectionNames}
-        />
-
-        <div className="flex min-h-0 flex-1">
-          <div className="min-w-0 flex-1 pt-3">
-            <Gallery
-              references={visible}
-              density={density}
-              collectionNames={collectionNames}
-              onOpen={openDetail}
-              onFavorite={(id) => void toggleFavorite(id)}
-              onEdit={(id) => setEditor({ mode: "edit", id })}
-              onDelete={(id) => void deleteReference(id)}
-              onFiles={(files) =>
-                setEditor({ mode: "upload", file: files[0] })
-              }
-              onSelectCollection={selectCollection}
-              onSelectTag={selectTag}
-            />
-          </div>
-
+        <div className="relative min-w-0 flex-1">
+          <Search
+            size={14}
+            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[var(--muted-2)]"
+          />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search references…"
+            className={cn(inputClass, "h-10 pl-8")}
+          />
         </div>
-      </div>
 
-      <Sheet
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        side="left"
-        title="Library"
-      >
-        <LibraryNav
-          view={view}
-          onViewChange={setView}
-          onNavigate={() => setMenuOpen(false)}
-          showTitle={false}
+        <div className="relative shrink-0" ref={filterRef}>
+          <IconButton
+            label="Filter"
+            className={cn("h-10 w-10", filterActive && "text-[var(--text)]")}
+            onClick={() => setFilterOpen((v) => !v)}
+          >
+            <Filter size={16} strokeWidth={1.75} />
+          </IconButton>
+          {!mobile && (
+            <FilterPanel
+              open={filterOpen}
+              onClose={() => setFilterOpen(false)}
+              filters={filters}
+              onChange={setFilters}
+              tags={tags}
+              mobile={false}
+            />
+          )}
+        </div>
+
+        <DensityToggle density={density} onChange={setDensity} />
+
+        <div className="relative shrink-0" ref={addRef}>
+          <IconButton
+            label="Add reference"
+            className="h-10 w-10"
+            onClick={() => setAddOpen((v) => !v)}
+          >
+            <Plus size={18} strokeWidth={1.75} />
+          </IconButton>
+          {!mobile && (
+            <AddMenu
+              open={addOpen}
+              onClose={() => setAddOpen(false)}
+              mobile={false}
+              onLink={() => {
+                setAddOpen(false);
+                setEditor({ mode: "link" });
+              }}
+              onUpload={() => {
+                setAddOpen(false);
+                setEditor({ mode: "upload" });
+              }}
+              onPaste={() => {
+                setAddOpen(false);
+                void pasteImage();
+              }}
+            />
+          )}
+        </div>
+      </header>
+
+      <LibraryNav view={view} onViewChange={setView} />
+
+      <FilterChips
+        filters={filters}
+        onChange={setFilters}
+        collectionNames={collectionNames}
+      />
+
+      <main className="min-h-0 flex-1 pt-3">
+        <Gallery
+          references={visible}
+          density={density}
+          collectionNames={collectionNames}
+          onOpen={openDetail}
+          onFavorite={(id) => void toggleFavorite(id)}
+          onEdit={(id) => setEditor({ mode: "edit", id })}
+          onDelete={(id) => void deleteReference(id)}
+          onFiles={(files) => setEditor({ mode: "upload", file: files[0] })}
+          onSelectCollection={selectCollection}
+          onSelectTag={selectTag}
         />
-      </Sheet>
+      </main>
 
       {mobile && (
         <FilterPanel
