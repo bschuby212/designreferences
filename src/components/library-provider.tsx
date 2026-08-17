@@ -66,6 +66,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       ...record,
       thumbnailUrl: record.thumbnailUrl ?? null,
       imageUrls: record.imageUrls ?? [],
+      comments: record.comments ?? [],
       thumbnail: byId.get(record.id) ?? null,
     }));
   }, [records, thumbs]);

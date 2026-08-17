@@ -16,6 +16,7 @@ function toReference(
     ...record,
     thumbnailUrl: record.thumbnailUrl ?? null,
     imageUrls: record.imageUrls ?? [],
+    comments: record.comments ?? [],
     thumbnail: blob,
   };
 }
@@ -133,6 +134,7 @@ export const indexedDbRepository: LibraryRepository = {
       collectionId: input.collectionId,
       tags: input.tags,
       notes: input.notes,
+      comments: [],
       favorite: input.favorite ?? false,
       createdAt: timestamp,
       updatedAt: timestamp,

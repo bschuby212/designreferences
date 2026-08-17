@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 export type Breakpoint = "mobile" | "tablet" | "desktop";
 
@@ -27,12 +27,20 @@ export function useBreakpoint(): Breakpoint {
 }
 
 export function useObjectUrl(blob: Blob | null | undefined) {
-  const url = useMemo(() => (blob ? URL.createObjectURL(blob) : null), [blob]);
+  const [url, setUrl] = useState<string | null>(null);
+  // Create and revoke the URL inside the same effect. Doing this via useMemo
+  // breaks under React Strict Mode: the effect cleanup revokes the URL, but the
+  // memo isn't recomputed on the re-mount, leaving a dead (revoked) URL.
   useEffect(() => {
-    return () => {
-      if (url) URL.revokeObjectURL(url);
-    };
-  }, [url]);
+    if (!blob) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setUrl(null);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(blob);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [blob]);
   return url;
 }
 

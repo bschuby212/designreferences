@@ -115,4 +115,30 @@ async function runSeed() {
   }
 
   await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
+
+  // Upgrade flows that were seeded before multi-image support existed: fetch the
+  // full set of screens so they render as a carousel. Idempotent — once a flow
+  // has more than one image stored, it is skipped on future loads.
+  const upgradeFlows = existing.filter(
+    (item) => /\/flows\//.test(item.url) && (item.imageUrls?.length ?? 0) < 2,
+  );
+  let upgradeIndex = 0;
+  async function upgradeWorker() {
+    while (upgradeIndex < upgradeFlows.length) {
+      const item = upgradeFlows[upgradeIndex++];
+      const data = await preview(item.url, item.thumbnailUrl ?? undefined);
+      if (!data || data.images.length < 2) continue;
+      const thumbnail = data.thumbnail
+        ? base64ToBlob(data.thumbnail.data, data.thumbnail.mime)
+        : null;
+      await repository.updateReference(item.id, {
+        imageUrls: data.images,
+        thumbnailUrl: data.thumbnailUrl || item.thumbnailUrl,
+        ...(thumbnail
+          ? { thumbnail, thumbnailType: data.thumbnailType }
+          : {}),
+      });
+    }
+  }
+  await Promise.all(Array.from({ length: CONCURRENCY }, () => upgradeWorker()));
 }

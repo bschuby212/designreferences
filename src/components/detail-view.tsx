@@ -1,12 +1,12 @@
 "use client";
 
-import { type ReactNode } from "react";
-import { ExternalLink, Heart, Pencil, Trash2, X } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { ExternalLink, Heart, Pencil, Send, Trash2, X } from "lucide-react";
 import type { Collection, Reference } from "@/lib/storage/types";
 import { formatSavedDate } from "@/lib/utils";
 import { referenceImageUrls, useObjectUrl, useThumbnailSrc } from "./hooks";
 import { ImageCarousel } from "./image-carousel";
-import { areaClass, GhostButton, IconButton } from "./ui";
+import { areaClass, IconButton } from "./ui";
 
 interface DetailViewProps {
   reference: Reference;
@@ -16,7 +16,8 @@ interface DetailViewProps {
   onEdit: () => void;
   onDelete: () => void;
   onNotes: (notes: string) => void;
-  variant: "panel" | "sheet";
+  onAddComment: (text: string) => void;
+  onDeleteComment: (commentId: string) => void;
 }
 
 export function DetailView({
@@ -27,15 +28,24 @@ export function DetailView({
   onEdit,
   onDelete,
   onNotes,
-  variant,
+  onAddComment,
+  onDeleteComment,
 }: DetailViewProps) {
   const src = useThumbnailSrc(reference);
   const blobSrc = useObjectUrl(reference.thumbnail);
   const images = referenceImageUrls(reference);
+  const [comment, setComment] = useState("");
+
+  const submitComment = () => {
+    const text = comment.trim();
+    if (!text) return;
+    onAddComment(text);
+    setComment("");
+  };
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-[var(--surface)]">
-      <div className="flex items-center justify-between px-2">
+      <div className="flex items-center justify-between border-b border-[var(--border)] px-2 py-1.5">
         <div className="flex items-center gap-0.5">
           <IconButton
             label={reference.favorite ? "Unfavorite" : "Favorite"}
@@ -59,105 +69,158 @@ export function DetailView({
         </IconButton>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-8">
-        {images.length > 1 ? (
-          <ImageCarousel
-            images={images}
-            alt={reference.title || "Reference"}
-            primaryUrl={reference.thumbnailUrl}
-            primaryBlobSrc={blobSrc}
-          />
-        ) : (
-          <div className="overflow-hidden rounded-[var(--radius)] bg-[var(--hover)]">
-            {src ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={src}
-                alt={reference.title || "Reference"}
-                className="block h-auto w-full"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="flex aspect-[4/3] items-center justify-center text-[12px] text-[var(--muted-2)]">
-                No image
-              </div>
-            )}
+      <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto md:grid-cols-[1.15fr_1fr]">
+        <div className="bg-[var(--hover)] p-4 md:border-r md:border-[var(--border)]">
+          {images.length > 1 ? (
+            <ImageCarousel
+              images={images}
+              alt={reference.title || "Reference"}
+              primaryUrl={reference.thumbnailUrl}
+              primaryBlobSrc={blobSrc}
+            />
+          ) : (
+            <div className="overflow-hidden rounded-[var(--radius)] border border-[var(--card-border)] bg-[var(--card)]">
+              {src ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={src}
+                  alt={reference.title || "Reference"}
+                  className="block h-auto w-full"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="flex aspect-[4/3] items-center justify-center text-[12px] text-[var(--muted-2)]">
+                  No image
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-4 p-4">
+          <div>
+            <h1 className="text-[17px] leading-snug font-semibold tracking-tight">
+              {reference.title || "Untitled"}
+            </h1>
+            <div className="mt-1 text-[12px] text-[var(--muted-2)]">
+              {reference.source} · Saved {formatSavedDate(reference.createdAt)}
+            </div>
           </div>
-        )}
 
-        <h1 className="mt-4 text-[16px] leading-snug font-medium tracking-tight">
-          {reference.title || "Untitled"}
-        </h1>
-
-        <dl className="mt-3 space-y-2 text-[13px]">
-          <Row label="Source">{reference.source}</Row>
           {reference.url && (
-            <Row label="URL">
-              <a
-                href={reference.url}
-                target="_blank"
-                rel="noreferrer"
-                className="break-all text-[var(--text)] underline-offset-2 hover:underline"
-              >
-                {reference.url}
-              </a>
-            </Row>
+            <a
+              href={reference.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-[var(--text)] text-[13px] font-medium text-white"
+            >
+              <ExternalLink size={14} strokeWidth={1.75} />
+              Open original
+            </a>
           )}
-          {collectionName && <Row label="Collection">{collectionName}</Row>}
-          {reference.tags.length > 0 && (
-            <Row label="Tags">{reference.tags.join(", ")}</Row>
+
+          {(collectionName || reference.tags.length > 0) && (
+            <div className="flex flex-wrap gap-1.5">
+              {collectionName && <Pill>{collectionName}</Pill>}
+              {reference.tags.map((tag) => (
+                <Pill key={tag}>{tag}</Pill>
+              ))}
+            </div>
           )}
-          <Row label="Saved">{formatSavedDate(reference.createdAt)}</Row>
-        </dl>
 
-        {reference.url && (
-          <a
-            href={reference.url}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-[var(--text)] text-[13px] font-medium text-white"
-          >
-            <ExternalLink size={14} strokeWidth={1.75} />
-            Open original
-          </a>
-        )}
+          <Section label="Description">
+            <textarea
+              defaultValue={reference.notes}
+              key={reference.id + reference.updatedAt}
+              className={areaClass}
+              placeholder="Add a description…"
+              onBlur={(e) => {
+                if (e.target.value !== reference.notes) onNotes(e.target.value);
+              }}
+            />
+          </Section>
 
-        <label className="mt-5 flex flex-col gap-1.5">
-          <span className="text-[11px] font-medium tracking-wide text-[var(--muted)]">
-            Notes
-          </span>
-          <textarea
-            defaultValue={reference.notes}
-            key={reference.id + reference.updatedAt}
-            className={areaClass}
-            placeholder="Add notes…"
-            onBlur={(e) => {
-              if (e.target.value !== reference.notes) onNotes(e.target.value);
-            }}
-          />
-        </label>
+          <Section label={`Comments${reference.comments.length ? ` (${reference.comments.length})` : ""}`}>
+            <div className="flex flex-col gap-2">
+              {reference.comments.length === 0 && (
+                <p className="text-[12px] text-[var(--muted-2)]">
+                  No comments yet.
+                </p>
+              )}
+              {reference.comments.map((item) => (
+                <div
+                  key={item.id}
+                  className="group/comment rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-3 py-2"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="min-w-0 flex-1 text-[13px] whitespace-pre-wrap break-words text-[var(--text)]">
+                      {item.text}
+                    </p>
+                    <button
+                      type="button"
+                      aria-label="Delete comment"
+                      title="Delete comment"
+                      onClick={() => onDeleteComment(item.id)}
+                      className="shrink-0 text-[var(--muted-2)] opacity-0 transition-opacity hover:text-[var(--danger)] group-hover/comment:opacity-100"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                  <div className="mt-1 text-[10px] text-[var(--muted-2)]">
+                    {formatSavedDate(item.createdAt)}
+                  </div>
+                </div>
+              ))}
 
-        {variant === "sheet" && (
-          <div className="mt-4 flex gap-2">
-            <GhostButton className="flex-1" onClick={onEdit}>
-              Edit
-            </GhostButton>
-            <GhostButton className="flex-1 text-[var(--danger)]" onClick={onDelete}>
-              Delete
-            </GhostButton>
-          </div>
-        )}
+              <div className="flex items-end gap-2">
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                      e.preventDefault();
+                      submitComment();
+                    }
+                  }}
+                  rows={2}
+                  className={areaClass.replace("min-h-[88px]", "min-h-[44px]")}
+                  placeholder="Add a comment…"
+                />
+                <button
+                  type="button"
+                  aria-label="Add comment"
+                  title="Add comment"
+                  onClick={submitComment}
+                  disabled={!comment.trim()}
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--text)] text-white disabled:opacity-40"
+                >
+                  <Send size={15} strokeWidth={1.75} />
+                </button>
+              </div>
+            </div>
+          </Section>
+        </div>
       </div>
     </div>
   );
 }
 
-function Row({ label, children }: { label: string; children: ReactNode }) {
+function Section({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="grid grid-cols-[88px_1fr] gap-2">
-      <dt className="text-[var(--muted-2)]">{label}</dt>
-      <dd className="min-w-0">{children}</dd>
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[11px] font-medium tracking-wide text-[var(--muted)]">
+        {label}
+      </span>
+      {children}
     </div>
+  );
+}
+
+function Pill({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex h-6 items-center rounded-full border border-[var(--border)] bg-[var(--card)] px-2.5 text-[11px] text-[var(--muted)]">
+      {children}
+    </span>
   );
 }
 

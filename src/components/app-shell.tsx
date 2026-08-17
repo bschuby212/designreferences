@@ -20,6 +20,7 @@ import {
   type Reference,
 } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
+import { uid } from "@/lib/utils";
 import { AddMenu, EditorDialog, type EditorState } from "./editor-dialog";
 import { DetailView, collectionNameOf } from "./detail-view";
 import { FilterChips, FilterPanel } from "./filter-panel";
@@ -27,7 +28,7 @@ import { Gallery } from "./gallery";
 import { useBreakpoint } from "./hooks";
 import { LibraryNav } from "./library-nav";
 import { useLibrary } from "./library-provider";
-import { Sheet } from "./sheet";
+import { Modal, Sheet } from "./sheet";
 import { IconButton, inputClass, useClickOutside } from "./ui";
 
 const RECENT_MS = 14 * 24 * 60 * 60 * 1000;
@@ -179,6 +180,36 @@ export function AppShell() {
     await updateReference(id, { favorite: !reference.favorite });
   }
 
+  async function addComment(id: string, text: string) {
+    const reference = references.find((item) => item.id === id);
+    if (!reference) return;
+    await updateReference(id, {
+      comments: [
+        ...reference.comments,
+        { id: uid(), text, createdAt: Date.now() },
+      ],
+    });
+  }
+
+  async function deleteComment(id: string, commentId: string) {
+    const reference = references.find((item) => item.id === id);
+    if (!reference) return;
+    await updateReference(id, {
+      comments: reference.comments.filter((item) => item.id !== commentId),
+    });
+  }
+
+  const selectCollection = useCallback((id: string) => {
+    setView({ type: "collection", id });
+    setSelectedId(null);
+  }, []);
+
+  const selectTag = useCallback((tag: string) => {
+    setFilters({ ...EMPTY_FILTERS, tags: [tag] });
+    setView({ type: "all" });
+    setSelectedId(null);
+  }, []);
+
   async function pasteImage() {
     try {
       const items = await navigator.clipboard.read();
@@ -328,7 +359,7 @@ export function AppShell() {
             <Gallery
               references={visible}
               density={density}
-              compactMeta={mobile}
+              collectionNames={collectionNames}
               onOpen={openDetail}
               onFavorite={(id) => void toggleFavorite(id)}
               onEdit={(id) => setEditor({ mode: "edit", id })}
@@ -336,31 +367,11 @@ export function AppShell() {
               onFiles={(files) =>
                 setEditor({ mode: "upload", file: files[0] })
               }
+              onSelectCollection={selectCollection}
+              onSelectTag={selectTag}
             />
           </div>
 
-          {selected && !mobile && (
-            <aside className="h-full w-[var(--panel-w)] shrink-0 border-l border-[var(--border)] bg-[var(--surface)]">
-              <DetailView
-                reference={selected}
-                collectionName={collectionNameOf(
-                  collections,
-                  selected.collectionId,
-                )}
-                variant="panel"
-                onClose={closeDetail}
-                onFavorite={() => void toggleFavorite(selected.id)}
-                onEdit={() => setEditor({ mode: "edit", id: selected.id })}
-                onDelete={() => {
-                  void deleteReference(selected.id);
-                  setSelectedId(null);
-                }}
-                onNotes={(notes) =>
-                  void updateReference(selected.id, { notes })
-                }
-              />
-            </aside>
-          )}
         </div>
       </div>
 
@@ -409,18 +420,15 @@ export function AppShell() {
         />
       )}
 
-      {mobile && selected && (
-        <Sheet
-          open
-          onClose={closeDetail}
-          side="bottom"
-          swipeToDismiss
-          className="h-[94dvh]"
-        >
+      <Modal
+        open={Boolean(selected)}
+        onClose={closeDetail}
+        className="h-[94dvh] max-w-5xl sm:h-auto"
+      >
+        {selected && (
           <DetailView
             reference={selected}
             collectionName={collectionNameOf(collections, selected.collectionId)}
-            variant="sheet"
             onClose={closeDetail}
             onFavorite={() => void toggleFavorite(selected.id)}
             onEdit={() => setEditor({ mode: "edit", id: selected.id })}
@@ -429,9 +437,13 @@ export function AppShell() {
               closeDetail();
             }}
             onNotes={(notes) => void updateReference(selected.id, { notes })}
+            onAddComment={(text) => void addComment(selected.id, text)}
+            onDeleteComment={(commentId) =>
+              void deleteComment(selected.id, commentId)
+            }
           />
-        </Sheet>
-      )}
+        )}
+      </Modal>
 
       <EditorDialog
         state={editor}

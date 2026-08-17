@@ -135,8 +135,8 @@ export function Modal({
         aria-modal="true"
         aria-label={title}
         className={cn(
-          "relative flex max-h-[94dvh] w-full max-w-md flex-col rounded-t-xl bg-[var(--surface)] sm:rounded-xl",
-          className,
+          "relative flex max-h-[94dvh] w-full flex-col rounded-t-xl bg-[var(--surface)] sm:rounded-xl",
+          className ?? "max-w-md",
         )}
       >
         {title && (
