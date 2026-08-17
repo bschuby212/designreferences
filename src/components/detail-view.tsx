@@ -1,18 +1,10 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import {
-  ExternalLink,
-  Folder,
-  Hash,
-  Heart,
-  Pencil,
-  Send,
-  Trash2,
-  X,
-} from "lucide-react";
+import { ExternalLink, Heart, Pencil, Send, Trash2, X } from "lucide-react";
 import type { Collection, Reference } from "@/lib/storage/types";
 import { formatSavedDate } from "@/lib/utils";
+import { CollectionIcon, TagIcon } from "./category-icons";
 import { referenceImageUrls, useObjectUrl, useThumbnailSrc } from "./hooks";
 import { ImageCarousel } from "./image-carousel";
 import { areaClass, IconButton } from "./ui";
@@ -132,12 +124,20 @@ export function DetailView({
           {(collectionName || reference.tags.length > 0) && (
             <div className="flex flex-wrap gap-1.5">
               {collectionName && (
-                <Pill icon={<Folder size={12} strokeWidth={1.75} />}>
+                <Pill
+                  icon={
+                    <CollectionIcon
+                      name={collectionName}
+                      size={12}
+                      strokeWidth={1.75}
+                    />
+                  }
+                >
                   {collectionName}
                 </Pill>
               )}
               {reference.tags.map((tag) => (
-                <Pill key={tag} icon={<Hash size={12} strokeWidth={1.75} />}>
+                <Pill key={tag} icon={<TagIcon size={12} strokeWidth={1.75} />}>
                   {tag}
                 </Pill>
               ))}
@@ -234,7 +234,7 @@ function Section({ label, children }: { label: string; children: ReactNode }) {
 
 function Pill({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
   return (
-    <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[var(--hover)] pr-2.5 pl-2 text-[11px] text-[var(--muted)]">
+    <span className="inline-flex h-6 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] pr-2.5 pl-2 text-[11px] text-[var(--muted)]">
       {icon && <span className="text-[var(--muted-2)]">{icon}</span>}
       {children}
     </span>

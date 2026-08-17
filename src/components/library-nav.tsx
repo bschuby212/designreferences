@@ -1,18 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Check,
-  Folder,
-  Globe,
-  LayoutGrid,
-  Pencil,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
 import { SOURCE_TYPES, type NavView } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
+import { AllIcon, CollectionIcon, SourceIcon } from "./category-icons";
 import { useLibrary } from "./library-provider";
 import { inputClass, useClickOutside } from "./ui";
 
@@ -37,10 +29,10 @@ function Pill({
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex h-8 shrink-0 items-center gap-1 rounded-full px-3 text-[13px] whitespace-nowrap transition-colors",
+        "inline-flex h-8 shrink-0 items-center gap-1 rounded-full border px-3 text-[13px] whitespace-nowrap transition-colors",
         active
-          ? "bg-[var(--chip-active)] font-medium text-[var(--text)]"
-          : "text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--text)]",
+          ? "border-[var(--border-strong)] bg-[var(--chip-active)] font-medium text-[var(--text)]"
+          : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)]",
       )}
     >
       {children}
@@ -126,7 +118,7 @@ export function LibraryNav({ view, onViewChange }: LibraryNavProps) {
 
       <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto">
         <Pill active={view.type === "all"} onClick={() => onViewChange({ type: "all" })}>
-          <LayoutGrid size={13} strokeWidth={1.75} />
+          <AllIcon size={13} strokeWidth={1.75} />
           All
         </Pill>
 
@@ -165,13 +157,17 @@ export function LibraryNav({ view, onViewChange }: LibraryNavProps) {
                     }}
                     title="Right-click to rename or delete"
                     className={cn(
-                      "inline-flex h-8 items-center gap-1 rounded-full px-3 text-[13px] whitespace-nowrap transition-colors",
+                      "inline-flex h-8 items-center gap-1 rounded-full border px-3 text-[13px] whitespace-nowrap transition-colors",
                       active
-                        ? "bg-[var(--chip-active)] font-medium text-[var(--text)]"
-                        : "text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--text)]",
+                        ? "border-[var(--border-strong)] bg-[var(--chip-active)] font-medium text-[var(--text)]"
+                        : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)]",
                     )}
                   >
-                    <Folder size={13} strokeWidth={1.75} />
+                    <CollectionIcon
+                      name={collection.name}
+                      size={13}
+                      strokeWidth={1.75}
+                    />
                     {collection.name}
                   </button>
                   {menuId === collection.id && (
@@ -212,7 +208,7 @@ export function LibraryNav({ view, onViewChange }: LibraryNavProps) {
                 active={view.type === "source" && view.source === source}
                 onClick={() => onViewChange({ type: "source", source })}
               >
-                <Globe size={13} strokeWidth={1.75} />
+                <SourceIcon source={source} size={13} strokeWidth={1.75} />
                 {source}
               </Pill>
             ))}

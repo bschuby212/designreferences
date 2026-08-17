@@ -3,9 +3,6 @@
 import { useState, type ReactNode } from "react";
 import {
   ExternalLink,
-  Folder,
-  Globe,
-  Hash,
   Heart,
   Images,
   MoreHorizontal,
@@ -14,6 +11,7 @@ import {
 } from "lucide-react";
 import type { Reference } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
+import { CollectionIcon, SourceIcon, TagIcon } from "./category-icons";
 import { referenceImageUrls, useThumbnailSrc } from "./hooks";
 import { useClickOutside } from "./ui";
 
@@ -56,7 +54,7 @@ export function ReferenceCard({
     chips.push({
       key: `c-${id}`,
       label: collectionName,
-      icon: <Folder size={11} strokeWidth={1.75} />,
+      icon: <CollectionIcon name={collectionName} size={11} strokeWidth={1.75} />,
       onClick: () => onSelectCollection(id),
     });
   }
@@ -65,7 +63,7 @@ export function ReferenceCard({
     chips.push({
       key: `t-${tag}`,
       label: tag,
-      icon: <Hash size={11} strokeWidth={1.75} />,
+      icon: <TagIcon size={11} strokeWidth={1.75} />,
       onClick: () => onSelectTag?.(tag),
     });
   }
@@ -74,7 +72,7 @@ export function ReferenceCard({
     chips.push({
       key: `s-${reference.source}`,
       label: reference.source,
-      icon: <Globe size={11} strokeWidth={1.75} />,
+      icon: <SourceIcon source={reference.source} size={11} strokeWidth={1.75} />,
       onClick: () => onSelectSource?.(reference.source),
     });
   }
@@ -176,7 +174,7 @@ export function ReferenceCard({
                   e.stopPropagation();
                   chip.onClick();
                 }}
-                className="inline-flex h-6 max-w-full items-center gap-1 rounded-full bg-[var(--surface)] pr-2 pl-1.5 text-[11px] text-[var(--muted)] transition-colors hover:text-[var(--text)]"
+                className="inline-flex h-6 max-w-full items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] pr-2 pl-1.5 text-[11px] text-[var(--muted)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text)]"
               >
                 <span className="shrink-0 text-[var(--muted-2)]">{chip.icon}</span>
                 <span className="truncate">{chip.label}</span>
