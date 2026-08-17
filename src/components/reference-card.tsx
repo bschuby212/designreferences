@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import type { Reference } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
-import { useObjectUrl } from "./hooks";
+import { useThumbnailSrc } from "./hooks";
 import { useClickOutside } from "./ui";
 
 interface ReferenceCardProps {
@@ -30,7 +30,7 @@ export function ReferenceCard({
   onEdit,
   onDelete,
 }: ReferenceCardProps) {
-  const src = useObjectUrl(reference.thumbnail);
+  const src = useThumbnailSrc(reference);
   const [menu, setMenu] = useState(false);
   const menuRef = useClickOutside(menu, () => setMenu(false));
 
@@ -47,6 +47,7 @@ export function ReferenceCard({
             src={src}
             alt={reference.title || "Reference"}
             className="block h-auto w-full"
+            referrerPolicy="no-referrer"
           />
         ) : (
           <div className="flex aspect-[4/3] items-center justify-center text-[11px] text-[var(--muted-2)]">

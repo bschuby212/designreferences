@@ -4,7 +4,7 @@ import { type ReactNode } from "react";
 import { ExternalLink, Heart, Pencil, Trash2, X } from "lucide-react";
 import type { Collection, Reference } from "@/lib/storage/types";
 import { formatSavedDate } from "@/lib/utils";
-import { useObjectUrl } from "./hooks";
+import { useThumbnailSrc } from "./hooks";
 import { areaClass, GhostButton, IconButton } from "./ui";
 
 interface DetailViewProps {
@@ -28,7 +28,7 @@ export function DetailView({
   onNotes,
   variant,
 }: DetailViewProps) {
-  const src = useObjectUrl(reference.thumbnail);
+  const src = useThumbnailSrc(reference);
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-[var(--surface)]">
@@ -64,6 +64,7 @@ export function DetailView({
               src={src}
               alt={reference.title || "Reference"}
               className="block h-auto w-full"
+              referrerPolicy="no-referrer"
             />
           ) : (
             <div className="flex aspect-[4/3] items-center justify-center text-[12px] text-[var(--muted-2)]">

@@ -6,6 +6,7 @@ export interface LinkPreview {
   siteName: string;
   favicon: string;
   source: SourceType;
+  thumbnailUrl: string | null;
   thumbnail: { mime: string; data: string } | null;
   thumbnailType: ThumbnailType;
 }

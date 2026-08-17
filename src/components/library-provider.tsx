@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getDb, repository } from "@/lib/storage";
+import { seedExampleReferences } from "@/lib/storage/seed-examples-runner";
 import type {
   Collection,
   CreateReferenceInput,
@@ -45,9 +46,14 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    void repository.seedIfEmpty().catch((error) => {
-      console.error("Failed to seed library", error);
-    });
+    void (async () => {
+      try {
+        await repository.seedIfEmpty();
+        await seedExampleReferences();
+      } catch (error) {
+        console.error("Failed to seed library", error);
+      }
+    })();
   }, []);
 
   const references = useMemo<Reference[]>(() => {
@@ -55,6 +61,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     const byId = new Map((thumbs ?? []).map((t) => [t.id, t.blob]));
     return records.map((record) => ({
       ...record,
+      thumbnailUrl: record.thumbnailUrl ?? null,
       thumbnail: byId.get(record.id) ?? null,
     }));
   }, [records, thumbs]);

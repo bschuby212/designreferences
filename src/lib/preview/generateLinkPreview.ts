@@ -7,6 +7,8 @@ const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const MOBBIN_CDN =
+  "https://bytescale.mobbin.com/FW25bBB/image/mobbin.com/prod/content";
 
 async function fetchWithTimeout(
   url: string,
@@ -28,7 +30,7 @@ async function fetchWithTimeout(
 
 function absUrl(value: string | undefined, base: string) {
   if (!value) return "";
-  const trimmed = value.trim();
+  const trimmed = decodeEntities(value);
   if (!trimmed || trimmed.startsWith("data:")) return "";
   try {
     return new URL(trimmed, base).toString();
@@ -37,10 +39,7 @@ function absUrl(value: string | undefined, base: string) {
   }
 }
 
-function meta(
-  $: cheerio.CheerioAPI,
-  ...keys: string[]
-) {
+function meta($: cheerio.CheerioAPI, ...keys: string[]) {
   for (const key of keys) {
     const byProp = $(`meta[property="${key}"]`).attr("content");
     if (byProp) return byProp;
@@ -58,6 +57,68 @@ function decodeEntities(value: string) {
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .trim();
+}
+
+function isGenericOg(url: string) {
+  return /\/og_image\.png(?:\?|$)/i.test(url) || /\/og\.png(?:\?|$)/i.test(url);
+}
+
+function cdnAsset(kind: "app_screens" | "sites", id: string, ext: string) {
+  return `${MOBBIN_CDN}/${kind}/${id}.${ext}?f=png&w=1200&q=70&fit=shrink-cover`;
+}
+
+function productImagesFromHtml(
+  html: string,
+  pageUrl: string,
+  $: cheerio.CheerioAPI,
+) {
+  const candidates: Array<{ url: string; type: ThumbnailType }> = [];
+  const seen = new Set<string>();
+  const add = (raw: string | undefined, type: ThumbnailType) => {
+    const url = absUrl(raw, pageUrl);
+    if (!url || isGenericOg(url) || seen.has(url)) return;
+    seen.add(url);
+    candidates.push({ url, type });
+  };
+
+  const og = absUrl(meta($, "og:image", "og:image:url", "og:image:secure_url"), pageUrl);
+  if (og) {
+    try {
+      const screenUrl = new URL(og).searchParams.get("screenUrl");
+      add(screenUrl ?? "", "og");
+    } catch {
+      // Ignore malformed og URLs.
+    }
+  }
+
+  const screen = html.match(/content\/app_screens\/([0-9a-f-]{36})\.(png|webp|jpg)/i);
+  if (screen) add(cdnAsset("app_screens", screen[1], screen[2]), "og");
+  const site = html.match(/content\/sites\/([0-9a-f-]{36})\.(png|webp|jpg)/i);
+  if (site) add(cdnAsset("sites", site[1], site[2]), "og");
+
+  add(og, "og");
+  add(meta($, "twitter:image", "twitter:image:src"), "twitter");
+  add(meta($, "image") || $('link[rel="image_src"]').attr("href"), "meta");
+
+  $('script[type="application/ld+json"]').each((_, el) => {
+    try {
+      const parsed = JSON.parse($(el).text()) as { image?: unknown };
+      const image = parsed?.image;
+      const src =
+        typeof image === "string"
+          ? image
+          : Array.isArray(image)
+            ? typeof image[0] === "string"
+              ? image[0]
+              : (image[0] as { url?: string })?.url
+            : (image as { url?: string } | undefined)?.url;
+      add(src, "meta");
+    } catch {
+      // Ignore malformed JSON-LD.
+    }
+  });
+
+  return candidates;
 }
 
 async function fetchImage(url: string) {
@@ -100,7 +161,10 @@ async function fetchScreenshot(url: string) {
   return null;
 }
 
-export async function generateLinkPreview(rawUrl: string): Promise<LinkPreview> {
+export async function generateLinkPreview(
+  rawUrl: string,
+  preferredImageUrl?: string,
+): Promise<LinkPreview> {
   let url: string;
   try {
     url = new URL(rawUrl).toString();
@@ -116,6 +180,7 @@ export async function generateLinkPreview(rawUrl: string): Promise<LinkPreview> 
     siteName: hostname,
     favicon: `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`,
     source,
+    thumbnailUrl: preferredImageUrl || null,
     thumbnail: null,
     thumbnailType: "placeholder",
   };
@@ -142,7 +207,7 @@ export async function generateLinkPreview(rawUrl: string): Promise<LinkPreview> 
       url = res.url || url;
     }
   } catch {
-    // Preview can still succeed via screenshot fallback.
+    // Preview can still succeed from a known product image URL.
   }
 
   let title = "";
@@ -150,11 +215,15 @@ export async function generateLinkPreview(rawUrl: string): Promise<LinkPreview> 
   let favicon = empty.favicon;
   const candidates: Array<{ url: string; type: ThumbnailType }> = [];
 
+  if (preferredImageUrl) {
+    candidates.push({ url: preferredImageUrl, type: "og" });
+  }
+
   if (html) {
     const $ = cheerio.load(html);
     title = decodeEntities(
       meta($, "og:title", "twitter:title") || $("title").first().text() || "",
-    );
+    ).replace(/\s*\|\s*Mobbin.*$/i, "");
     siteName = decodeEntities(meta($, "og:site_name") || hostname);
 
     const iconHref =
@@ -163,38 +232,11 @@ export async function generateLinkPreview(rawUrl: string): Promise<LinkPreview> 
       $('link[rel="shortcut icon"]').attr("href");
     favicon = absUrl(iconHref, url) || empty.favicon;
 
-    const og = absUrl(meta($, "og:image", "og:image:url", "og:image:secure_url"), url);
-    const twitter = absUrl(meta($, "twitter:image", "twitter:image:src"), url);
-    const other = absUrl(
-      meta($, "image") || $('link[rel="image_src"]').attr("href"),
-      url,
-    );
-
-    if (og) candidates.push({ url: og, type: "og" });
-    if (twitter && twitter !== og) candidates.push({ url: twitter, type: "twitter" });
-    if (other && other !== og && other !== twitter) {
-      candidates.push({ url: other, type: "meta" });
-    }
-
-    const jsonLd = $('script[type="application/ld+json"]');
-    jsonLd.each((_, el) => {
-      try {
-        const parsed = JSON.parse($(el).text()) as { image?: unknown };
-        const image = parsed?.image;
-        const src =
-          typeof image === "string"
-            ? image
-            : Array.isArray(image)
-              ? typeof image[0] === "string"
-                ? image[0]
-                : (image[0] as { url?: string })?.url
-              : (image as { url?: string } | undefined)?.url;
-        const resolved = absUrl(src, url);
-        if (resolved) candidates.push({ url: resolved, type: "meta" });
-      } catch {
-        // Ignore malformed JSON-LD.
+    for (const candidate of productImagesFromHtml(html, url, $)) {
+      if (!candidates.some((item) => item.url === candidate.url)) {
+        candidates.push(candidate);
       }
-    });
+    }
   }
 
   for (const candidate of candidates) {
@@ -206,23 +248,28 @@ export async function generateLinkPreview(rawUrl: string): Promise<LinkPreview> 
         siteName,
         favicon,
         source,
+        thumbnailUrl: candidate.url,
         thumbnail,
         thumbnailType: candidate.type,
       };
     }
   }
 
-  const screenshot = await fetchScreenshot(url);
-  if (screenshot) {
-    return {
-      title: title || hostname,
-      url,
-      siteName,
-      favicon,
-      source,
-      thumbnail: screenshot,
-      thumbnailType: "screenshot",
-    };
+  const thumbnailUrl = candidates[0]?.url || preferredImageUrl || null;
+  if (source !== "Mobbin") {
+    const screenshot = await fetchScreenshot(url);
+    if (screenshot) {
+      return {
+        title: title || hostname,
+        url,
+        siteName,
+        favicon,
+        source,
+        thumbnailUrl,
+        thumbnail: screenshot,
+        thumbnailType: "screenshot",
+      };
+    }
   }
 
   return {
@@ -230,5 +277,7 @@ export async function generateLinkPreview(rawUrl: string): Promise<LinkPreview> 
     title: title || hostname,
     siteName,
     favicon,
+    thumbnailUrl,
+    thumbnailType: thumbnailUrl ? "og" : "placeholder",
   };
 }

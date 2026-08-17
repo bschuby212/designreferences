@@ -105,6 +105,7 @@ function EditorForm({
   const [thumbnail, setThumbnail] = useState<Blob | null>(
     initialFile ?? existing?.thumbnail ?? null,
   );
+  const [thumbnailUrl, setThumbnailUrl] = useState(existing?.thumbnailUrl ?? "");
   const [thumbnailType, setThumbnailType] = useState<ThumbnailType>(
     existing?.thumbnailType ?? (state.mode === "upload" ? "upload" : "placeholder"),
   );
@@ -112,7 +113,8 @@ function EditorForm({
   const [saving, setSaving] = useState(false);
   const lastPreviewed = useRef("");
   const urlRef = useRef<HTMLInputElement>(null);
-  const previewUrl = useObjectUrl(thumbnail);
+  const blobPreview = useObjectUrl(thumbnail);
+  const previewUrl = blobPreview || thumbnailUrl || null;
 
   useEffect(() => {
     if (state.mode === "link") {
@@ -141,6 +143,7 @@ function EditorForm({
         setThumbnail(base64ToBlob(data.thumbnail.data, data.thumbnail.mime));
         setThumbnailType(data.thumbnailType);
       }
+      if (data.thumbnailUrl) setThumbnailUrl(data.thumbnailUrl);
     } finally {
       setPreviewing(false);
     }
@@ -158,6 +161,7 @@ function EditorForm({
     if (!file || !file.type.startsWith("image/")) return;
     setThumbnail(file);
     setThumbnailType("upload");
+    setThumbnailUrl("");
     setTitle((current) => current || file.name.replace(/\.[^.]+$/, ""));
   }
 
@@ -172,7 +176,8 @@ function EditorForm({
         title: title.trim(),
         url: normalizeUrl(url),
         thumbnail,
-        thumbnailType: thumbnail ? thumbnailType : "placeholder",
+        thumbnailUrl: thumbnailUrl || null,
+        thumbnailType: thumbnail || thumbnailUrl ? thumbnailType : "placeholder",
         source: state.mode === "upload" && source === "Website" ? "Upload" : source,
         collectionId: collectionId || null,
         tags: parsedTags,
@@ -218,7 +223,7 @@ function EditorForm({
         <div className="overflow-hidden rounded-[var(--radius)] bg-[var(--hover)]">
           {previewUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={previewUrl} alt="" className="block max-h-64 w-full object-contain" />
+            <img src={previewUrl} alt="" className="block max-h-64 w-full object-contain" referrerPolicy="no-referrer" />
           ) : (
             <div className="flex aspect-[16/10] flex-col items-center justify-center gap-2 text-[12px] text-[var(--muted-2)]">
               {previewing ? (

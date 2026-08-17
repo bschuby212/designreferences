@@ -11,8 +11,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import type { NavView, SourceType } from "@/lib/storage/types";
-import { SIDEBAR_SOURCES } from "@/lib/storage/types";
+import type { NavView } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
 import { IconButton, inputClass, useClickOutside } from "./ui";
@@ -244,18 +243,6 @@ export function LibraryNav({
           </div>
         );
       })}
-
-      <SectionLabel>Sources</SectionLabel>
-      {SIDEBAR_SOURCES.map((source) => (
-        <NavButton
-          key={source}
-          active={view.type === "source" && view.source === source}
-          icon={<span className="w-[15px] text-center text-[10px]">·</span>}
-          onClick={() => go({ type: "source", source: source as SourceType })}
-        >
-          {source === "Website" ? "Websites" : source === "Upload" ? "Uploads" : source}
-        </NavButton>
-      ))}
     </nav>
   );
 }

@@ -17,6 +17,11 @@ export class LibraryDB extends Dexie {
       collections: "id, sortOrder, name",
       thumbnails: "id",
     });
+    this.version(2).stores({
+      references: "id, source, collectionId, favorite, createdAt, updatedAt",
+      collections: "id, sortOrder, name",
+      thumbnails: "id",
+    });
   }
 }
 

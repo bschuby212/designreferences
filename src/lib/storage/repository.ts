@@ -12,7 +12,7 @@ function toReference(
   record: ReferenceRecord,
   blob: Blob | null,
 ): Reference {
-  return { ...record, thumbnail: blob };
+  return { ...record, thumbnailUrl: record.thumbnailUrl ?? null, thumbnail: blob };
 }
 
 export interface LibraryRepository {
@@ -56,6 +56,7 @@ export const indexedDbRepository: LibraryRepository = {
       id: uid(),
       title: input.title,
       url: input.url,
+      thumbnailUrl: input.thumbnailUrl ?? null,
       thumbnailType: input.thumbnailType,
       source: input.source,
       collectionId: input.collectionId,

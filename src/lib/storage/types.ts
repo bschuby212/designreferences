@@ -12,15 +12,6 @@ export const SOURCE_TYPES = [
 
 export type SourceType = (typeof SOURCE_TYPES)[number];
 
-export const SIDEBAR_SOURCES = [
-  "Dribbble",
-  "X",
-  "Behance",
-  "Figma",
-  "Website",
-  "Upload",
-] as const;
-
 export type ThumbnailType =
   | "og"
   | "twitter"
@@ -43,6 +34,7 @@ export interface Reference {
   title: string;
   url: string;
   thumbnail: Blob | null;
+  thumbnailUrl: string | null;
   thumbnailType: ThumbnailType;
   source: SourceType;
   collectionId: string | null;
@@ -57,6 +49,7 @@ export interface ReferenceRecord {
   id: string;
   title: string;
   url: string;
+  thumbnailUrl: string | null;
   thumbnailType: ThumbnailType;
   source: SourceType;
   collectionId: string | null;
@@ -83,6 +76,7 @@ export interface CreateReferenceInput {
   title: string;
   url: string;
   thumbnail: Blob | null;
+  thumbnailUrl?: string | null;
   thumbnailType: ThumbnailType;
   source: SourceType;
   collectionId: string | null;

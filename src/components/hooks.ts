@@ -35,3 +35,10 @@ export function useObjectUrl(blob: Blob | null | undefined) {
   }, [url]);
   return url;
 }
+
+export function useThumbnailSrc(reference: {
+  thumbnail: Blob | null;
+  thumbnailUrl?: string | null;
+}) {
+  return useObjectUrl(reference.thumbnail) || reference.thumbnailUrl || null;
+}
