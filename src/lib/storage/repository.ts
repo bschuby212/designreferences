@@ -6,18 +6,29 @@ import {
   type Reference,
   type ReferenceRecord,
 } from "./types";
-import { now, uid } from "../utils";
+import { normalizeUrl, now, uid } from "../utils";
 
 function toReference(
   record: ReferenceRecord,
   blob: Blob | null,
 ): Reference {
-  return { ...record, thumbnailUrl: record.thumbnailUrl ?? null, thumbnail: blob };
+  return {
+    ...record,
+    thumbnailUrl: record.thumbnailUrl ?? null,
+    imageUrls: record.imageUrls ?? [],
+    comments: record.comments ?? [],
+    thumbnail: blob,
+  };
 }
 
 export interface LibraryRepository {
   listReferences(): Promise<Reference[]>;
   getReference(id: string): Promise<Reference | undefined>;
+  findDuplicate(input: {
+    url?: string | null;
+    thumbnailUrl?: string | null;
+  }): Promise<Reference | undefined>;
+  dedupeReferences(retiredUrls?: string[]): Promise<number>;
   createReference(input: CreateReferenceInput): Promise<Reference>;
   updateReference(
     id: string,
@@ -50,7 +61,67 @@ export const indexedDbRepository: LibraryRepository = {
     return toReference(record, thumb?.blob ?? null);
   },
 
+  async findDuplicate(input) {
+    const url = normalizeUrl(input.url ?? "");
+    const thumbnailUrl = input.thumbnailUrl ?? "";
+    if (!url && !thumbnailUrl) return undefined;
+    const records = await getDb().references.toArray();
+    const match = records.find((record) => {
+      if (url && normalizeUrl(record.url) === url) return true;
+      // Fall back to the image only when there is no URL to compare (e.g.
+      // pasted/uploaded images that share the same source asset).
+      if (!url && thumbnailUrl && record.thumbnailUrl === thumbnailUrl) return true;
+      return false;
+    });
+    if (!match) return undefined;
+    const thumb = await getDb().thumbnails.get(match.id);
+    return toReference(match, thumb?.blob ?? null);
+  },
+
+  async dedupeReferences(retiredUrls = []) {
+    const retired = new Set(
+      retiredUrls.map((value) => normalizeUrl(value)).filter(Boolean),
+    );
+    // Oldest first so we always keep the earliest copy of a duplicate.
+    const records = await getDb().references.orderBy("createdAt").toArray();
+    const seen = new Set<string>();
+    const toDelete: string[] = [];
+    for (const record of records) {
+      const url = normalizeUrl(record.url);
+      if (url && retired.has(url)) {
+        toDelete.push(record.id);
+        continue;
+      }
+      // Only URL-backed references can be safely treated as duplicates; leave
+      // user uploads (no URL) untouched.
+      if (!url) continue;
+      if (seen.has(url)) {
+        toDelete.push(record.id);
+        continue;
+      }
+      seen.add(url);
+    }
+    if (toDelete.length > 0) {
+      await getDb().transaction(
+        "rw",
+        getDb().references,
+        getDb().thumbnails,
+        async () => {
+          await getDb().references.bulkDelete(toDelete);
+          await getDb().thumbnails.bulkDelete(toDelete);
+        },
+      );
+    }
+    return toDelete.length;
+  },
+
   async createReference(input) {
+    const duplicate = await this.findDuplicate({
+      url: input.url,
+      thumbnailUrl: input.thumbnailUrl ?? null,
+    });
+    if (duplicate) return duplicate;
+
     const timestamp = now();
     const record: ReferenceRecord = {
       id: uid(),
@@ -58,10 +129,12 @@ export const indexedDbRepository: LibraryRepository = {
       url: input.url,
       thumbnailUrl: input.thumbnailUrl ?? null,
       thumbnailType: input.thumbnailType,
+      imageUrls: input.imageUrls ?? [],
       source: input.source,
       collectionId: input.collectionId,
       tags: input.tags,
       notes: input.notes,
+      comments: [],
       favorite: input.favorite ?? false,
       createdAt: timestamp,
       updatedAt: timestamp,

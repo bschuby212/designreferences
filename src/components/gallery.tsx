@@ -7,28 +7,34 @@ import { ReferenceCard } from "./reference-card";
 interface GalleryProps {
   references: Reference[];
   density: Density;
-  compactMeta: boolean;
+  collectionNames: Record<string, string>;
   onOpen: (id: string) => void;
   onFavorite: (id: string) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onFiles: (files: File[]) => void;
+  onSelectCollection: (id: string) => void;
+  onSelectTag: (tag: string) => void;
+  onSelectSource: (source: Reference["source"]) => void;
 }
 
 export function Gallery({
   references,
   density,
-  compactMeta,
+  collectionNames,
   onOpen,
   onFavorite,
   onEdit,
   onDelete,
   onFiles,
+  onSelectCollection,
+  onSelectTag,
+  onSelectSource,
 }: GalleryProps) {
   return (
     <div
       className={cn(
-        "h-full overflow-y-auto overscroll-contain px-3 pb-8 md:px-4",
+        "h-full overflow-y-auto overscroll-contain px-4 pb-10 md:px-6 lg:px-8",
         `density-${density}`,
       )}
       onDragOver={(e) => {
@@ -50,11 +56,18 @@ export function Gallery({
             <ReferenceCard
               key={reference.id}
               reference={reference}
-              compactMeta={compactMeta}
+              collectionName={
+                reference.collectionId
+                  ? collectionNames[reference.collectionId]
+                  : undefined
+              }
               onOpen={() => onOpen(reference.id)}
               onFavorite={() => onFavorite(reference.id)}
               onEdit={() => onEdit(reference.id)}
               onDelete={() => onDelete(reference.id)}
+              onSelectCollection={onSelectCollection}
+              onSelectTag={onSelectTag}
+              onSelectSource={onSelectSource}
             />
           ))}
         </div>

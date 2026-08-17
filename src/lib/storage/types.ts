@@ -22,6 +22,12 @@ export type ThumbnailType =
 
 export type Density = "compact" | "medium" | "large";
 
+export interface Comment {
+  id: string;
+  text: string;
+  createdAt: number;
+}
+
 export type NavView =
   | { type: "all" }
   | { type: "favorites" }
@@ -36,10 +42,12 @@ export interface Reference {
   thumbnail: Blob | null;
   thumbnailUrl: string | null;
   thumbnailType: ThumbnailType;
+  imageUrls: string[];
   source: SourceType;
   collectionId: string | null;
   tags: string[];
   notes: string;
+  comments: Comment[];
   favorite: boolean;
   createdAt: number;
   updatedAt: number;
@@ -51,10 +59,12 @@ export interface ReferenceRecord {
   url: string;
   thumbnailUrl: string | null;
   thumbnailType: ThumbnailType;
+  imageUrls: string[];
   source: SourceType;
   collectionId: string | null;
   tags: string[];
   notes: string;
+  comments: Comment[];
   favorite: boolean;
   createdAt: number;
   updatedAt: number;
@@ -78,6 +88,7 @@ export interface CreateReferenceInput {
   thumbnail: Blob | null;
   thumbnailUrl?: string | null;
   thumbnailType: ThumbnailType;
+  imageUrls?: string[];
   source: SourceType;
   collectionId: string | null;
   tags: string[];
