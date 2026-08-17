@@ -1,0 +1,35 @@
+import type { Metadata, Viewport } from "next";
+import { Geist } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Library",
+  description: "Personal design reference library",
+  appleWebApp: {
+    capable: true,
+    title: "Library",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#f3f2ef",
+};
+
+export default function RootLayout({ children }: LayoutProps<"/">) {
+  return (
+    <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
+      <body className="h-full overflow-hidden bg-[var(--bg)] font-sans text-[var(--text)]">
+        {children}
+      </body>
+    </html>
+  );
+}
