@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getDb, repository } from "@/lib/storage";
+import { RETIRED_SEED_URLS } from "@/lib/storage/seed-examples";
 import { seedExampleReferences } from "@/lib/storage/seed-examples-runner";
 import type {
   Collection,
@@ -49,6 +50,8 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     void (async () => {
       try {
         await repository.seedIfEmpty();
+        // Heal libraries seeded before dedup/junk fixes existed.
+        await repository.dedupeReferences(RETIRED_SEED_URLS);
         await seedExampleReferences();
       } catch (error) {
         console.error("Failed to seed library", error);

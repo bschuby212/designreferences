@@ -27,6 +27,7 @@ export interface LibraryRepository {
     url?: string | null;
     thumbnailUrl?: string | null;
   }): Promise<Reference | undefined>;
+  dedupeReferences(retiredUrls?: string[]): Promise<number>;
   createReference(input: CreateReferenceInput): Promise<Reference>;
   updateReference(
     id: string,
@@ -74,6 +75,43 @@ export const indexedDbRepository: LibraryRepository = {
     if (!match) return undefined;
     const thumb = await getDb().thumbnails.get(match.id);
     return toReference(match, thumb?.blob ?? null);
+  },
+
+  async dedupeReferences(retiredUrls = []) {
+    const retired = new Set(
+      retiredUrls.map((value) => normalizeUrl(value)).filter(Boolean),
+    );
+    // Oldest first so we always keep the earliest copy of a duplicate.
+    const records = await getDb().references.orderBy("createdAt").toArray();
+    const seen = new Set<string>();
+    const toDelete: string[] = [];
+    for (const record of records) {
+      const url = normalizeUrl(record.url);
+      if (url && retired.has(url)) {
+        toDelete.push(record.id);
+        continue;
+      }
+      // Only URL-backed references can be safely treated as duplicates; leave
+      // user uploads (no URL) untouched.
+      if (!url) continue;
+      if (seen.has(url)) {
+        toDelete.push(record.id);
+        continue;
+      }
+      seen.add(url);
+    }
+    if (toDelete.length > 0) {
+      await getDb().transaction(
+        "rw",
+        getDb().references,
+        getDb().thumbnails,
+        async () => {
+          await getDb().references.bulkDelete(toDelete);
+          await getDb().thumbnails.bulkDelete(toDelete);
+        },
+      );
+    }
+    return toDelete.length;
   },
 
   async createReference(input) {

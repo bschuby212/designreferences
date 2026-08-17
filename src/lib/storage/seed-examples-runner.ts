@@ -8,6 +8,11 @@ import { base64ToBlob } from "@/lib/utils";
 
 const CONCURRENCY = 4;
 
+// React runs effects twice in dev (Strict Mode), which previously let two
+// seeding passes race and duplicate the entire library. A module-level lock
+// ensures only one pass runs at a time.
+let seedRunLock: Promise<void> | null = null;
+
 async function preview(url: string, imageUrl?: string): Promise<LinkPreview | null> {
   try {
     const res = await fetch("/api/preview", {
@@ -23,6 +28,14 @@ async function preview(url: string, imageUrl?: string): Promise<LinkPreview | nu
 }
 
 export async function seedExampleReferences() {
+  if (seedRunLock) return seedRunLock;
+  seedRunLock = runSeed().finally(() => {
+    seedRunLock = null;
+  });
+  return seedRunLock;
+}
+
+async function runSeed() {
   await repository.seedIfEmpty();
   const collections = await getDb().collections.toArray();
   const byName = new Map(collections.map((c) => [c.name, c.id]));
