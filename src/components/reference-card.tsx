@@ -4,13 +4,14 @@ import { useState, type ReactNode } from "react";
 import {
   ExternalLink,
   Heart,
+  Images,
   MoreHorizontal,
   Pencil,
   Trash2,
 } from "lucide-react";
 import type { Reference } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
-import { useThumbnailSrc } from "./hooks";
+import { referenceImageUrls, useThumbnailSrc } from "./hooks";
 import { useClickOutside } from "./ui";
 
 interface ReferenceCardProps {
@@ -31,6 +32,7 @@ export function ReferenceCard({
   onDelete,
 }: ReferenceCardProps) {
   const src = useThumbnailSrc(reference);
+  const imageCount = referenceImageUrls(reference).length;
   const [menu, setMenu] = useState(false);
   const menuRef = useClickOutside(menu, () => setMenu(false));
 
@@ -55,6 +57,13 @@ export function ReferenceCard({
           </div>
         )}
       </button>
+
+      {imageCount > 1 && (
+        <div className="pointer-events-none absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-white">
+          <Images size={11} strokeWidth={2} />
+          {imageCount}
+        </div>
+      )}
 
       <div className="pointer-events-none absolute top-1.5 right-1.5 hidden gap-0.5 rounded-md bg-[var(--surface)]/92 p-0.5 opacity-0 shadow-sm ring-1 ring-[var(--border)] transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 [@media(hover:hover)]:flex">
         <Action

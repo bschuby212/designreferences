@@ -30,11 +30,21 @@ export async function seedExampleReferences() {
   const seen = new Set(
     existing.map((item) => `${item.collectionId ?? ""}:${item.url}`),
   );
+  const seenUrls = new Set(existing.map((item) => item.url));
+  const seenImages = new Set(
+    existing.map((item) => item.thumbnailUrl).filter(Boolean) as string[],
+  );
 
+  // Skip anything already stored, plus repeated URLs/images within the seed set
+  // itself so the same screen never shows up twice.
   const pending = EXAMPLE_SEEDS.filter((item) => {
     const collectionId = byName.get(item.collection);
     if (!collectionId) return false;
-    return !seen.has(`${collectionId}:${item.url}`);
+    if (seen.has(`${collectionId}:${item.url}`)) return false;
+    if (seenUrls.has(item.url) || seenImages.has(item.imageUrl)) return false;
+    seenUrls.add(item.url);
+    seenImages.add(item.imageUrl);
+    return true;
   });
 
   // Save the product image URL first so tiles render immediately.
@@ -49,6 +59,7 @@ export async function seedExampleReferences() {
         thumbnail: null,
         thumbnailUrl: item.imageUrl,
         thumbnailType: "og",
+        imageUrls: [item.imageUrl],
         source: "Mobbin",
         collectionId,
         tags: item.tags,
@@ -68,6 +79,12 @@ export async function seedExampleReferences() {
       const thumbnail = data.thumbnail
         ? base64ToBlob(data.thumbnail.data, data.thumbnail.mime)
         : null;
+      const imageUrls =
+        data.images.length > 0
+          ? data.images
+          : seed?.imageUrl
+            ? [seed.imageUrl]
+            : current.imageUrls;
       await repository.updateReference(current.id, {
         title: data.title || current.title,
         url: data.url || current.url,
@@ -78,6 +95,7 @@ export async function seedExampleReferences() {
           : data.thumbnailUrl || seed?.imageUrl
             ? "og"
             : current.thumbnailType,
+        imageUrls,
         source: data.source ?? "Mobbin",
       });
     }

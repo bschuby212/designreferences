@@ -4,7 +4,8 @@ import { type ReactNode } from "react";
 import { ExternalLink, Heart, Pencil, Trash2, X } from "lucide-react";
 import type { Collection, Reference } from "@/lib/storage/types";
 import { formatSavedDate } from "@/lib/utils";
-import { useThumbnailSrc } from "./hooks";
+import { referenceImageUrls, useObjectUrl, useThumbnailSrc } from "./hooks";
+import { ImageCarousel } from "./image-carousel";
 import { areaClass, GhostButton, IconButton } from "./ui";
 
 interface DetailViewProps {
@@ -29,6 +30,8 @@ export function DetailView({
   variant,
 }: DetailViewProps) {
   const src = useThumbnailSrc(reference);
+  const blobSrc = useObjectUrl(reference.thumbnail);
+  const images = referenceImageUrls(reference);
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-[var(--surface)]">
@@ -57,21 +60,30 @@ export function DetailView({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-8">
-        <div className="overflow-hidden rounded-[var(--radius)] bg-[var(--hover)]">
-          {src ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={src}
-              alt={reference.title || "Reference"}
-              className="block h-auto w-full"
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <div className="flex aspect-[4/3] items-center justify-center text-[12px] text-[var(--muted-2)]">
-              No image
-            </div>
-          )}
-        </div>
+        {images.length > 1 ? (
+          <ImageCarousel
+            images={images}
+            alt={reference.title || "Reference"}
+            primaryUrl={reference.thumbnailUrl}
+            primaryBlobSrc={blobSrc}
+          />
+        ) : (
+          <div className="overflow-hidden rounded-[var(--radius)] bg-[var(--hover)]">
+            {src ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={src}
+                alt={reference.title || "Reference"}
+                className="block h-auto w-full"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="flex aspect-[4/3] items-center justify-center text-[12px] text-[var(--muted-2)]">
+                No image
+              </div>
+            )}
+          </div>
+        )}
 
         <h1 className="mt-4 text-[16px] leading-snug font-medium tracking-tight">
           {reference.title || "Untitled"}

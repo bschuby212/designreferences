@@ -62,6 +62,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     return records.map((record) => ({
       ...record,
       thumbnailUrl: record.thumbnailUrl ?? null,
+      imageUrls: record.imageUrls ?? [],
       thumbnail: byId.get(record.id) ?? null,
     }));
   }, [records, thumbs]);

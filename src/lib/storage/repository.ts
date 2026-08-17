@@ -6,18 +6,27 @@ import {
   type Reference,
   type ReferenceRecord,
 } from "./types";
-import { now, uid } from "../utils";
+import { normalizeUrl, now, uid } from "../utils";
 
 function toReference(
   record: ReferenceRecord,
   blob: Blob | null,
 ): Reference {
-  return { ...record, thumbnailUrl: record.thumbnailUrl ?? null, thumbnail: blob };
+  return {
+    ...record,
+    thumbnailUrl: record.thumbnailUrl ?? null,
+    imageUrls: record.imageUrls ?? [],
+    thumbnail: blob,
+  };
 }
 
 export interface LibraryRepository {
   listReferences(): Promise<Reference[]>;
   getReference(id: string): Promise<Reference | undefined>;
+  findDuplicate(input: {
+    url?: string | null;
+    thumbnailUrl?: string | null;
+  }): Promise<Reference | undefined>;
   createReference(input: CreateReferenceInput): Promise<Reference>;
   updateReference(
     id: string,
@@ -50,7 +59,30 @@ export const indexedDbRepository: LibraryRepository = {
     return toReference(record, thumb?.blob ?? null);
   },
 
+  async findDuplicate(input) {
+    const url = normalizeUrl(input.url ?? "");
+    const thumbnailUrl = input.thumbnailUrl ?? "";
+    if (!url && !thumbnailUrl) return undefined;
+    const records = await getDb().references.toArray();
+    const match = records.find((record) => {
+      if (url && normalizeUrl(record.url) === url) return true;
+      // Fall back to the image only when there is no URL to compare (e.g.
+      // pasted/uploaded images that share the same source asset).
+      if (!url && thumbnailUrl && record.thumbnailUrl === thumbnailUrl) return true;
+      return false;
+    });
+    if (!match) return undefined;
+    const thumb = await getDb().thumbnails.get(match.id);
+    return toReference(match, thumb?.blob ?? null);
+  },
+
   async createReference(input) {
+    const duplicate = await this.findDuplicate({
+      url: input.url,
+      thumbnailUrl: input.thumbnailUrl ?? null,
+    });
+    if (duplicate) return duplicate;
+
     const timestamp = now();
     const record: ReferenceRecord = {
       id: uid(),
@@ -58,6 +90,7 @@ export const indexedDbRepository: LibraryRepository = {
       url: input.url,
       thumbnailUrl: input.thumbnailUrl ?? null,
       thumbnailType: input.thumbnailType,
+      imageUrls: input.imageUrls ?? [],
       source: input.source,
       collectionId: input.collectionId,
       tags: input.tags,

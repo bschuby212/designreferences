@@ -36,6 +36,7 @@ export interface Reference {
   thumbnail: Blob | null;
   thumbnailUrl: string | null;
   thumbnailType: ThumbnailType;
+  imageUrls: string[];
   source: SourceType;
   collectionId: string | null;
   tags: string[];
@@ -51,6 +52,7 @@ export interface ReferenceRecord {
   url: string;
   thumbnailUrl: string | null;
   thumbnailType: ThumbnailType;
+  imageUrls: string[];
   source: SourceType;
   collectionId: string | null;
   tags: string[];
@@ -78,6 +80,7 @@ export interface CreateReferenceInput {
   thumbnail: Blob | null;
   thumbnailUrl?: string | null;
   thumbnailType: ThumbnailType;
+  imageUrls?: string[];
   source: SourceType;
   collectionId: string | null;
   tags: string[];

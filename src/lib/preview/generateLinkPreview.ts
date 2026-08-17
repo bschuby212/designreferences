@@ -63,8 +63,34 @@ function isGenericOg(url: string) {
   return /\/og_image\.png(?:\?|$)/i.test(url) || /\/og\.png(?:\?|$)/i.test(url);
 }
 
+const MAX_IMAGES = 30;
+
 function cdnAsset(kind: "app_screens" | "sites", id: string, ext: string) {
   return `${MOBBIN_CDN}/${kind}/${id}.${ext}?f=png&w=1200&q=70&fit=shrink-cover`;
+}
+
+// Mobbin flows and multi-screen pages embed every screen as a CDN asset.
+// Collect them in document order (deduped) so a reference can show a carousel.
+function mobbinScreenUrls(html: string) {
+  const urls: string[] = [];
+  const seen = new Set<string>();
+  const push = (kind: "app_screens" | "sites", id: string, ext: string) => {
+    const url = cdnAsset(kind, id, ext);
+    if (seen.has(url)) return;
+    seen.add(url);
+    urls.push(url);
+  };
+  const patterns: Array<[RegExp, "app_screens" | "sites"]> = [
+    [/content\/app_screens\/([0-9a-f-]{36})\.(png|webp|jpg)/gi, "app_screens"],
+    [/content\/sites\/([0-9a-f-]{36})\.(png|webp|jpg)/gi, "sites"],
+  ];
+  for (const [pattern, kind] of patterns) {
+    for (const match of html.matchAll(pattern)) {
+      push(kind, match[1], match[2]);
+      if (urls.length >= MAX_IMAGES) return urls;
+    }
+  }
+  return urls;
 }
 
 function productImagesFromHtml(
@@ -183,6 +209,7 @@ export async function generateLinkPreview(
     thumbnailUrl: preferredImageUrl || null,
     thumbnail: null,
     thumbnailType: "placeholder",
+    images: preferredImageUrl ? [preferredImageUrl] : [],
   };
 
   let html = "";
@@ -214,6 +241,7 @@ export async function generateLinkPreview(
   let siteName = hostname;
   let favicon = empty.favicon;
   const candidates: Array<{ url: string; type: ThumbnailType }> = [];
+  let screenUrls: string[] = [];
 
   if (preferredImageUrl) {
     candidates.push({ url: preferredImageUrl, type: "og" });
@@ -237,9 +265,22 @@ export async function generateLinkPreview(
         candidates.push(candidate);
       }
     }
+
+    // Only Mobbin *flow* pages are genuinely multi-screen. Screen and section
+    // pages also embed many related screens, which must not be pulled in.
+    if (source === "Mobbin" && /\/flows\//.test(url)) {
+      screenUrls = mobbinScreenUrls(html);
+    }
   }
 
-  for (const candidate of candidates) {
+  // When a page exposes multiple screens (e.g. a Mobbin flow), keep every image
+  // so the reference can render a carousel. The first screen is the primary.
+  const multiImage = screenUrls.length > 1;
+  const primaryCandidates = multiImage
+    ? screenUrls.map((imageUrl) => ({ url: imageUrl, type: "og" as ThumbnailType }))
+    : candidates;
+
+  for (const candidate of primaryCandidates) {
     const thumbnail = await fetchImage(candidate.url);
     if (thumbnail) {
       return {
@@ -251,11 +292,13 @@ export async function generateLinkPreview(
         thumbnailUrl: candidate.url,
         thumbnail,
         thumbnailType: candidate.type,
+        images: multiImage ? screenUrls : [candidate.url],
       };
     }
   }
 
-  const thumbnailUrl = candidates[0]?.url || preferredImageUrl || null;
+  const thumbnailUrl =
+    (multiImage ? screenUrls[0] : candidates[0]?.url) || preferredImageUrl || null;
   if (source !== "Mobbin") {
     const screenshot = await fetchScreenshot(url);
     if (screenshot) {
@@ -268,6 +311,7 @@ export async function generateLinkPreview(
         thumbnailUrl,
         thumbnail: screenshot,
         thumbnailType: "screenshot",
+        images: thumbnailUrl ? [thumbnailUrl] : [],
       };
     }
   }
@@ -279,5 +323,6 @@ export async function generateLinkPreview(
     favicon,
     thumbnailUrl,
     thumbnailType: thumbnailUrl ? "og" : "placeholder",
+    images: multiImage ? screenUrls : thumbnailUrl ? [thumbnailUrl] : [],
   };
 }

@@ -42,3 +42,15 @@ export function useThumbnailSrc(reference: {
 }) {
   return useObjectUrl(reference.thumbnail) || reference.thumbnailUrl || null;
 }
+
+// Ordered list of image URLs for a reference. Multi-image references (e.g.
+// Mobbin flows) carry every screen; single-image ones fall back to the
+// thumbnail so the carousel/detail view always has something to show.
+export function referenceImageUrls(reference: {
+  imageUrls?: string[] | null;
+  thumbnailUrl?: string | null;
+}) {
+  const images = (reference.imageUrls ?? []).filter(Boolean);
+  if (images.length > 0) return images;
+  return reference.thumbnailUrl ? [reference.thumbnailUrl] : [];
+}
