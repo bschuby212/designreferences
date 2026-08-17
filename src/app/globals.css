@@ -3,10 +3,11 @@
 :root {
   --bg: #ffffff;
   --surface: #ffffff;
-  --card: #fcfcfc;
+  --card: #f4f4f5;
   --card-border: #e2e2e2;
-  --hover: #f4f4f5;
-  --border: #e2e2e2;
+  --chip-active: #e5e5e8;
+  --hover: #ededf0;
+  --border: #e6e6e8;
   --border-strong: #d4d4d8;
   --text: #18181b;
   --muted: #6b6b70;
@@ -81,7 +82,7 @@ button {
   display: grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
   gap: var(--gap);
-  align-items: start;
+  align-items: stretch;
 }
 
 .density-compact {

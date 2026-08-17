@@ -5,7 +5,6 @@ import {
   Check,
   Folder,
   LayoutGrid,
-  MoreHorizontal,
   Pencil,
   Plus,
   Tag,
@@ -40,8 +39,8 @@ function Pill({
       className={cn(
         "inline-flex h-8 shrink-0 items-center gap-1 rounded-full px-3 text-[13px] whitespace-nowrap transition-colors",
         active
-          ? "bg-[var(--text)] text-white"
-          : "border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)]",
+          ? "bg-[var(--chip-active)] font-medium text-[var(--text)]"
+          : "text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--text)]",
       )}
     >
       {children}
@@ -153,42 +152,28 @@ export function LibraryNav({ view, onViewChange }: LibraryNavProps) {
               }
               return (
                 <div key={collection.id} className="relative shrink-0">
-                  <div
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onViewChange({ type: "collection", id: collection.id })
+                    }
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      setMenuId((id) =>
+                        id === collection.id ? null : collection.id,
+                      );
+                    }}
+                    title="Right-click to rename or delete"
                     className={cn(
-                      "inline-flex h-8 items-center rounded-full transition-colors",
+                      "inline-flex h-8 items-center gap-1 rounded-full px-3 text-[13px] whitespace-nowrap transition-colors",
                       active
-                        ? "bg-[var(--text)] text-white"
-                        : "border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)]",
+                        ? "bg-[var(--chip-active)] font-medium text-[var(--text)]"
+                        : "text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--text)]",
                     )}
                   >
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onViewChange({ type: "collection", id: collection.id })
-                      }
-                      className="inline-flex items-center gap-1 py-0 pr-1 pl-3 text-[13px] whitespace-nowrap"
-                    >
-                      <Folder size={13} strokeWidth={1.75} />
-                      {collection.name}
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Collection options"
-                      onClick={() =>
-                        setMenuId((id) =>
-                          id === collection.id ? null : collection.id,
-                        )
-                      }
-                      className={cn(
-                        "inline-flex h-8 w-7 items-center justify-center rounded-r-full",
-                        active
-                          ? "text-white/80 hover:text-white"
-                          : "text-[var(--muted-2)] hover:text-[var(--text)]",
-                      )}
-                    >
-                      <MoreHorizontal size={14} />
-                    </button>
-                  </div>
+                    <Folder size={13} strokeWidth={1.75} />
+                    {collection.name}
+                  </button>
                   {menuId === collection.id && (
                     <div
                       ref={menuRef}

@@ -15,6 +15,7 @@ interface GalleryProps {
   onFiles: (files: File[]) => void;
   onSelectCollection: (id: string) => void;
   onSelectTag: (tag: string) => void;
+  onSelectSource: (source: Reference["source"]) => void;
 }
 
 export function Gallery({
@@ -28,6 +29,7 @@ export function Gallery({
   onFiles,
   onSelectCollection,
   onSelectTag,
+  onSelectSource,
 }: GalleryProps) {
   return (
     <div
@@ -65,6 +67,7 @@ export function Gallery({
               onDelete={() => onDelete(reference.id)}
               onSelectCollection={onSelectCollection}
               onSelectTag={onSelectTag}
+              onSelectSource={onSelectSource}
             />
           ))}
         </div>

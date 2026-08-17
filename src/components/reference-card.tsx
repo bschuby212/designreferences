@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import {
   ExternalLink,
   Folder,
+  Globe,
   Heart,
   Images,
   MoreHorizontal,
@@ -25,6 +26,7 @@ interface ReferenceCardProps {
   onDelete: () => void;
   onSelectCollection?: (id: string) => void;
   onSelectTag?: (tag: string) => void;
+  onSelectSource?: (source: Reference["source"]) => void;
 }
 
 export function ReferenceCard({
@@ -36,6 +38,7 @@ export function ReferenceCard({
   onDelete,
   onSelectCollection,
   onSelectTag,
+  onSelectSource,
 }: ReferenceCardProps) {
   const src = useThumbnailSrc(reference);
   const imageCount = referenceImageUrls(reference).length;
@@ -66,25 +69,34 @@ export function ReferenceCard({
       onClick: () => onSelectTag?.(tag),
     });
   }
+  // Ensure every card always shows at least one chip on every view.
+  if (chips.length === 0) {
+    chips.push({
+      key: `s-${reference.source}`,
+      label: reference.source,
+      icon: <Globe size={11} strokeWidth={1.75} />,
+      onClick: () => onSelectSource?.(reference.source),
+    });
+  }
 
   return (
-    <article className="group relative mb-0 flex break-inside-avoid flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--card-border)] bg-[var(--card)] transition-shadow hover:shadow-[0_1px_2px_rgba(24,24,27,0.06),0_8px_24px_rgba(24,24,27,0.06)]">
+    <article className="group relative mb-0 flex h-full break-inside-avoid flex-col overflow-hidden rounded-[var(--radius)] bg-[var(--card)] transition-shadow hover:shadow-[0_1px_2px_rgba(24,24,27,0.06),0_8px_24px_rgba(24,24,27,0.06)]">
       <div className="relative p-1.5">
         <button
           type="button"
           onClick={onOpen}
-          className="block w-full overflow-hidden rounded-[calc(var(--radius)-4px)] bg-[var(--hover)] text-left"
+          className="block aspect-[4/3] w-full overflow-hidden rounded-[calc(var(--radius)-4px)] bg-[var(--hover)] text-left"
         >
           {src ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={src}
               alt={reference.title || "Reference"}
-              className="block h-auto w-full"
+              className="block h-full w-full object-cover object-top"
               referrerPolicy="no-referrer"
             />
           ) : (
-            <div className="flex aspect-[4/3] items-center justify-center text-[11px] text-[var(--muted-2)]">
+            <div className="flex h-full items-center justify-center text-[11px] text-[var(--muted-2)]">
               No image
             </div>
           )}
@@ -146,7 +158,7 @@ export function ReferenceCard({
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-col gap-2 px-3 pt-1 pb-3">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 px-3 pt-1 pb-3">
         <button
           type="button"
           onClick={onOpen}
@@ -155,7 +167,7 @@ export function ReferenceCard({
           <span className="line-clamp-1">{reference.title || "Untitled"}</span>
         </button>
         {chips.length > 0 && (
-          <div className="flex flex-wrap gap-1">
+          <div className="mt-auto flex flex-wrap gap-1">
             {chips.map((chip) => (
               <button
                 key={chip.key}
@@ -164,7 +176,7 @@ export function ReferenceCard({
                   e.stopPropagation();
                   chip.onClick();
                 }}
-                className="inline-flex h-6 max-w-full items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] pr-2 pl-1.5 text-[11px] text-[var(--muted)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text)]"
+                className="inline-flex h-6 max-w-full items-center gap-1 rounded-full bg-[var(--surface)] pr-2 pl-1.5 text-[11px] text-[var(--muted)] transition-colors hover:text-[var(--text)]"
               >
                 <span className="shrink-0 text-[var(--muted-2)]">{chip.icon}</span>
                 <span className="truncate">{chip.label}</span>

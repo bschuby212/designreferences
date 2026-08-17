@@ -204,6 +204,12 @@ export function AppShell() {
     setSelectedId(null);
   }, []);
 
+  const selectSource = useCallback((source: Reference["source"]) => {
+    setFilters(EMPTY_FILTERS);
+    setView({ type: "source", source });
+    setSelectedId(null);
+  }, []);
+
   async function pasteImage() {
     try {
       const items = await navigator.clipboard.read();
@@ -329,6 +335,7 @@ export function AppShell() {
           onFiles={(files) => setEditor({ mode: "upload", file: files[0] })}
           onSelectCollection={selectCollection}
           onSelectTag={selectTag}
+          onSelectSource={selectSource}
         />
       </main>
 

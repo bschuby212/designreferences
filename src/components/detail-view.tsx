@@ -89,7 +89,7 @@ export function DetailView({
                 primaryBlobSrc={blobSrc}
               />
             ) : (
-              <div className="overflow-hidden rounded-[var(--radius)] border border-[var(--card-border)] bg-[var(--card)]">
+              <div className="overflow-hidden rounded-[var(--radius)] bg-[var(--card)]">
                 {src ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -235,7 +235,7 @@ function Section({ label, children }: { label: string; children: ReactNode }) {
 
 function Pill({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
   return (
-    <span className="inline-flex h-6 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--card)] pr-2.5 pl-2 text-[11px] text-[var(--muted)]">
+    <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[var(--hover)] pr-2.5 pl-2 text-[11px] text-[var(--muted)]">
       {icon && <span className="text-[var(--muted-2)]">{icon}</span>}
       {children}
     </span>
