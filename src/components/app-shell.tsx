@@ -229,7 +229,7 @@ export function AppShell() {
 
   return (
     <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-[var(--bg)]">
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-[var(--border)] px-3 pt-[env(safe-area-inset-top)] md:px-4">
+      <header className="flex h-14 shrink-0 items-center gap-2 px-4 pt-[env(safe-area-inset-top)] md:px-6 lg:px-8">
         <button
           type="button"
           onClick={() => setView({ type: "all" })}
@@ -317,7 +317,7 @@ export function AppShell() {
         collectionNames={collectionNames}
       />
 
-      <main className="min-h-0 flex-1 pt-3">
+      <main className="min-h-0 flex-1 pt-4">
         <Gallery
           references={visible}
           density={density}

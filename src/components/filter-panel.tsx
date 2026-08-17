@@ -245,7 +245,7 @@ export function FilterChips({
   if (chips.length === 0) return null;
 
   return (
-    <div className="no-scrollbar flex gap-1.5 overflow-x-auto px-3 pb-2 md:px-4">
+    <div className="no-scrollbar flex gap-1.5 overflow-x-auto px-4 pt-1 pb-2 md:px-6 lg:px-8">
       {chips.map((chip) => (
         <button
           key={chip.key}

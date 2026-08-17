@@ -114,7 +114,7 @@ export function LibraryNav({ view, onViewChange }: LibraryNavProps) {
   }
 
   return (
-    <div className="flex items-center gap-2 border-b border-[var(--border)] px-3 py-2 md:px-4">
+    <div className="flex items-center gap-2 border-b border-[var(--border)] px-4 py-2.5 md:px-6 lg:px-8">
       <Segmented
         tab={tab}
         onChange={(next) => {

@@ -79,31 +79,33 @@ export function DetailView({
       </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto md:grid-cols-[1.15fr_1fr]">
-        <div className="bg-[var(--hover)] p-4 md:border-r md:border-[var(--border)]">
-          {images.length > 1 ? (
-            <ImageCarousel
-              images={images}
-              alt={reference.title || "Reference"}
-              primaryUrl={reference.thumbnailUrl}
-              primaryBlobSrc={blobSrc}
-            />
-          ) : (
-            <div className="overflow-hidden rounded-[var(--radius)] border border-[var(--card-border)] bg-[var(--card)]">
-              {src ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={src}
-                  alt={reference.title || "Reference"}
-                  className="block h-auto w-full"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <div className="flex aspect-[4/3] items-center justify-center text-[12px] text-[var(--muted-2)]">
-                  No image
-                </div>
-              )}
-            </div>
-          )}
+        <div className="flex items-center justify-center bg-[var(--hover)] p-4 md:border-r md:border-[var(--border)]">
+          <div className="w-full">
+            {images.length > 1 ? (
+              <ImageCarousel
+                images={images}
+                alt={reference.title || "Reference"}
+                primaryUrl={reference.thumbnailUrl}
+                primaryBlobSrc={blobSrc}
+              />
+            ) : (
+              <div className="overflow-hidden rounded-[var(--radius)] border border-[var(--card-border)] bg-[var(--card)]">
+                {src ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={src}
+                    alt={reference.title || "Reference"}
+                    className="block h-auto w-full"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="flex aspect-[4/3] items-center justify-center text-[12px] text-[var(--muted-2)]">
+                    No image
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex min-w-0 flex-col gap-4 p-4">
