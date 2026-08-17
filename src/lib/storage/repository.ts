@@ -1,4 +1,4 @@
-import { db } from "./indexeddb";
+import { getDb } from "./indexeddb";
 import {
   DEFAULT_COLLECTIONS,
   type Collection,
@@ -33,18 +33,20 @@ export interface LibraryRepository {
   seedIfEmpty(): Promise<void>;
 }
 
+let seedLock: Promise<void> | null = null;
+
 export const indexedDbRepository: LibraryRepository = {
   async listReferences() {
-    const records = await db.references.orderBy("createdAt").reverse().toArray();
-    const thumbs = await db.thumbnails.toArray();
+    const records = await getDb().references.orderBy("createdAt").reverse().toArray();
+    const thumbs = await getDb().thumbnails.toArray();
     const byId = new Map(thumbs.map((t) => [t.id, t.blob]));
     return records.map((record) => toReference(record, byId.get(record.id) ?? null));
   },
 
   async getReference(id) {
-    const record = await db.references.get(id);
+    const record = await getDb().references.get(id);
     if (!record) return undefined;
-    const thumb = await db.thumbnails.get(id);
+    const thumb = await getDb().thumbnails.get(id);
     return toReference(record, thumb?.blob ?? null);
   },
 
@@ -63,17 +65,17 @@ export const indexedDbRepository: LibraryRepository = {
       createdAt: timestamp,
       updatedAt: timestamp,
     };
-    await db.transaction("rw", db.references, db.thumbnails, async () => {
-      await db.references.put(record);
+    await getDb().transaction("rw", getDb().references, getDb().thumbnails, async () => {
+      await getDb().references.put(record);
       if (input.thumbnail) {
-        await db.thumbnails.put({ id: record.id, blob: input.thumbnail });
+        await getDb().thumbnails.put({ id: record.id, blob: input.thumbnail });
       }
     });
     return toReference(record, input.thumbnail);
   },
 
   async updateReference(id, patch) {
-    const existing = await db.references.get(id);
+    const existing = await getDb().references.get(id);
     if (!existing) return undefined;
     const { thumbnail, ...rest } = patch;
     const next: ReferenceRecord = {
@@ -83,48 +85,48 @@ export const indexedDbRepository: LibraryRepository = {
       createdAt: existing.createdAt,
       updatedAt: now(),
     };
-    await db.transaction("rw", db.references, db.thumbnails, async () => {
-      await db.references.put(next);
+    await getDb().transaction("rw", getDb().references, getDb().thumbnails, async () => {
+      await getDb().references.put(next);
       if (thumbnail !== undefined) {
-        if (thumbnail) await db.thumbnails.put({ id, blob: thumbnail });
-        else await db.thumbnails.delete(id);
+        if (thumbnail) await getDb().thumbnails.put({ id, blob: thumbnail });
+        else await getDb().thumbnails.delete(id);
       }
     });
-    const thumb = await db.thumbnails.get(id);
+    const thumb = await getDb().thumbnails.get(id);
     return toReference(next, thumb?.blob ?? null);
   },
 
   async deleteReference(id) {
-    await db.transaction("rw", db.references, db.thumbnails, async () => {
-      await db.references.delete(id);
-      await db.thumbnails.delete(id);
+    await getDb().transaction("rw", getDb().references, getDb().thumbnails, async () => {
+      await getDb().references.delete(id);
+      await getDb().thumbnails.delete(id);
     });
   },
 
   async listCollections() {
-    return db.collections.orderBy("sortOrder").toArray();
+    return getDb().collections.orderBy("sortOrder").toArray();
   },
 
   async createCollection(name) {
-    const collections = await db.collections.toArray();
+    const collections = await getDb().collections.toArray();
     const collection: Collection = {
       id: uid(),
       name: name.trim(),
       createdAt: now(),
       sortOrder: collections.length,
     };
-    await db.collections.put(collection);
+    await getDb().collections.put(collection);
     return collection;
   },
 
   async renameCollection(id, name) {
-    await db.collections.update(id, { name: name.trim() });
+    await getDb().collections.update(id, { name: name.trim() });
   },
 
   async deleteCollection(id) {
-    await db.transaction("rw", db.collections, db.references, async () => {
-      await db.collections.delete(id);
-      await db.references.where("collectionId").equals(id).modify({
+    await getDb().transaction("rw", getDb().collections, getDb().references, async () => {
+      await getDb().collections.delete(id);
+      await getDb().references.where("collectionId").equals(id).modify({
         collectionId: null,
         updatedAt: now(),
       });
@@ -132,16 +134,23 @@ export const indexedDbRepository: LibraryRepository = {
   },
 
   async seedIfEmpty() {
-    const count = await db.collections.count();
-    if (count > 0) return;
-    const timestamp = now();
-    await db.collections.bulkPut(
-      DEFAULT_COLLECTIONS.map((name, index) => ({
-        id: uid(),
-        name,
-        createdAt: timestamp,
-        sortOrder: index,
-      })),
-    );
+    if (!seedLock) {
+      seedLock = (async () => {
+        const count = await getDb().collections.count();
+        if (count > 0) return;
+        const timestamp = now();
+        await getDb().collections.bulkPut(
+          DEFAULT_COLLECTIONS.map((name, index) => ({
+            id: uid(),
+            name,
+            createdAt: timestamp,
+            sortOrder: index,
+          })),
+        );
+      })().finally(() => {
+        seedLock = null;
+      });
+    }
+    return seedLock;
   },
 };

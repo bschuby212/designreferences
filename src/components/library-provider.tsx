@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, repository } from "@/lib/storage";
+import { getDb, repository } from "@/lib/storage";
 import type {
   Collection,
   CreateReferenceInput,
@@ -31,18 +31,23 @@ interface LibraryContextValue {
 const LibraryContext = createContext<LibraryContextValue | null>(null);
 
 export function LibraryProvider({ children }: { children: ReactNode }) {
-  const records = useLiveQuery(
-    () => db.references.orderBy("createdAt").reverse().toArray(),
-    [],
-  );
-  const collections = useLiveQuery(
-    () => db.collections.orderBy("sortOrder").toArray(),
-    [],
-  );
-  const thumbs = useLiveQuery(() => db.thumbnails.toArray(), []);
+  const records = useLiveQuery(() => {
+    if (typeof window === "undefined") return [];
+    return getDb().references.orderBy("createdAt").reverse().toArray();
+  }, []);
+  const collections = useLiveQuery(() => {
+    if (typeof window === "undefined") return [];
+    return getDb().collections.orderBy("sortOrder").toArray();
+  }, []);
+  const thumbs = useLiveQuery(() => {
+    if (typeof window === "undefined") return [];
+    return getDb().thumbnails.toArray();
+  }, []);
 
   useEffect(() => {
-    void repository.seedIfEmpty();
+    void repository.seedIfEmpty().catch((error) => {
+      console.error("Failed to seed library", error);
+    });
   }, []);
 
   const references = useMemo<Reference[]>(() => {

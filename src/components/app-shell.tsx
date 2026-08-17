@@ -374,6 +374,7 @@ export function AppShell() {
           view={view}
           onViewChange={setView}
           onNavigate={() => setMenuOpen(false)}
+          showTitle={false}
         />
       </Sheet>
 

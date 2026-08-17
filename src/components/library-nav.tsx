@@ -21,6 +21,7 @@ interface LibraryNavProps {
   view: NavView;
   onViewChange: (view: NavView) => void;
   onNavigate?: () => void;
+  showTitle?: boolean;
 }
 
 function SectionLabel({
@@ -56,7 +57,7 @@ function NavButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex min-h-11 w-full items-center gap-2.5 rounded-md px-2 text-left text-[13px] md:min-h-8",
+        "flex min-h-11 w-full items-center gap-2.5 rounded-md px-2 text-left text-[13px] lg:min-h-8",
         active
           ? "bg-[var(--hover)] text-[var(--text)]"
           : "text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--text)]",
@@ -68,7 +69,12 @@ function NavButton({
   );
 }
 
-export function LibraryNav({ view, onViewChange, onNavigate }: LibraryNavProps) {
+export function LibraryNav({
+  view,
+  onViewChange,
+  onNavigate,
+  showTitle = true,
+}: LibraryNavProps) {
   const { collections, createCollection, renameCollection, deleteCollection } =
     useLibrary();
   const [creating, setCreating] = useState(false);
@@ -104,9 +110,11 @@ export function LibraryNav({ view, onViewChange, onNavigate }: LibraryNavProps) 
 
   return (
     <nav className="flex h-full flex-col overflow-y-auto px-2 pb-6 pt-3">
-      <div className="px-2 pb-3 text-[13px] font-medium tracking-tight">
-        Library
-      </div>
+      {showTitle && (
+        <div className="px-2 pb-3 text-[13px] font-medium tracking-tight">
+          Library
+        </div>
+      )}
 
       <NavButton
         active={view.type === "all"}
@@ -182,7 +190,7 @@ export function LibraryNav({ view, onViewChange, onNavigate }: LibraryNavProps) 
           );
         }
         return (
-          <div key={collection.id} className="relative flex items-center">
+          <div key={collection.id} className="group relative flex items-center">
             <NavButton
               active={active}
               icon={<Folder size={15} strokeWidth={1.75} />}
@@ -192,7 +200,12 @@ export function LibraryNav({ view, onViewChange, onNavigate }: LibraryNavProps) 
             </NavButton>
             <IconButton
               label="Collection options"
-              className="h-8 w-8 shrink-0 text-[var(--muted-2)]"
+              className={cn(
+                "absolute right-0 h-8 w-8 shrink-0 text-[var(--muted-2)]",
+                menuId === collection.id
+                  ? "opacity-100"
+                  : "opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100",
+              )}
               onClick={() =>
                 setMenuId((id) => (id === collection.id ? null : collection.id))
               }

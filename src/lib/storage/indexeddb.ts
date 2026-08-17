@@ -20,4 +20,12 @@ export class LibraryDB extends Dexie {
   }
 }
 
-export const db = new LibraryDB();
+let instance: LibraryDB | null = null;
+
+export function getDb() {
+  if (typeof window === "undefined") {
+    throw new Error("Library storage is only available in the browser");
+  }
+  if (!instance) instance = new LibraryDB();
+  return instance;
+}
