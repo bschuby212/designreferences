@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ExternalLink, Heart, Pencil, Send, Trash2, X } from "lucide-react";
+import {
+  ExternalLink,
+  Folder,
+  Heart,
+  Pencil,
+  Send,
+  Tag,
+  Trash2,
+  X,
+} from "lucide-react";
 import type { Collection, Reference } from "@/lib/storage/types";
 import { formatSavedDate } from "@/lib/utils";
 import { referenceImageUrls, useObjectUrl, useThumbnailSrc } from "./hooks";
@@ -121,9 +130,15 @@ export function DetailView({
 
           {(collectionName || reference.tags.length > 0) && (
             <div className="flex flex-wrap gap-1.5">
-              {collectionName && <Pill>{collectionName}</Pill>}
+              {collectionName && (
+                <Pill icon={<Folder size={12} strokeWidth={1.75} />}>
+                  {collectionName}
+                </Pill>
+              )}
               {reference.tags.map((tag) => (
-                <Pill key={tag}>{tag}</Pill>
+                <Pill key={tag} icon={<Tag size={12} strokeWidth={1.75} />}>
+                  {tag}
+                </Pill>
               ))}
             </div>
           )}
@@ -216,9 +231,10 @@ function Section({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function Pill({ children }: { children: ReactNode }) {
+function Pill({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
   return (
-    <span className="inline-flex h-6 items-center rounded-full border border-[var(--border)] bg-[var(--card)] px-2.5 text-[11px] text-[var(--muted)]">
+    <span className="inline-flex h-6 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--card)] pr-2.5 pl-2 text-[11px] text-[var(--muted)]">
+      {icon && <span className="text-[var(--muted-2)]">{icon}</span>}
       {children}
     </span>
   );

@@ -3,10 +3,12 @@
 import { useState, type ReactNode } from "react";
 import {
   ExternalLink,
+  Folder,
   Heart,
   Images,
   MoreHorizontal,
   Pencil,
+  Tag,
   Trash2,
 } from "lucide-react";
 import type { Reference } from "@/lib/storage/types";
@@ -40,12 +42,18 @@ export function ReferenceCard({
   const [menu, setMenu] = useState(false);
   const menuRef = useClickOutside(menu, () => setMenu(false));
 
-  const chips: Array<{ key: string; label: string; onClick: () => void }> = [];
+  const chips: Array<{
+    key: string;
+    label: string;
+    icon: ReactNode;
+    onClick: () => void;
+  }> = [];
   if (collectionName && reference.collectionId && onSelectCollection) {
     const id = reference.collectionId;
     chips.push({
       key: `c-${id}`,
       label: collectionName,
+      icon: <Folder size={11} strokeWidth={1.75} />,
       onClick: () => onSelectCollection(id),
     });
   }
@@ -54,17 +62,18 @@ export function ReferenceCard({
     chips.push({
       key: `t-${tag}`,
       label: tag,
+      icon: <Tag size={11} strokeWidth={1.75} />,
       onClick: () => onSelectTag?.(tag),
     });
   }
 
   return (
     <article className="group relative mb-0 flex break-inside-avoid flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--card-border)] bg-[var(--card)] transition-shadow hover:shadow-[0_1px_2px_rgba(24,24,27,0.06),0_8px_24px_rgba(24,24,27,0.06)]">
-      <div className="relative">
+      <div className="relative p-1.5">
         <button
           type="button"
           onClick={onOpen}
-          className="block w-full overflow-hidden bg-[var(--hover)] text-left"
+          className="block w-full overflow-hidden rounded-[calc(var(--radius)-4px)] bg-[var(--hover)] text-left"
         >
           {src ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -82,13 +91,13 @@ export function ReferenceCard({
         </button>
 
         {imageCount > 1 && (
-          <div className="pointer-events-none absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-white">
+          <div className="pointer-events-none absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-white">
             <Images size={11} strokeWidth={2} />
             {imageCount}
           </div>
         )}
 
-        <div className="pointer-events-none absolute top-2 right-2 hidden gap-0.5 rounded-md bg-[var(--surface)]/92 p-0.5 opacity-0 shadow-sm ring-1 ring-[var(--border)] backdrop-blur transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 [@media(hover:hover)]:flex">
+        <div className="pointer-events-none absolute top-3 right-3 hidden gap-0.5 rounded-md bg-[var(--surface)]/92 p-0.5 opacity-0 shadow-sm ring-1 ring-[var(--border)] backdrop-blur transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 [@media(hover:hover)]:flex">
           <Action
             label={reference.favorite ? "Unfavorite" : "Favorite"}
             onClick={onFavorite}
@@ -137,7 +146,7 @@ export function ReferenceCard({
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-col gap-2 px-2.5 pt-2 pb-2.5">
+      <div className="flex min-w-0 flex-col gap-2 px-3 pt-1 pb-3">
         <button
           type="button"
           onClick={onOpen}
@@ -155,8 +164,9 @@ export function ReferenceCard({
                   e.stopPropagation();
                   chip.onClick();
                 }}
-                className="inline-flex h-6 max-w-full items-center rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 text-[11px] text-[var(--muted)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text)]"
+                className="inline-flex h-6 max-w-full items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] pr-2 pl-1.5 text-[11px] text-[var(--muted)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text)]"
               >
+                <span className="shrink-0 text-[var(--muted-2)]">{chip.icon}</span>
                 <span className="truncate">{chip.label}</span>
               </button>
             ))}

@@ -149,7 +149,7 @@ function Chip({
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex h-8 items-center rounded-md border px-2.5 text-[12px]",
+        "inline-flex h-8 items-center rounded-full border px-3 text-[12px]",
         active
           ? "border-[var(--text)] bg-[var(--text)] text-white"
           : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-strong)]",
@@ -251,7 +251,7 @@ export function FilterChips({
           key={chip.key}
           type="button"
           onClick={chip.clear}
-          className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 text-[12px] text-[var(--muted)]"
+          className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 text-[12px] text-[var(--muted)]"
         >
           {chip.label}
           <X size={12} />

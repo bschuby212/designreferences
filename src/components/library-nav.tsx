@@ -1,7 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Check, MoreHorizontal, Pencil, Plus, Trash2, X } from "lucide-react";
+import {
+  Check,
+  Folder,
+  LayoutGrid,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Tag,
+  Trash2,
+  X,
+} from "lucide-react";
 import { SOURCE_TYPES, type NavView } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
@@ -117,6 +127,7 @@ export function LibraryNav({ view, onViewChange }: LibraryNavProps) {
 
       <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto">
         <Pill active={view.type === "all"} onClick={() => onViewChange({ type: "all" })}>
+          <LayoutGrid size={13} strokeWidth={1.75} />
           All
         </Pill>
 
@@ -155,8 +166,9 @@ export function LibraryNav({ view, onViewChange }: LibraryNavProps) {
                       onClick={() =>
                         onViewChange({ type: "collection", id: collection.id })
                       }
-                      className="py-0 pr-1 pl-3 text-[13px] whitespace-nowrap"
+                      className="inline-flex items-center gap-1 py-0 pr-1 pl-3 text-[13px] whitespace-nowrap"
                     >
+                      <Folder size={13} strokeWidth={1.75} />
                       {collection.name}
                     </button>
                     <button
@@ -215,6 +227,7 @@ export function LibraryNav({ view, onViewChange }: LibraryNavProps) {
                 active={view.type === "source" && view.source === source}
                 onClick={() => onViewChange({ type: "source", source })}
               >
+                <Tag size={13} strokeWidth={1.75} />
                 {source}
               </Pill>
             ))}
