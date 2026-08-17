@@ -4,10 +4,10 @@ import { useState, type ReactNode } from "react";
 import {
   ExternalLink,
   Folder,
+  Hash,
   Heart,
   Pencil,
   Send,
-  Tag,
   Trash2,
   X,
 } from "lucide-react";
@@ -78,57 +78,56 @@ export function DetailView({
         </IconButton>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto md:grid-cols-[1.15fr_1fr]">
-        <div className="flex items-center justify-center bg-[var(--hover)] p-4 md:border-r md:border-[var(--border)]">
-          <div className="w-full">
-            {images.length > 1 ? (
-              <ImageCarousel
-                images={images}
-                alt={reference.title || "Reference"}
-                primaryUrl={reference.thumbnailUrl}
-                primaryBlobSrc={blobSrc}
-              />
-            ) : (
-              <div className="overflow-hidden rounded-[var(--radius)] bg-[var(--card)]">
-                {src ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={src}
-                    alt={reference.title || "Reference"}
-                    className="block h-auto w-full"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="flex aspect-[4/3] items-center justify-center text-[12px] text-[var(--muted-2)]">
-                    No image
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="bg-[var(--hover)] p-3">
+          {images.length > 1 ? (
+            <ImageCarousel
+              images={images}
+              alt={reference.title || "Reference"}
+              primaryUrl={reference.thumbnailUrl}
+              primaryBlobSrc={blobSrc}
+            />
+          ) : (
+            <div className="flex items-center justify-center">
+              {src ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={src}
+                  alt={reference.title || "Reference"}
+                  className="max-h-[52vh] w-auto max-w-full rounded-[var(--radius)] object-contain"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="flex aspect-[4/3] w-full items-center justify-center rounded-[var(--radius)] text-[12px] text-[var(--muted-2)]">
+                  No image
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex min-w-0 flex-col gap-4 p-4">
-          <div>
-            <h1 className="text-[17px] leading-snug font-semibold tracking-tight">
-              {reference.title || "Untitled"}
-            </h1>
-            <div className="mt-1 text-[12px] text-[var(--muted-2)]">
-              {reference.source} · Saved {formatSavedDate(reference.createdAt)}
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-[16px] leading-snug font-semibold tracking-tight">
+                {reference.title || "Untitled"}
+              </h1>
+              <div className="mt-1 text-[12px] text-[var(--muted-2)]">
+                {reference.source} · Saved {formatSavedDate(reference.createdAt)}
+              </div>
             </div>
+            {reference.url && (
+              <a
+                href={reference.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-[var(--text)] px-3 text-[12px] font-medium text-white"
+              >
+                <ExternalLink size={13} strokeWidth={1.75} />
+                Open
+              </a>
+            )}
           </div>
-
-          {reference.url && (
-            <a
-              href={reference.url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-[var(--text)] text-[13px] font-medium text-white"
-            >
-              <ExternalLink size={14} strokeWidth={1.75} />
-              Open original
-            </a>
-          )}
 
           {(collectionName || reference.tags.length > 0) && (
             <div className="flex flex-wrap gap-1.5">
@@ -138,7 +137,7 @@ export function DetailView({
                 </Pill>
               )}
               {reference.tags.map((tag) => (
-                <Pill key={tag} icon={<Tag size={12} strokeWidth={1.75} />}>
+                <Pill key={tag} icon={<Hash size={12} strokeWidth={1.75} />}>
                   {tag}
                 </Pill>
               ))}

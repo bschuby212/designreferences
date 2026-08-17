@@ -4,10 +4,10 @@ import { useState } from "react";
 import {
   Check,
   Folder,
+  Globe,
   LayoutGrid,
   Pencil,
   Plus,
-  Tag,
   Trash2,
   X,
 } from "lucide-react";
@@ -212,7 +212,7 @@ export function LibraryNav({ view, onViewChange }: LibraryNavProps) {
                 active={view.type === "source" && view.source === source}
                 onClick={() => onViewChange({ type: "source", source })}
               >
-                <Tag size={13} strokeWidth={1.75} />
+                <Globe size={13} strokeWidth={1.75} />
                 {source}
               </Pill>
             ))}

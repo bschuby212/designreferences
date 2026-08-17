@@ -64,10 +64,10 @@ export function ImageCarousel({
       tabIndex={0}
       aria-roledescription="carousel"
       aria-label={alt}
-      className="group relative overflow-hidden rounded-[var(--radius)] bg-[var(--hover)] outline-none"
+      className="group relative w-full overflow-hidden rounded-[var(--radius)] bg-[var(--hover)] outline-none"
     >
       <div
-        className="flex transition-transform duration-300 ease-out"
+        className="flex h-[52vh] transition-transform duration-300 ease-out"
         style={{ transform: `translateX(-${clamped * 100}%)` }}
       >
         {images.map((url, i) => (
@@ -76,7 +76,7 @@ export function ImageCarousel({
             key={`${url}-${i}`}
             src={srcFor(url)}
             alt={count > 1 ? `${alt} (${i + 1} of ${count})` : alt}
-            className="block h-auto w-full shrink-0 grow-0 basis-full object-contain"
+            className="block h-full w-full shrink-0 grow-0 basis-full object-contain"
             referrerPolicy="no-referrer"
             loading={i === 0 ? "eager" : "lazy"}
             draggable={false}

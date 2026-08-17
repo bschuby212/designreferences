@@ -5,11 +5,11 @@ import {
   ExternalLink,
   Folder,
   Globe,
+  Hash,
   Heart,
   Images,
   MoreHorizontal,
   Pencil,
-  Tag,
   Trash2,
 } from "lucide-react";
 import type { Reference } from "@/lib/storage/types";
@@ -65,7 +65,7 @@ export function ReferenceCard({
     chips.push({
       key: `t-${tag}`,
       label: tag,
-      icon: <Tag size={11} strokeWidth={1.75} />,
+      icon: <Hash size={11} strokeWidth={1.75} />,
       onClick: () => onSelectTag?.(tag),
     });
   }

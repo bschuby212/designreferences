@@ -373,7 +373,7 @@ export function AppShell() {
       <Modal
         open={Boolean(selected)}
         onClose={closeDetail}
-        className="h-[94dvh] max-w-5xl sm:h-auto"
+        className="h-[92dvh] max-w-2xl sm:h-auto sm:max-h-[90vh]"
       >
         {selected && (
           <DetailView
