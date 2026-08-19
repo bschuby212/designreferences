@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { heroShotUrl, isEncryptedCdn, isMobbinFlow } from "@/lib/utils";
 
 export type Breakpoint = "mobile" | "tablet" | "desktop";
 
@@ -27,12 +28,20 @@ export function useBreakpoint(): Breakpoint {
 }
 
 export function useObjectUrl(blob: Blob | null | undefined) {
-  const url = useMemo(() => (blob ? URL.createObjectURL(blob) : null), [blob]);
+  const [url, setUrl] = useState<string | null>(null);
+  // Create and revoke the URL inside the same effect. Doing this via useMemo
+  // breaks under React Strict Mode: the effect cleanup revokes the URL, but the
+  // memo isn't recomputed on the re-mount, leaving a dead (revoked) URL.
   useEffect(() => {
-    return () => {
-      if (url) URL.revokeObjectURL(url);
-    };
-  }, [url]);
+    if (!blob) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setUrl(null);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(blob);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [blob]);
   return url;
 }
 
@@ -41,4 +50,25 @@ export function useThumbnailSrc(reference: {
   thumbnailUrl?: string | null;
 }) {
   return useObjectUrl(reference.thumbnail) || reference.thumbnailUrl || null;
+}
+
+// Ordered list of image URLs for a reference. Multi-image references (e.g.
+// Mobbin flows) carry every screen; single-image ones fall back to the
+// thumbnail so the carousel/detail view always has something to show.
+export function referenceImageUrls(reference: {
+  url?: string | null;
+  imageUrls?: string[] | null;
+  thumbnailUrl?: string | null;
+}) {
+  const images = (reference.imageUrls ?? [])
+    .filter((url) => url && !isEncryptedCdn(url))
+    .map(heroShotUrl);
+  const fallback = reference.thumbnailUrl ? [heroShotUrl(reference.thumbnailUrl)] : [];
+  // Non-flow Mobbin pages list related screens in HTML; never carousel those.
+  if (reference.url && /mobbin\.com/i.test(reference.url) && !isMobbinFlow(reference.url)) {
+    const one = images[0] || fallback[0];
+    return one ? [one] : [];
+  }
+  if (images.length > 0) return images;
+  return fallback;
 }

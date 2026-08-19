@@ -130,7 +130,9 @@ function Group({ label, children }: { label: string; children: ReactNode }) {
       <div className="mb-2 text-[11px] font-medium tracking-wide text-[var(--muted)]">
         {label}
       </div>
-      <div className="flex flex-wrap gap-1.5">{children}</div>
+      <div className="flex flex-wrap gap-[3px] rounded-[16px] bg-[var(--chip-track)] p-[3px]">
+        {children}
+      </div>
     </div>
   );
 }
@@ -149,10 +151,10 @@ function Chip({
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex h-8 items-center rounded-md border px-2.5 text-[12px]",
+        "inline-flex h-7 items-center rounded-full px-3 text-[12px] transition-all",
         active
-          ? "border-[var(--text)] bg-[var(--text)] text-white"
-          : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-strong)]",
+          ? "bg-[var(--chip-active)] font-medium text-[var(--text)] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_0_0_0.5px_rgba(0,0,0,0.04)]"
+          : "text-[var(--muted)] hover:text-[var(--text)]",
       )}
     >
       {children}
@@ -245,13 +247,13 @@ export function FilterChips({
   if (chips.length === 0) return null;
 
   return (
-    <div className="no-scrollbar flex gap-1.5 overflow-x-auto px-3 pb-2 md:px-4">
+    <div className="no-scrollbar flex gap-1.5 overflow-x-auto px-4 pt-1 pb-2 md:px-6 lg:px-8">
       {chips.map((chip) => (
         <button
           key={chip.key}
           type="button"
           onClick={chip.clear}
-          className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 text-[12px] text-[var(--muted)]"
+          className="inline-flex h-7 shrink-0 items-center gap-1 rounded-full bg-[var(--chip-track)] px-3 text-[12px] text-[var(--muted)] hover:text-[var(--text)]"
         >
           {chip.label}
           <X size={12} />

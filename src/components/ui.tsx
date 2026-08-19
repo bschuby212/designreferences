@@ -54,7 +54,7 @@ export const inputClass =
   "h-10 w-full rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 text-[13px] outline-none transition-colors placeholder:text-[var(--muted-2)] focus:border-[var(--border-strong)]";
 
 export const areaClass =
-  "min-h-[88px] w-full resize-y rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[13px] outline-none focus:border-[var(--border-strong)]";
+  "min-h-[88px] w-full resize-none rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[13px] outline-none focus:border-[var(--border-strong)]";
 
 export function PrimaryButton({
   className,

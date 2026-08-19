@@ -9,4 +9,7 @@ export interface LinkPreview {
   thumbnailUrl: string | null;
   thumbnail: { mime: string; data: string } | null;
   thumbnailType: ThumbnailType;
+  images: string[];
+  videoUrl?: string | null;
+  logoUrl?: string | null;
 }

@@ -7,37 +7,37 @@ import { ReferenceCard } from "./reference-card";
 interface GalleryProps {
   references: Reference[];
   density: Density;
-  compactMeta: boolean;
+  collectionNames: Record<string, string>;
   onOpen: (id: string) => void;
-  onFavorite: (id: string) => void;
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
   onFiles: (files: File[]) => void;
+  onSelectCollection: (id: string) => void;
+  mode?: "grid" | "feed";
 }
 
 export function Gallery({
   references,
   density,
-  compactMeta,
+  collectionNames,
   onOpen,
-  onFavorite,
-  onEdit,
-  onDelete,
   onFiles,
+  onSelectCollection,
+  mode = "grid",
 }: GalleryProps) {
+  const feed = mode === "feed";
   return (
     <div
       className={cn(
-        "h-full overflow-y-auto overscroll-contain px-3 pb-8 md:px-4",
-        `density-${density}`,
+        "h-full overflow-y-auto overscroll-contain px-4 pb-10 md:px-6 lg:px-8",
+        !feed && `density-${density}`,
+        feed && "snap-y snap-proximity",
       )}
       onDragOver={(e) => {
         if ([...e.dataTransfer.types].includes("Files")) e.preventDefault();
       }}
       onDrop={(e) => {
         e.preventDefault();
-        const files = [...e.dataTransfer.files].filter((f) =>
-          f.type.startsWith("image/"),
+        const files = [...e.dataTransfer.files].filter((file) =>
+          file.type.startsWith("image/"),
         );
         if (files.length) onFiles(files);
       }}
@@ -45,17 +45,26 @@ export function Gallery({
       {references.length === 0 ? (
         <div className="py-16 text-center text-[13px] text-[var(--muted-2)]" />
       ) : (
-        <div className="gallery-grid">
+        <div
+          className={cn(
+            feed
+              ? "mx-auto flex max-w-[420px] flex-col gap-8 pt-2 md:max-w-[560px]"
+              : "gallery-grid",
+          )}
+        >
           {references.map((reference) => (
-            <ReferenceCard
-              key={reference.id}
-              reference={reference}
-              compactMeta={compactMeta}
-              onOpen={() => onOpen(reference.id)}
-              onFavorite={() => onFavorite(reference.id)}
-              onEdit={() => onEdit(reference.id)}
-              onDelete={() => onDelete(reference.id)}
-            />
+            <div key={reference.id} className={cn(feed && "snap-start")}>
+              <ReferenceCard
+                reference={reference}
+                collectionName={
+                  reference.collectionId
+                    ? collectionNames[reference.collectionId]
+                    : undefined
+                }
+                onOpen={() => onOpen(reference.id)}
+                onSelectCollection={onSelectCollection}
+              />
+            </div>
           ))}
         </div>
       )}

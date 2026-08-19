@@ -1,6 +1,7 @@
 import * as cheerio from "cheerio";
 import { detectSource } from "./detectSource";
 import type { LinkPreview } from "./types";
+import { cleanDesignTitle } from "@/lib/storage/product-tags";
 import type { ThumbnailType } from "@/lib/storage/types";
 
 const USER_AGENT =
@@ -63,8 +64,75 @@ function isGenericOg(url: string) {
   return /\/og_image\.png(?:\?|$)/i.test(url) || /\/og\.png(?:\?|$)/i.test(url);
 }
 
+const MAX_IMAGES = 30;
+
 function cdnAsset(kind: "app_screens" | "sites", id: string, ext: string) {
+  if (kind === "sites") {
+    return `${MOBBIN_CDN}/${kind}/${id}.${ext}?f=png&w=1440&h=1080&q=70&fit=crop&crop=top`;
+  }
   return `${MOBBIN_CDN}/${kind}/${id}.${ext}?f=png&w=1200&q=70&fit=shrink-cover`;
+}
+
+function bestImgSrc(tag: string) {
+  const srcset =
+    tag.match(/\bsrcSet="([^"]+)"/i)?.[1] ||
+    tag.match(/\bsrcset="([^"]+)"/i)?.[1];
+  const src = tag.match(/\bsrc="([^"]+)"/i)?.[1];
+  const pick = (raw: string) => decodeEntities(raw).trim();
+  if (srcset) {
+    const parts = srcset
+      .split(",")
+      .map((part) => pick(part).split(/\s+/)[0])
+      .filter(Boolean);
+    if (parts.length > 0) return parts[parts.length - 1];
+  }
+  return src ? pick(src) : "";
+}
+
+/** Only the screens that belong to this flow (alt: "Screen 3 of 12 of the … flow"). */
+function mobbinFlowImageUrls(html: string) {
+  const expected = Number(html.match(/Screen\s+1\s+of\s+(\d+)/i)?.[1] || 0);
+  const ids: string[] = [];
+  const seenIds = new Set<string>();
+  for (const match of html.matchAll(/content\/app_screens\/([0-9a-f-]{36})/gi)) {
+    const id = match[1].toLowerCase();
+    if (seenIds.has(id)) continue;
+    seenIds.add(id);
+    ids.push(id);
+  }
+  const stable = (expected > 1 ? ids.slice(0, expected) : ids)
+    .slice(0, MAX_IMAGES)
+    .map((id) => cdnAsset("app_screens", id, "png"));
+  if (stable.length > 1) return stable;
+
+  const screens: Array<{ index: number; url: string }> = [];
+  const seen = new Set<string>();
+  for (const match of html.matchAll(/<img\b[^>]*>/gi)) {
+    const tag = match[0];
+    const alt = tag.match(/\balt="([^"]*)"/i)?.[1] ?? "";
+    const numbered = alt.match(/Screen\s+(\d+)\s+of\s+(\d+)/i);
+    if (!numbered || !/flow/i.test(alt)) continue;
+    const uuid = tag.match(/content\/app_screens\/([0-9a-f-]{36})/i)?.[1];
+    const url = uuid ? cdnAsset("app_screens", uuid, "png") : bestImgSrc(tag);
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    screens.push({ index: Number(numbered[1]), url });
+  }
+  screens.sort((a, b) => a.index - b.index);
+  return screens.slice(0, MAX_IMAGES).map((item) => item.url);
+}
+
+function pageVideoUrl($: cheerio.CheerioAPI, pageUrl: string) {
+  const og = absUrl(
+    meta($, "og:video", "og:video:url", "og:video:secure_url", "twitter:player:stream"),
+    pageUrl,
+  );
+  if (og && /\.(mp4|webm|mov|m4v)(\?|$)/i.test(og)) return og;
+  const src =
+    $("video source[src]").first().attr("src") || $("video[src]").first().attr("src");
+  const video = absUrl(src, pageUrl);
+  if (video && /\.(mp4|webm|mov|m4v)(\?|$)/i.test(video)) return video;
+  return null;
 }
 
 function productImagesFromHtml(
@@ -151,8 +219,8 @@ async function fetchImage(url: string) {
 
 async function fetchScreenshot(url: string) {
   const shots = [
-    `https://s.wordpress.com/mshots/v1/${encodeURIComponent(url)}?w=1200`,
-    `https://image.thum.io/get/width/1200/noanimate/${url}`,
+    `https://s.wordpress.com/mshots/v1/${encodeURIComponent(url)}?w=1440&h=1080`,
+    `https://image.thum.io/get/width/1440/crop/1080/noanimate/${url}`,
   ];
   for (const shot of shots) {
     const image = await fetchImage(shot);
@@ -164,6 +232,7 @@ async function fetchScreenshot(url: string) {
 export async function generateLinkPreview(
   rawUrl: string,
   preferredImageUrl?: string,
+  options: { metaOnly?: boolean } = {},
 ): Promise<LinkPreview> {
   let url: string;
   try {
@@ -183,6 +252,9 @@ export async function generateLinkPreview(
     thumbnailUrl: preferredImageUrl || null,
     thumbnail: null,
     thumbnailType: "placeholder",
+    images: preferredImageUrl ? [preferredImageUrl] : [],
+    videoUrl: null,
+    logoUrl: null,
   };
 
   let html = "";
@@ -214,16 +286,19 @@ export async function generateLinkPreview(
   let siteName = hostname;
   let favicon = empty.favicon;
   const candidates: Array<{ url: string; type: ThumbnailType }> = [];
-
+  let screenUrls: string[] = [];
+  let videoUrl: string | null = null;
   if (preferredImageUrl) {
     candidates.push({ url: preferredImageUrl, type: "og" });
   }
 
   if (html) {
     const $ = cheerio.load(html);
-    title = decodeEntities(
-      meta($, "og:title", "twitter:title") || $("title").first().text() || "",
-    ).replace(/\s*\|\s*Mobbin.*$/i, "");
+    title = cleanDesignTitle(
+      decodeEntities(
+        meta($, "og:title", "twitter:title") || $("title").first().text() || "",
+      ),
+    );
     siteName = decodeEntities(meta($, "og:site_name") || hostname);
 
     const iconHref =
@@ -231,15 +306,39 @@ export async function generateLinkPreview(
       $('link[rel="icon"]').attr("href") ||
       $('link[rel="shortcut icon"]').attr("href");
     favicon = absUrl(iconHref, url) || empty.favicon;
+    videoUrl = pageVideoUrl($, url);
 
     for (const candidate of productImagesFromHtml(html, url, $)) {
       if (!candidates.some((item) => item.url === candidate.url)) {
         candidates.push(candidate);
       }
     }
+
+    // Screen/section pages embed dozens of *related* app screens in the HTML.
+    // Prefer stable app_screens UUIDs over encrypted file.webp URLs.
+    if (source === "Mobbin" && /\/flows\//.test(url)) {
+      screenUrls = mobbinFlowImageUrls(html);
+    }
   }
 
-  for (const candidate of candidates) {
+  if (options.metaOnly) {
+    return {
+      ...empty,
+      title: title || hostname,
+      siteName,
+      favicon,
+      logoUrl: null,
+    };
+  }
+
+  // When a page exposes multiple screens (e.g. a Mobbin flow), keep every image
+  // so the reference can render a carousel. The first screen is the primary.
+  const multiImage = screenUrls.length > 1;
+  const primaryCandidates = multiImage
+    ? screenUrls.map((imageUrl) => ({ url: imageUrl, type: "og" as ThumbnailType }))
+    : candidates;
+
+  for (const candidate of primaryCandidates) {
     const thumbnail = await fetchImage(candidate.url);
     if (thumbnail) {
       return {
@@ -251,11 +350,15 @@ export async function generateLinkPreview(
         thumbnailUrl: candidate.url,
         thumbnail,
         thumbnailType: candidate.type,
+        images: multiImage ? screenUrls : [candidate.url],
+        videoUrl,
+        logoUrl: null,
       };
     }
   }
 
-  const thumbnailUrl = candidates[0]?.url || preferredImageUrl || null;
+  const thumbnailUrl =
+    (multiImage ? screenUrls[0] : candidates[0]?.url) || preferredImageUrl || null;
   if (source !== "Mobbin") {
     const screenshot = await fetchScreenshot(url);
     if (screenshot) {
@@ -268,6 +371,9 @@ export async function generateLinkPreview(
         thumbnailUrl,
         thumbnail: screenshot,
         thumbnailType: "screenshot",
+        images: thumbnailUrl ? [thumbnailUrl] : [],
+        videoUrl,
+        logoUrl: null,
       };
     }
   }
@@ -279,5 +385,8 @@ export async function generateLinkPreview(
     favicon,
     thumbnailUrl,
     thumbnailType: thumbnailUrl ? "og" : "placeholder",
+    images: multiImage ? screenUrls : thumbnailUrl ? [thumbnailUrl] : [],
+    videoUrl,
+    logoUrl: null,
   };
 }

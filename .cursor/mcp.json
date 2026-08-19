@@ -1,9 +1,14 @@
 {
   "mcpServers": {
     "Mobbin": {
-      "type": "http",
-      "url": "https://api.mobbin.com/mcp",
-      "headers": {}
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://api.mobbin.com/mcp",
+        "--transport",
+        "http-only"
+      ]
     }
   }
 }

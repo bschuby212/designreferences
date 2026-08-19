@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:weekly": "python3 scripts/scrape-mobbin-seeds.py --append"
   },
   "dependencies": {
     "cheerio": "^1.2.0",

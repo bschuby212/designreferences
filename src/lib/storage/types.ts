@@ -22,8 +22,15 @@ export type ThumbnailType =
 
 export type Density = "compact" | "medium" | "large";
 
+export interface Comment {
+  id: string;
+  text: string;
+  createdAt: number;
+}
+
 export type NavView =
   | { type: "all" }
+  | { type: "feed" }
   | { type: "favorites" }
   | { type: "recent" }
   | { type: "collection"; id: string }
@@ -36,10 +43,14 @@ export interface Reference {
   thumbnail: Blob | null;
   thumbnailUrl: string | null;
   thumbnailType: ThumbnailType;
+  imageUrls: string[];
+  videoUrl?: string | null;
+  logoUrl?: string | null;
   source: SourceType;
   collectionId: string | null;
   tags: string[];
   notes: string;
+  comments: Comment[];
   favorite: boolean;
   createdAt: number;
   updatedAt: number;
@@ -51,10 +62,14 @@ export interface ReferenceRecord {
   url: string;
   thumbnailUrl: string | null;
   thumbnailType: ThumbnailType;
+  imageUrls: string[];
+  videoUrl?: string | null;
+  logoUrl?: string | null;
   source: SourceType;
   collectionId: string | null;
   tags: string[];
   notes: string;
+  comments: Comment[];
   favorite: boolean;
   createdAt: number;
   updatedAt: number;
@@ -78,6 +93,9 @@ export interface CreateReferenceInput {
   thumbnail: Blob | null;
   thumbnailUrl?: string | null;
   thumbnailType: ThumbnailType;
+  imageUrls?: string[];
+  videoUrl?: string | null;
+  logoUrl?: string | null;
   source: SourceType;
   collectionId: string | null;
   tags: string[];
@@ -101,11 +119,9 @@ export const EMPTY_FILTERS: ActiveFilters = {
 
 export const DEFAULT_COLLECTIONS = [
   "Mobile Apps",
-  "Web",
-  "Dashboards",
+  "Product Design",
+  "Website",
   "Onboarding",
   "Navigation",
-  "Typography",
   "Motion",
-  "Branding",
 ];

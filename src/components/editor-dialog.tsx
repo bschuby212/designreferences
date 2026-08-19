@@ -9,6 +9,7 @@ import {
   type SourceType,
   type ThumbnailType,
 } from "@/lib/storage/types";
+import { cleanDesignTitle, parseTagInput } from "@/lib/storage/product-tags";
 import { base64ToBlob, cn, normalizeUrl } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
 import { useBreakpoint, useObjectUrl } from "./hooks";
@@ -93,8 +94,11 @@ function EditorForm({
 
   const [url, setUrl] = useState(existing?.url ?? "");
   const [title, setTitle] = useState(
-    existing?.title ??
-      (initialFile ? initialFile.name.replace(/\.[^.]+$/, "") : ""),
+    existing
+      ? cleanDesignTitle(existing.title)
+      : initialFile
+        ? initialFile.name.replace(/\.[^.]+$/, "")
+        : "",
   );
   const [source, setSource] = useState<SourceType>(
     existing?.source ?? (state.mode === "upload" ? "Upload" : "Website"),
@@ -109,6 +113,8 @@ function EditorForm({
   const [thumbnailType, setThumbnailType] = useState<ThumbnailType>(
     existing?.thumbnailType ?? (state.mode === "upload" ? "upload" : "placeholder"),
   );
+  const [imageUrls, setImageUrls] = useState<string[]>(existing?.imageUrls ?? []);
+  const [videoUrl, setVideoUrl] = useState(existing?.videoUrl ?? "");
   const [previewing, setPreviewing] = useState(false);
   const [saving, setSaving] = useState(false);
   const lastPreviewed = useRef("");
@@ -137,13 +143,15 @@ function EditorForm({
       const data = (await res.json()) as LinkPreview & { error?: string };
       if (!res.ok) return;
       setUrl(data.url || normalized);
-      if (data.title) setTitle((current) => current || data.title);
+      if (data.title) setTitle((current) => current || cleanDesignTitle(data.title));
       if (data.source) setSource(data.source);
       if (data.thumbnail) {
         setThumbnail(base64ToBlob(data.thumbnail.data, data.thumbnail.mime));
         setThumbnailType(data.thumbnailType);
       }
       if (data.thumbnailUrl) setThumbnailUrl(data.thumbnailUrl);
+      setImageUrls(data.images ?? []);
+      setVideoUrl(data.videoUrl ?? "");
     } finally {
       setPreviewing(false);
     }
@@ -162,22 +170,22 @@ function EditorForm({
     setThumbnail(file);
     setThumbnailType("upload");
     setThumbnailUrl("");
+    setImageUrls([]);
     setTitle((current) => current || file.name.replace(/\.[^.]+$/, ""));
   }
 
   async function save() {
     setSaving(true);
     try {
-      const parsedTags = tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean);
+      const parsedTags = parseTagInput(tags);
       const payload: CreateReferenceInput = {
-        title: title.trim(),
+        title: cleanDesignTitle(title.trim()),
         url: normalizeUrl(url),
         thumbnail,
         thumbnailUrl: thumbnailUrl || null,
         thumbnailType: thumbnail || thumbnailUrl ? thumbnailType : "placeholder",
+        imageUrls,
+        videoUrl: videoUrl || null,
         source: state.mode === "upload" && source === "Website" ? "Upload" : source,
         collectionId: collectionId || null,
         tags: parsedTags,
@@ -196,6 +204,11 @@ function EditorForm({
     }
   }
 
+  const normalizedUrl = normalizeUrl(url);
+  const duplicate =
+    state.mode !== "edit" && normalizedUrl
+      ? references.find((r) => normalizeUrl(r.url) === normalizedUrl)
+      : undefined;
   const canSave = Boolean(thumbnail || normalizeUrl(url) || title.trim());
 
   return (
@@ -239,6 +252,20 @@ function EditorForm({
             </div>
           )}
         </div>
+
+        {imageUrls.length > 1 && (
+          <p className="text-[11px] text-[var(--muted)]">
+            {imageUrls.length} screens · shown as a carousel
+          </p>
+        )}
+
+        {duplicate && (
+          <p className="rounded-[var(--radius)] bg-[var(--hover)] px-3 py-2 text-[11px] text-[var(--muted)]">
+            Already in your library
+            {duplicate.title ? ` as “${duplicate.title}”` : ""}. Saving won’t create
+            a duplicate.
+          </p>
+        )}
 
         {(state.mode === "upload" || (state.mode === "edit" && thumbnail)) && (
           <UploadPicker onPick={onPick} compact />
