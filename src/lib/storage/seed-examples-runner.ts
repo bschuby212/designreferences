@@ -15,13 +15,14 @@ import {
   imageAssetKey,
   isEncryptedCdn,
   isMobbinFlow,
+  isPhoneShot,
   isMotionSrc,
   now,
   uid,
 } from "@/lib/utils";
 
 const CONCURRENCY = 4;
-export const SEED_VERSION = 11;
+export const SEED_VERSION = 12;
 const SEED_VERSION_KEY = "library-seed-version";
 
 const COLLECTION_RENAMES: Record<string, string> = {
@@ -188,6 +189,56 @@ async function remapPlayableMotion(byName: Map<string, string>) {
   }
 }
 
+async function remapAllReferences(byName: Map<string, string>) {
+  const refs = await getDb().references.toArray();
+  const byId = new Map((await getDb().collections.toArray()).map((c) => [c.id, c.name]));
+  const docsNeedles = [
+    "developer.apple.com/design",
+    "developer.apple.com/sf-symbols",
+    "m3.material.io",
+    "reactnative.dev/docs",
+    "docs.expo.dev",
+    "tokens.studio",
+    "heroicons.com",
+    "phosphoricons.com",
+    "ui.shadcn.com",
+    "radix-ui.com",
+  ];
+  for (const record of refs) {
+    const hasMotion = [record.videoUrl, record.thumbnailUrl, ...(record.imageUrls ?? [])].some(
+      (url) => isMotionSrc(url),
+    );
+    const currentName = record.collectionId ? (byId.get(record.collectionId) ?? "") : "";
+    let nextName: string | null = null;
+    if (hasMotion) {
+      nextName = "Motion";
+    } else if (/\/(?:explore\/)?sections\//i.test(record.url)) {
+      nextName = "Website";
+    } else if (/\/content\/sites\//i.test(record.thumbnailUrl ?? "")) {
+      nextName = "Product Design";
+    } else if (
+      isPhoneShot(record.url, record.thumbnailUrl || record.imageUrls?.[0] || null)
+    ) {
+      if (currentName === "Onboarding") nextName = "Onboarding";
+      else if (currentName === "Navigation") nextName = "Navigation";
+      else nextName = "Mobile Apps";
+    } else if (docsNeedles.some((needle) => record.url.toLowerCase().includes(needle))) {
+      nextName = "Website";
+    }
+    // Hard guard: Mobile Apps must stay phone-only.
+    if (!nextName && currentName === "Mobile Apps") {
+      nextName = "Website";
+    }
+    if (!nextName) continue;
+    const targetId = byName.get(nextName);
+    if (!targetId || targetId === record.collectionId) continue;
+    await repository.updateReference(record.id, {
+      collectionId: targetId,
+      tags: productTagsFor(nextName, cleanDesignTitle(record.title)),
+    });
+  }
+}
+
 async function refreshStaleSeeds() {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(SEED_VERSION_KEY, String(SEED_VERSION));
@@ -199,6 +250,7 @@ async function collapseMixedScreens() {
   for (const record of existing) {
     if (isMobbinFlow(record.url)) continue;
     if (seedByUrl.get(record.url)?.videoUrl) continue;
+    if (isPhoneShot(record.url, record.thumbnailUrl || record.imageUrls?.[0] || null)) continue;
     if ((record.imageUrls?.length ?? 0) <= 1) continue;
     const one = heroShotUrl(record.thumbnailUrl || record.imageUrls[0]);
     await repository.updateReference(record.id, {
@@ -217,13 +269,27 @@ async function applyCarouselAndHero() {
     list.push(seed.imageUrl);
     siblings.set(seed.title, list);
   }
+  // Also harvest siblings from already-saved phone references so carousel has frames
+  // even when a record was user-added or no longer seed-backed.
+  for (const record of existing) {
+    if (!isPhoneShot(record.url, record.thumbnailUrl || record.imageUrls?.[0] || null)) continue;
+    const title = cleanDesignTitle(record.title);
+    const list = siblings.get(title) ?? [];
+    if (record.thumbnailUrl) list.push(record.thumbnailUrl);
+    for (const frame of record.imageUrls ?? []) list.push(frame);
+    siblings.set(title, list);
+  }
 
   for (const record of existing) {
     const seed = seedByUrl.get(record.url);
     const thumb = heroShotUrl(seed?.imageUrl || record.thumbnailUrl || "");
     const flow = framesFor(record.url, thumb || record.thumbnailUrl);
-    const related = seed ? siblings.get(seed.title) ?? [] : [];
+    const relatedTitle = seed?.title ?? cleanDesignTitle(record.title);
+    const related = siblings.get(relatedTitle) ?? [];
     const motionStill = false;
+    const phoneLike =
+      isPhoneShot(record.url, seed?.imageUrl || record.thumbnailUrl || record.imageUrls?.[0] || null) ||
+      /\/content\/app_screens\//i.test(seed?.imageUrl || "");
     const nextImages = isMobbinFlow(record.url)
       ? uniqueUrls(
           flow.length > 1
@@ -232,7 +298,9 @@ async function applyCarouselAndHero() {
         )
       : motionStill
         ? uniqueUrls([thumb || record.thumbnailUrl, ...related])
-        : uniqueUrls([thumb || record.thumbnailUrl]);
+        : phoneLike
+          ? uniqueUrls([thumb || record.thumbnailUrl, ...related, ...(record.imageUrls ?? [])])
+          : uniqueUrls([thumb || record.thumbnailUrl]);
     const videoUrl =
       seed?.videoUrl ||
       motionPreviewFor(record.url, record.videoUrl) ||
@@ -264,7 +332,8 @@ async function applyCarouselAndHero() {
         !isMobbinFlow(record.url) &&
         !motionStill)
     ) {
-      patch.imageUrls = isMobbinFlow(record.url) || motionStill ? nextImages : [nextImages[0]];
+      patch.imageUrls =
+        isMobbinFlow(record.url) || motionStill || phoneLike ? nextImages : [nextImages[0]];
     }
     if ((videoUrl || null) !== (record.videoUrl || null)) patch.videoUrl = videoUrl;
     if (Object.keys(patch).length === 0) continue;
@@ -279,6 +348,7 @@ async function runSeed() {
   const byName = new Map(collections.map((c) => [c.name, c.id]));
   await remapSeedCollections(byName);
   await remapPlayableMotion(byName);
+  await remapAllReferences(byName);
   await refreshStaleSeeds();
   await collapseMixedScreens();
 
