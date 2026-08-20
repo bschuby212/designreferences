@@ -248,6 +248,23 @@ for (const viewport of WIDTHS) {
       dotAfter === `3/${dotAfter?.split("/")[1]}` && dotAfter !== dotBefore,
       `${dotBefore} -> ${dotAfter}`,
     );
+    // Every dot, including the first, must page without opening the detail
+    // view: they sit next to the open target, so a stray bubble would be easy
+    // to miss by eye.
+    let opened = 0;
+    for (let position = 0; position < dotCount; position += 1) {
+      await dots.nth(position).click();
+      await page.waitForTimeout(120);
+      const detailOpen =
+        (await page.locator("[role='dialog']").count()) +
+        (await page.locator("aside").filter({ hasText: "Screens" }).count());
+      if (detailOpen > 0) opened += 1;
+      const seen = await counterOf(page);
+      if (seen !== `${position + 1}/${dotCount}`) {
+        check(`${label}: dot ${position + 1} selects its screen`, false, String(seen));
+      }
+    }
+    check(`${label}: no dot opens the detail view`, opened === 0, `${opened} of ${dotCount} did`);
   } else {
     check(`${label}: pagination dots present`, false, `found ${dotCount}`);
   }

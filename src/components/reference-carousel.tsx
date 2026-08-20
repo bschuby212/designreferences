@@ -222,14 +222,16 @@ export function ReferenceCarousel({
       </div>
 
       {count > 1 && (
-        <div className="mt-1.5 flex items-center justify-center gap-1">
+        <div className="mt-1 flex items-center justify-center gap-0.5">
           {screens.map((screen, position) => (
             <button
               key={screen.src}
               type="button"
               aria-label={`Show screen ${position + 1}`}
               aria-current={position === index}
-              className="grid h-6 w-5 place-items-center"
+              // Generous target: the dots sit right below the area that opens
+              // the reference, so a near miss should still page.
+              className="grid h-7 w-7 place-items-center"
               onClick={(event) => {
                 event.stopPropagation();
                 go(position);
@@ -237,10 +239,10 @@ export function ReferenceCarousel({
             >
               <span
                 className={cn(
-                  "block h-1.5 rounded-full transition-all",
+                  "block h-2 rounded-full transition-all",
                   position === index
                     ? "w-4 bg-[var(--text)]"
-                    : "w-1.5 bg-[var(--border-strong)]",
+                    : "w-2 bg-[var(--border-strong)]",
                 )}
               />
             </button>
