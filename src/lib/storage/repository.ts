@@ -40,7 +40,9 @@ export interface LibraryRepository {
   deleteCollection(id: string): Promise<void>;
   seedIfEmpty(): Promise<void>;
   ensureCollections(names: string[]): Promise<Collection[]>;
-  deleteSeededReferences(): Promise<number>;
+  mergeDuplicateCollections(): Promise<number>;
+  replaceSeededReferences(inputs: CreateReferenceInput[]): Promise<number>;
+  countSeededReferences(): Promise<number>;
   getMeta(key: string): Promise<string | null>;
   setMeta(key: string, value: string): Promise<void>;
 }
@@ -201,16 +203,89 @@ export const indexedDbRepository: LibraryRepository = {
     return getDb().collections.orderBy("sortOrder").toArray();
   },
 
-  /** Removes only seeded examples; references a user added have no seedKey. */
-  async deleteSeededReferences() {
-    const seeded = await getDb().references.filter((r) => Boolean(r.seedKey)).toArray();
-    await getDb().transaction("rw", getDb().references, getDb().thumbnails, async () => {
-      for (const record of seeded) {
-        await getDb().references.delete(record.id);
-        await getDb().thumbnails.delete(record.id);
+  /**
+   * Collapses collections that share a name. Seeding used to be able to run
+   * twice concurrently, which left two rows called e.g. "Motion": the sidebar
+   * showed one of them with a count of zero while the references pointed at
+   * the other. Duplicates are merged into the earliest row and references are
+   * remapped, so an affected library repairs itself on load.
+   */
+  async mergeDuplicateCollections() {
+    let merged = 0;
+    await getDb().transaction("rw", getDb().collections, getDb().references, async () => {
+      const collections = await getDb().collections.orderBy("sortOrder").toArray();
+      const keep = new Map<string, string>();
+      const remap = new Map<string, string>();
+      for (const collection of collections) {
+        const name = collection.name.trim().toLowerCase();
+        const existing = keep.get(name);
+        if (existing) {
+          remap.set(collection.id, existing);
+        } else {
+          keep.set(name, collection.id);
+        }
+      }
+      if (remap.size === 0) return;
+      merged = remap.size;
+      for (const id of remap.keys()) await getDb().collections.delete(id);
+      const references = await getDb().references.toArray();
+      for (const record of references) {
+        const ids = record.collectionIds ?? [];
+        const next = [...new Set(ids.map((id) => remap.get(id) ?? id))];
+        if (next.length === ids.length && next.every((id, i) => id === ids[i])) {
+          continue;
+        }
+        await getDb().references.update(record.id, { collectionIds: next });
       }
     });
-    return seeded.length;
+    return merged;
+  },
+
+  /**
+   * Swaps the seeded examples in a single transaction. References a user added
+   * have no seedKey and are left untouched; doing it atomically means a reload
+   * mid-install cannot leave the library half seeded or duplicated.
+   */
+  async replaceSeededReferences(inputs) {
+    const timestamp = now();
+    return getDb().transaction(
+      "rw",
+      getDb().references,
+      getDb().thumbnails,
+      async () => {
+        const seeded = await getDb()
+          .references.filter((record) => Boolean(record.seedKey))
+          .toArray();
+        for (const record of seeded) {
+          await getDb().references.delete(record.id);
+          await getDb().thumbnails.delete(record.id);
+        }
+        const records: ReferenceRecord[] = inputs.map((input, index) => ({
+          id: uid(),
+          title: input.title,
+          url: input.url,
+          thumbnailUrl: input.thumbnailUrl ?? null,
+          thumbnailType: input.thumbnailType,
+          source: input.source,
+          collectionIds: input.collectionIds ?? [],
+          screens: input.screens ?? [],
+          aspect: input.aspect ?? null,
+          seedKey: input.seedKey ?? null,
+          tags: input.tags,
+          notes: input.notes,
+          favorite: input.favorite ?? false,
+          // Keep the authored order stable in a "newest first" gallery.
+          createdAt: timestamp + index,
+          updatedAt: timestamp + index,
+        }));
+        await getDb().references.bulkPut(records);
+        return records.length;
+      },
+    );
+  },
+
+  async countSeededReferences() {
+    return getDb().references.filter((record) => Boolean(record.seedKey)).count();
   },
 
   async getMeta(key) {

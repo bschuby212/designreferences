@@ -48,7 +48,8 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void (async () => {
       try {
-        await repository.seedIfEmpty();
+        // Creates the default collections and installs the seeded examples;
+        // safe to call more than once.
         await seedExampleReferences();
       } catch (error) {
         console.error("Failed to seed library", error);
