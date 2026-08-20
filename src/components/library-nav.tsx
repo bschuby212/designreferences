@@ -126,10 +126,8 @@ function Chip({
       {count !== undefined && (
         <span
           className={cn(
-            "ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1.5 text-[10px] font-medium tabular-nums",
-            active
-              ? "bg-[var(--hover)] !text-[var(--text)]"
-              : "bg-[var(--hover)] !text-[var(--muted)]",
+            "ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--preview)] px-1.5 text-[10px] font-medium tabular-nums",
+            active ? "!text-[var(--text)]" : "!text-[var(--muted)]",
           )}
         >
           {count}
