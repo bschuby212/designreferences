@@ -1,6 +1,7 @@
 import { getDb } from "./indexeddb";
 import {
   DEFAULT_COLLECTIONS,
+  OBSOLETE_NAV_COLLECTIONS,
   type Collection,
   type CreateReferenceInput,
   type Reference,
@@ -40,6 +41,7 @@ export interface LibraryRepository {
   deleteCollection(id: string): Promise<void>;
   seedIfEmpty(): Promise<void>;
   ensureCollections(names: string[]): Promise<Collection[]>;
+  syncCanonicalCollections(): Promise<void>;
   mergeDuplicateCollections(): Promise<number>;
   replaceSeededReferences(inputs: CreateReferenceInput[]): Promise<number>;
   countSeededReferences(): Promise<number>;
@@ -184,11 +186,14 @@ export const indexedDbRepository: LibraryRepository = {
    * top of the user's own ordering.
    */
   async ensureCollections(names) {
+    const obsolete = new Set(
+      OBSOLETE_NAV_COLLECTIONS.map((name) => name.toLowerCase()),
+    );
     const existing = await getDb().collections.toArray();
     const byName = new Map(existing.map((c) => [c.name.toLowerCase(), c]));
-    const created: Collection[] = [];
     let sortOrder = existing.length;
     for (const name of names) {
+      if (obsolete.has(name.toLowerCase())) continue;
       if (byName.has(name.toLowerCase())) continue;
       const collection: Collection = {
         id: uid(),
@@ -198,9 +203,102 @@ export const indexedDbRepository: LibraryRepository = {
       };
       await getDb().collections.put(collection);
       byName.set(name.toLowerCase(), collection);
-      created.push(collection);
     }
     return getDb().collections.orderBy("sortOrder").toArray();
+  },
+
+  /**
+   * Renames and merges the old chip set onto the six canonical canvases.
+   * User-created collections keep their ids; only empty obsolete chips are
+   * deleted after references have been remapped.
+   */
+  async syncCanonicalCollections() {
+    const db = getDb();
+    await db.transaction("rw", db.collections, db.references, async () => {
+      const remapCollectionId = async (fromId: string, toId: string) => {
+        if (fromId === toId) return;
+        const references = await db.references.toArray();
+        for (const record of references) {
+          const ids = record.collectionIds ?? [];
+          if (!ids.includes(fromId)) continue;
+          const next = [...new Set(ids.map((id) => (id === fromId ? toId : id)))];
+          await db.references.update(record.id, { collectionIds: next });
+        }
+      };
+
+      const byName = async () => {
+        const rows = await db.collections.toArray();
+        return new Map(rows.map((row) => [row.name.trim().toLowerCase(), row]));
+      };
+
+      const renameOrMerge = async (from: string, to: string) => {
+        const map = await byName();
+        const source = map.get(from.toLowerCase());
+        if (!source) return;
+        const dest = map.get(to.toLowerCase());
+        if (dest && dest.id !== source.id) {
+          await remapCollectionId(source.id, dest.id);
+          await db.collections.delete(source.id);
+          return;
+        }
+        if (source.name !== to) {
+          await db.collections.update(source.id, { name: to });
+        }
+      };
+
+      await renameOrMerge("Onboarding", "Mobile Onboarding");
+      await renameOrMerge("Navigation", "Mobile Navigation");
+
+      const map = await byName();
+      const combined = map.get("web & landing pages");
+      const web = map.get("web");
+      const landing = map.get("landing pages");
+      const survivor = combined ?? web ?? landing;
+      if (survivor) {
+        if (survivor.name !== "Web & Landing Pages") {
+          await db.collections.update(survivor.id, { name: "Web & Landing Pages" });
+        }
+        for (const extra of [combined, web, landing]) {
+          if (extra && extra.id !== survivor.id) {
+            await remapCollectionId(extra.id, survivor.id);
+            await db.collections.delete(extra.id);
+          }
+        }
+      }
+
+      const after = await byName();
+      if (!after.get("web sign-up")) {
+        const existing = await db.collections.toArray();
+        await db.collections.put({
+          id: uid(),
+          name: "Web Sign-Up",
+          createdAt: now(),
+          sortOrder: existing.length,
+        });
+      }
+
+      const obsolete = new Set(
+        OBSOLETE_NAV_COLLECTIONS.map((name) => name.toLowerCase()),
+      );
+      const refs = await db.references.toArray();
+      const used = new Set(refs.flatMap((row) => row.collectionIds ?? []));
+      for (const row of await db.collections.toArray()) {
+        if (!obsolete.has(row.name.trim().toLowerCase())) continue;
+        if (used.has(row.id)) continue;
+        await db.collections.delete(row.id);
+      }
+
+      const current = await byName();
+      const extras = (await db.collections.toArray())
+        .filter((row) => !DEFAULT_COLLECTIONS.includes(row.name))
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+      let sortOrder = 0;
+      for (const name of [...DEFAULT_COLLECTIONS, ...extras.map((row) => row.name)]) {
+        const row = current.get(name.toLowerCase());
+        if (!row) continue;
+        await db.collections.update(row.id, { sortOrder: sortOrder++ });
+      }
+    });
   },
 
   /**

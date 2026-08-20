@@ -22,6 +22,9 @@ import sys
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from classify_category import SEED_REVISION, categories_for, recategorize_library
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ORIGINALS = os.path.join(ROOT, "scripts", "original-seeds.json")
 HARVEST = os.path.join(ROOT, "scripts", "mobbin-data.json")
@@ -30,7 +33,6 @@ CACHE = os.path.join(ROOT, "scripts", ".cache", "restored")
 PUBLIC = os.path.join(ROOT, "public", "screens", "restored")
 TARGET = os.path.join(ROOT, "src", "lib", "storage", "seed-examples.ts")
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/122 Safari/537.36"
-SEED_REVISION = "2026-08-full-library-3"
 
 
 def slug(value: str) -> str:
@@ -105,46 +107,7 @@ def viewport_capture(job: tuple[str, str, str]) -> str:
     return output
 
 
-def categories_for(original: dict, metadata: dict, flow_audit: dict | None) -> list[str]:
-    original_category = original["collection"]
-    platform = metadata.get("platform")
-    patterns = set(metadata.get("screenPatterns") or metadata.get("pagePatterns") or [])
-    elements = set(metadata.get("screenElements") or [])
-
-    if original_category == "Mobile Apps":
-        categories = ["Mobile Apps"]
-    elif original_category == "Web":
-        categories = ["Web"]
-        if "Dashboard" in patterns or "Charts" in patterns:
-            categories.append("Dashboards")
-    elif original_category == "Dashboards":
-        categories = ["Web", "Dashboards"]
-    elif original_category == "Onboarding":
-        categories = ["Mobile Apps" if platform == "ios" else "Web", "Onboarding"]
-        if flow_audit and "Landing Pages" in flow_audit.get("collections", []):
-            categories.append("Landing Pages")
-    elif original_category == "Navigation":
-        categories = ["Mobile Apps", "Navigation"]
-    elif original_category == "Typography":
-        categories = ["Web", "Landing Pages", "Typography"]
-    elif original_category == "Motion":
-        categories = ["Mobile Apps", "Motion"]
-    elif original_category == "Branding":
-        categories = ["Web", "Branding"]
-        if "Dashboard" in patterns or "Charts" in patterns:
-            categories.append("Dashboards")
-        name = (metadata.get("name") or original["title"]).lower()
-        if "homepage" in name or "landing page" in name:
-            categories.append("Landing Pages")
-    else:
-        categories = [original_category]
-
-    # Keep the original conceptual category when its content evidence supports it.
-    if original_category == "Navigation" and not (
-        {"Tab Bar", "Top Navigation Bar", "Toolbar"} & elements
-    ):
-        categories.remove("Navigation")
-    return list(dict.fromkeys(categories))
+# categories_for lives in classify_category.py so seed rebuilds and remaps share rules.
 
 
 def build_references() -> tuple[list[dict], list[dict]]:
@@ -299,6 +262,7 @@ def write_seed_file(references: list[dict]) -> None:
 
 def main() -> int:
     references, retired = build_references()
+    references, _audit = recategorize_library(references)
     write_seed_file(references)
     print(f"Wrote {len(references)} references to {TARGET}")
     print(f"Retired {len(retired)} exact duplicate images:")

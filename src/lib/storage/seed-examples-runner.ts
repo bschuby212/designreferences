@@ -32,6 +32,7 @@ export function seedExampleReferences() {
 async function run() {
   await repository.seedIfEmpty();
   await repository.mergeDuplicateCollections();
+  await repository.syncCanonicalCollections();
 
   const storedRevision = await repository.getMeta(REVISION_KEY);
   const seededCount = await repository.countSeededReferences();

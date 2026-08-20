@@ -122,17 +122,42 @@ export const EMPTY_FILTERS: ActiveFilters = {
   tags: [],
 };
 
-export const DEFAULT_COLLECTIONS = [
+export const CANONICAL_NAV_COLLECTIONS = [
   "Mobile Apps",
-  "Web",
+  "Web & Landing Pages",
   "Dashboards",
-  "Landing Pages",
-  "Onboarding",
-  "Navigation",
+  "Mobile Onboarding",
+  "Web Sign-Up",
+  "Mobile Navigation",
+] as const;
+
+export type CanonicalNavCollection = (typeof CANONICAL_NAV_COLLECTIONS)[number];
+
+export const DEFAULT_COLLECTIONS = [
+  ...CANONICAL_NAV_COLLECTIONS,
   "Typography",
   "Motion",
   "Branding",
 ];
 
 /** Kept in IndexedDB, but not shown as gallery canvases. */
-export const HIDDEN_NAV_COLLECTIONS = ["Typography", "Branding"] as const;
+export const HIDDEN_NAV_COLLECTIONS = [
+  "Typography",
+  "Branding",
+  "Motion",
+] as const;
+
+/** Landscape 2-up gallery canvases. */
+export const LAPTOP_NAV_COLLECTIONS = [
+  "Web & Landing Pages",
+  "Dashboards",
+  "Web Sign-Up",
+] as const;
+
+/** Old chip names that must not be recreated after migration. */
+export const OBSOLETE_NAV_COLLECTIONS = [
+  "Web",
+  "Landing Pages",
+  "Onboarding",
+  "Navigation",
+] as const;
