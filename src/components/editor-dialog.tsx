@@ -11,6 +11,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { classifyReference } from "@/lib/classify/category";
 import type { LinkPreview } from "@/lib/preview/types";
 import { detectSource } from "@/lib/preview/detectSource";
 import type {
@@ -125,6 +126,7 @@ function EditorForm({
   const [categoryId, setCategoryId] = useState(
     initialCollectionIds[0] ?? "",
   );
+  const [categoryTouched, setCategoryTouched] = useState(false);
   const [screens, setScreens] = useState<ReferenceScreen[]>(
     existing?.screens ?? [],
   );
@@ -255,6 +257,30 @@ function EditorForm({
         previewTitle.current.trim() ||
         hostnameOf(normalized) ||
         "Untitled";
+      const classifiedCollectionIds = () => {
+        if (categoryTouched) return categoryId ? [categoryId] : [];
+        const currentName =
+          collections.find((collection) => collection.id === categoryId)?.name;
+        const names = classifyReference({
+          title: resolvedTitle,
+          url: normalized,
+          notes,
+          aspect,
+          screenLabels: resolved.map((screen) => screen.label),
+          originalCategory: currentName,
+        });
+        const ids = [
+          ...new Set(
+            names
+              .map(
+                (name) =>
+                  collections.find((collection) => collection.name === name)?.id,
+              )
+              .filter((id): id is string => Boolean(id)),
+          ),
+        ];
+        return ids.length ? ids : categoryId ? [categoryId] : [];
+      };
       const payload: CreateReferenceInput = {
         title: resolvedTitle,
         url: normalized,
@@ -266,12 +292,13 @@ function EditorForm({
           : thumbnail
             ? "Upload"
             : "Website",
-        collectionIds:
-          existing && existing.collectionIds.includes(categoryId)
+        collectionIds: existing
+          ? existing.collectionIds.includes(categoryId)
             ? existing.collectionIds
             : categoryId
               ? [categoryId]
-              : [],
+              : []
+          : classifiedCollectionIds(),
         screens: resolved,
         aspect,
         seedKey: existing?.seedKey ?? null,
@@ -325,7 +352,10 @@ function EditorForm({
           <Field label="Category">
             <select
               value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
+              onChange={(e) => {
+                setCategoryTouched(true);
+                setCategoryId(e.target.value);
+              }}
               className={inputClass}
             >
               <option value="">Select a category</option>

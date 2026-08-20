@@ -31,6 +31,8 @@ interface ReferenceCarouselProps {
   title: string;
   /** "card" adds a transparent open target underneath the controls. */
   variant: "card" | "detail";
+  /** Dashboards drop the tall laptop plate so screenshots fill the frame. */
+  fit?: "default" | "dashboard";
   onActivate?: () => void;
   className?: string;
 }
@@ -40,6 +42,7 @@ export function ReferenceCarousel({
   aspect,
   title,
   variant,
+  fit = "default",
   onActivate,
   className,
 }: ReferenceCarouselProps) {
@@ -174,7 +177,9 @@ export function ReferenceCarousel({
                   "flex items-center justify-center px-5 py-6",
                 card &&
                   kind === "landscape" &&
-                  "flex items-center justify-center px-6 py-12",
+                  (fit === "dashboard"
+                    ? "flex items-center justify-center px-4 py-4"
+                    : "flex items-center justify-center px-6 py-12"),
               )}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Plus, Search, X } from "lucide-react";
 import {
   EMPTY_FILTERS,
+  LAPTOP_NAV_COLLECTIONS,
   type ActiveFilters,
   type NavView,
   type Reference,
@@ -268,10 +269,14 @@ export function AppShell() {
               selectedId={selectedId}
               laptop={
                 activeView.type === "collection" &&
-                ["Web", "Dashboards", "Landing Pages"].includes(
+                (LAPTOP_NAV_COLLECTIONS as readonly string[]).includes(
                   collections.find((collection) => collection.id === activeView.id)
                     ?.name ?? "",
                 )
+              }
+              dashboardCollectionId={
+                collections.find((collection) => collection.name === "Dashboards")
+                  ?.id ?? null
               }
               emptyTitle={empty.title}
               emptyHint={empty.hint}

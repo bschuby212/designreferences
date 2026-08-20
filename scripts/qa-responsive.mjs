@@ -552,7 +552,7 @@ for (const viewport of WIDTHS) {
   }
 
   if (viewport.width >= 1280) {
-    await page.locator('[data-nav-label="Web"]').click();
+    await page.locator('[data-nav-label="Web & Landing Pages"]').click();
     await page.waitForTimeout(400);
     await page.waitForFunction(
       () =>
@@ -572,7 +572,7 @@ for (const viewport of WIDTHS) {
       return cards.filter((card) => Math.round(card.getBoundingClientRect().top) === firstTop).length;
     });
     check(
-      `${label}: Web canvas is two cards per row`,
+      `${label}: Web & Landing Pages canvas is two cards per row`,
       webColumns === 2,
       `${webColumns} in first row`,
     );
@@ -590,9 +590,21 @@ for (const viewport of WIDTHS) {
       "original-808643f4-122e-40a8-9b14-bc25c7379c34",
     ];
     check(
-      `${label}: Web canvas has no onboarding-flow cards`,
-      webTitles.every((src) => !onboardingFlowDirs.some((dir) => src.includes(dir))),
-      webTitles.filter((src) => onboardingFlowDirs.some((dir) => src.includes(dir))).slice(0, 3).join(", "),
+      `${label}: Web & Landing Pages has no sign-up flow cards`,
+      webTitles.every(
+        (src) =>
+          !onboardingFlowDirs.some(
+            (dir) => src.includes(`${dir}/02.`) || src.includes(`${dir}/03.`),
+          ),
+      ),
+      webTitles
+        .filter((src) =>
+          onboardingFlowDirs.some(
+            (dir) => src.includes(`${dir}/02.`) || src.includes(`${dir}/03.`),
+          ),
+        )
+        .slice(0, 3)
+        .join(", "),
     );
     const desktopThumbs = await page.evaluate(() =>
       [...document.querySelectorAll("article img")]

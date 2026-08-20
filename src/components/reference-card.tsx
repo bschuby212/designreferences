@@ -16,6 +16,7 @@ import { useClickOutside } from "./ui";
 interface ReferenceCardProps {
   reference: Reference;
   selected?: boolean;
+  fit?: "default" | "dashboard";
   onOpen: () => void;
   onFavorite: () => void;
   onEdit: () => void;
@@ -25,6 +26,7 @@ interface ReferenceCardProps {
 export function ReferenceCard({
   reference,
   selected,
+  fit = "default",
   onOpen,
   onFavorite,
   onEdit,
@@ -47,6 +49,7 @@ export function ReferenceCard({
           aspect={reference.aspect}
           title={name}
           variant="card"
+          fit={fit}
           onActivate={onOpen}
         />
       </div>

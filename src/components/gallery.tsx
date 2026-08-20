@@ -7,6 +7,7 @@ interface GalleryProps {
   references: Reference[];
   selectedId: string | null;
   laptop?: boolean;
+  dashboardCollectionId?: string | null;
   emptyTitle: string;
   emptyHint: string;
   onOpen: (id: string) => void;
@@ -20,6 +21,7 @@ export function Gallery({
   references,
   selectedId,
   laptop = false,
+  dashboardCollectionId = null,
   emptyTitle,
   emptyHint,
   onOpen,
@@ -62,6 +64,12 @@ export function Gallery({
               key={reference.id}
               reference={reference}
               selected={reference.id === selectedId}
+              fit={
+                dashboardCollectionId &&
+                reference.collectionIds.includes(dashboardCollectionId)
+                  ? "dashboard"
+                  : "default"
+              }
               onOpen={() => onOpen(reference.id)}
               onFavorite={() => onFavorite(reference.id)}
               onEdit={() => onEdit(reference.id)}

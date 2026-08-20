@@ -12,7 +12,7 @@ import {
   Image,
   Layers,
   LayoutDashboard,
-  Monitor,
+  LogIn,
   Palette,
   PanelTop,
   PenTool,
@@ -39,11 +39,11 @@ type Icon = ComponentType<LucideProps>;
 
 const CATEGORY_ICONS: Record<string, Icon> = {
   "Mobile Apps": Smartphone,
-  Web: Monitor,
+  "Web & Landing Pages": PanelTop,
   Dashboards: LayoutDashboard,
-  "Landing Pages": PanelTop,
-  Onboarding: Sparkles,
-  Navigation: Compass,
+  "Mobile Onboarding": Sparkles,
+  "Web Sign-Up": LogIn,
+  "Mobile Navigation": Compass,
   Motion: Clapperboard,
 };
 

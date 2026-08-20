@@ -88,6 +88,9 @@ export function DetailView({
               aspect={reference.aspect}
               title={reference.title || "Reference"}
               variant="detail"
+              fit={
+                collectionNames?.includes("Dashboards") ? "dashboard" : "default"
+              }
             />
           </div>
         </section>

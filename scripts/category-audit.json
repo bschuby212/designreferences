@@ -1,0 +1,3011 @@
+[
+  {
+    "id": "original-8abf0a47-b548-4a64-98bb-4540adf5f7d7",
+    "product": "Plum",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-d7297117-6773-4b02-afbb-4f480f48a5a5",
+    "product": "Klarna",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-38a0a85c-fa53-46ef-8e25-6a34ed2449ca",
+    "product": "Cash App",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-6e369d44-185d-4982-8338-595f17137ef7",
+    "product": "Airbnb",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-cdac2fc5-ef88-4fe4-b4b3-9850455f99c0",
+    "product": "Grab",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-ab1f766d-1f1e-42eb-9b13-4a44eb97a8f0",
+    "product": "Revolut",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-5ec30559-be5a-491e-b563-a87fa1160e42",
+    "product": "Revolut",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-c94010cd-efc6-4ab5-95fe-70d79a8f59cc",
+    "product": "Wise",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-d5384da7-036e-4ed6-94d6-36e5a35a2f8a",
+    "product": "MyFitnessPal",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-a2e597fa-50af-426b-93ba-5726fc0ef3da",
+    "product": "Revolut",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-41e035de-eb59-433c-a13a-b2367812536f",
+    "product": "Airbnb",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-0cd621cb-59a9-46b3-ad46-86d7a5886474",
+    "product": "Peloton",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-ae773805-d0e9-4d39-92b2-9d9ba98548f4",
+    "product": "Chase UK",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-0c758216-f623-4b62-9e81-e0496e07f38b",
+    "product": "Uber Eats",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-d0b6b71d-99b7-4503-b2c4-a0c85f6dc9c0",
+    "product": "Coinbase",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-3e730b86-bbd9-4d74-a35b-40a07c3a4163",
+    "product": "N26",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-58e88acd-c7a4-40f4-98a5-f9a1911dcae5",
+    "product": "Uber",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-53c8ee32-2e3e-4873-95db-41bb1aaa47eb",
+    "product": "Spotify",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-93e9257c-dbcc-4867-8751-c685d4560eed",
+    "product": "Uber",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-f83bc9d1-ad58-4821-9d63-3941e2520488",
+    "product": "Lifesum",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps"
+    ],
+    "final": [
+      "Mobile Apps"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-a3072727-bc6a-4477-a560-9651a4efb914",
+    "product": "Remote",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged 2 same-company captures",
+    "slideCount": 2,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-05b1b240-bf8c-4939-889a-01fb0b80fab2",
+    "product": "Quicken",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-50d32b63-ebfb-4e11-b81f-24e2039cbc92",
+    "product": "PandaDoc",
+    "platform": "web",
+    "previous": [
+      "Web"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-83a4381f-4c7b-45fc-8f49-8a95e132ffb3",
+    "product": "beehiiv",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-b2361cb1-96cd-4806-88a4-6ebc8bfb8f64",
+    "product": "Attio",
+    "platform": "web",
+    "previous": [
+      "Web"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-3a5db2b5-c1f9-4593-95d2-105a00a75c78",
+    "product": "OpenSea",
+    "platform": "web",
+    "previous": [
+      "Web"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-54ddc763-5778-4675-8f3f-761cd9a2cce6",
+    "product": "Contra",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-ca69a753-ee20-4e4d-bbbe-7260a303cdac",
+    "product": "Shopify",
+    "platform": "web",
+    "previous": [
+      "Web"
+    ],
+    "final": [
+      "Web & Landing Pages"
+    ],
+    "reason": "reclassified from ['Web'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-45909568-a202-4ac0-8e70-e0fc5d5e6324",
+    "product": "Remote",
+    "platform": "web",
+    "previous": [
+      "Web"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-34d0f00d-1ca1-4c73-b388-14b96f0b88a9",
+    "product": "Bonsai",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-ee8af58c-987b-4fb1-81e9-6517c0fbc707",
+    "product": "Deel",
+    "platform": "web",
+    "previous": [
+      "Web"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged 2 same-company captures",
+    "slideCount": 2,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-e39a4e8b-0d81-4948-ac70-cfc63b04baa0",
+    "product": "Origin",
+    "platform": "web",
+    "previous": [
+      "Web"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-1956d6e4-3b1d-4a2b-ba5b-23c227ad87fd",
+    "product": "Bonsai",
+    "platform": "web",
+    "previous": [
+      "Web"
+    ],
+    "final": [
+      "Web Sign-Up"
+    ],
+    "reason": "reclassified from ['Web'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-0adb9ea1-c989-4546-ace9-e697449518d5",
+    "product": "Sana AI",
+    "platform": "web",
+    "previous": [
+      "Web"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-f68a78f4-1d63-4979-a00f-dbae7c59a999",
+    "product": "Coinbase",
+    "platform": "web",
+    "previous": [
+      "Web"
+    ],
+    "final": [
+      "Web Sign-Up"
+    ],
+    "reason": "reclassified from ['Web'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-bc7bb8a9-2e2c-4984-8ecb-3753812b3146",
+    "product": "Deel",
+    "platform": "web",
+    "previous": [
+      "Web"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-44a18f7a-5e3c-469c-86fa-3adc37d038a9",
+    "product": "June",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-8b381727-1836-4188-ae2f-2be7b6566162",
+    "product": "Notion",
+    "platform": "web",
+    "previous": [
+      "Web"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-f139c9ea-4fb1-4319-a379-13b55f196a22",
+    "product": "Sana AI",
+    "platform": "web",
+    "previous": [
+      "Web"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-21116a93-645c-4d13-922e-13f1748b995b",
+    "product": "Amplitude",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-5b908c10-a485-4dad-9030-37608f9b0c35",
+    "product": "Navattic",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged 3 same-company captures",
+    "slideCount": 3,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-90db0da6-7974-4e77-9509-51066dab3c0b",
+    "product": "Substack",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged 3 same-company captures",
+    "slideCount": 3,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-79a31934-4ca2-4700-86a5-c180fa735404",
+    "product": "Navattic",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-120c2856-780c-4ce1-9356-4c42ca789cea",
+    "product": "Manus",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged 2 same-company captures",
+    "slideCount": 2,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-fd5c30e3-9acd-41a0-9eb2-fa2c7efe2dbd",
+    "product": "Navattic",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-c259bb12-d530-49cb-8eb9-ccf9bf520221",
+    "product": "Rox",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged 3 same-company captures",
+    "slideCount": 3,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-f2081b8c-ecba-4ed3-ba4d-2a678aa388ce",
+    "product": "Maze",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged 3 same-company captures",
+    "slideCount": 3,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-5b74a28a-82c6-4480-bed3-f3a88373ec5d",
+    "product": "GoFundMe",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-41f22041-1b75-4dd1-a336-01069df559cc",
+    "product": "Care.com",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-910698d4-4e0d-4c1f-b271-b0c25e194860",
+    "product": "Hootsuite",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged 3 same-company captures",
+    "slideCount": 3,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-86697356-0d84-4739-8ab9-e3d62b81b83d",
+    "product": "Substack",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-6f48b680-0e25-4201-bfef-5b979d0a7029",
+    "product": "Dialpad",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged 2 same-company captures",
+    "slideCount": 2,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-6c181179-def9-4926-ab05-a47491b81bb7",
+    "product": "Rox",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-28bfc8bf-418e-4f54-81ae-a0a3fe73ef2b",
+    "product": "Maze",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-01e83b3c-0c55-4613-9e4c-17f3fbbd4813",
+    "product": "Hootsuite",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-4e0f8f44-de8b-4e99-8c39-ec95ca2e7448",
+    "product": "Substack",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-459cb074-8432-4f19-be45-0ec439d834dd",
+    "product": "Salesforce",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-4a67a2be-a2f2-482b-bade-14409b623529",
+    "product": "Hootsuite",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-05780d19-3dc9-4000-a64a-838af651635a",
+    "product": "Manus",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-cd29c218-cdc9-4a78-8687-14ec98176cda",
+    "product": "Todoist",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "reclassified from ['Web', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-7cdc08c0-3bcb-4882-90dd-5cf92019616f",
+    "product": "Headspace",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Onboarding"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Onboarding"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Onboarding'] by screen purpose",
+    "slideCount": 6,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-d162ef83-02c1-45d9-be0f-6d03633ac095",
+    "product": "Spotify",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Onboarding"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Onboarding"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Onboarding'] by screen purpose",
+    "slideCount": 6,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-7291bae9-7b5a-4b40-a911-316447f4437c",
+    "product": "Revolut",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Onboarding"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Onboarding"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Onboarding'] by screen purpose",
+    "slideCount": 6,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-cc454aaf-c5b6-40c3-8bef-3b815a88d168",
+    "product": "Airbnb",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Onboarding"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Onboarding"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Onboarding'] by screen purpose",
+    "slideCount": 6,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-1daa0279-a2ce-44dc-a2f0-667380b64294",
+    "product": "Wise",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Onboarding"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Onboarding"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Onboarding'] by screen purpose",
+    "slideCount": 6,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-835f959d-7928-45a7-a4f7-fdec964e7270",
+    "product": "Revolut",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Onboarding"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Onboarding"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Onboarding'] by screen purpose",
+    "slideCount": 6,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-093bddb2-c6df-434e-86bc-dd52e3feb909",
+    "product": "Uber Eats",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Onboarding"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Onboarding"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Onboarding'] by screen purpose",
+    "slideCount": 6,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-37252943-7152-4236-8d9c-3cc80e872c6c",
+    "product": "Mozi",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Onboarding"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Onboarding"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Onboarding'] by screen purpose",
+    "slideCount": 6,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-fc508ec1-6af0-46bd-9b01-578751475faa",
+    "product": "Instagram",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Onboarding"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Onboarding"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Onboarding'] by screen purpose",
+    "slideCount": 6,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-24035767-44e2-4688-8869-e891996fabc2",
+    "product": "Luma",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Onboarding"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Onboarding"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Onboarding'] by screen purpose",
+    "slideCount": 6,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-57e41d19-30db-4443-ab36-b19c8c20dfe4",
+    "product": "Ahead",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Onboarding"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Onboarding"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Onboarding'] by screen purpose",
+    "slideCount": 6,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-ab8dcea1-9830-43e8-9487-fe6ce5910c84-landing",
+    "product": "Rox",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web & Landing Pages"
+    ],
+    "reason": "split marketing homepage off a mixed web onboarding flow",
+    "slideCount": 1,
+    "action": "split-landing",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-ab8dcea1-9830-43e8-9487-fe6ce5910c84",
+    "product": "Rox",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web Sign-Up"
+    ],
+    "reason": "browser account-entry flow",
+    "slideCount": 3,
+    "action": "split-signup",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-ab8dcea1-9830-43e8-9487-fe6ce5910c84-dashboard",
+    "product": "Rox",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "workspace/dashboard frames removed from sign-up carousel",
+    "slideCount": 1,
+    "action": "split-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-e064f4d1-4ee1-4748-ba66-f2172caa277d-landing",
+    "product": "Maze",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web & Landing Pages"
+    ],
+    "reason": "split marketing homepage off a mixed web onboarding flow",
+    "slideCount": 1,
+    "action": "split-landing",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-e064f4d1-4ee1-4748-ba66-f2172caa277d",
+    "product": "Maze",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web Sign-Up"
+    ],
+    "reason": "browser account-entry flow",
+    "slideCount": 3,
+    "action": "split-signup",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-e064f4d1-4ee1-4748-ba66-f2172caa277d-dashboard",
+    "product": "Maze",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "workspace/dashboard frames removed from sign-up carousel",
+    "slideCount": 1,
+    "action": "split-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-242ff3d6-866e-4a34-87eb-715354f9d45f-landing",
+    "product": "Navattic",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web & Landing Pages"
+    ],
+    "reason": "split marketing homepage off a mixed web onboarding flow",
+    "slideCount": 1,
+    "action": "split-landing",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-242ff3d6-866e-4a34-87eb-715354f9d45f",
+    "product": "Navattic",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web Sign-Up"
+    ],
+    "reason": "browser account-entry flow",
+    "slideCount": 4,
+    "action": "split-signup",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-0c3206ce-2ec1-4408-8a00-24190ec7651d-landing",
+    "product": "Copy.ai",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web & Landing Pages"
+    ],
+    "reason": "split marketing homepage off a mixed web onboarding flow",
+    "slideCount": 1,
+    "action": "split-landing",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-0c3206ce-2ec1-4408-8a00-24190ec7651d",
+    "product": "Copy.ai",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web Sign-Up"
+    ],
+    "reason": "browser account-entry flow",
+    "slideCount": 3,
+    "action": "split-signup",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-0c3206ce-2ec1-4408-8a00-24190ec7651d-dashboard",
+    "product": "Copy.ai",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "workspace/dashboard frames removed from sign-up carousel",
+    "slideCount": 1,
+    "action": "split-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-4ad908cc-ad45-4e29-b906-841b405495cf",
+    "product": "Uber",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Onboarding"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Onboarding"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Onboarding'] by screen purpose",
+    "slideCount": 6,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-ec2d5551-50bd-45c9-be09-b5a84a3f6605-landing",
+    "product": "Shop",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web & Landing Pages"
+    ],
+    "reason": "split marketing homepage off a mixed web onboarding flow",
+    "slideCount": 1,
+    "action": "split-landing",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-ec2d5551-50bd-45c9-be09-b5a84a3f6605",
+    "product": "Shop",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web Sign-Up"
+    ],
+    "reason": "browser account-entry flow",
+    "slideCount": 4,
+    "action": "split-signup",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-7f996659-bee1-4760-b1e2-7918e3816f20-landing",
+    "product": "Dialpad",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web & Landing Pages"
+    ],
+    "reason": "split marketing homepage off a mixed web onboarding flow",
+    "slideCount": 1,
+    "action": "split-landing",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-7f996659-bee1-4760-b1e2-7918e3816f20",
+    "product": "Dialpad",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web Sign-Up"
+    ],
+    "reason": "browser account-entry flow",
+    "slideCount": 3,
+    "action": "split-signup",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-7f996659-bee1-4760-b1e2-7918e3816f20-dashboard",
+    "product": "Dialpad",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "workspace/dashboard frames removed from sign-up carousel",
+    "slideCount": 1,
+    "action": "split-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-950c4839-2b7d-4a9e-9e15-52b1c5e77769",
+    "product": "Manus",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web Sign-Up"
+    ],
+    "reason": "reclassified from ['Onboarding'] by screen purpose",
+    "slideCount": 5,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-808643f4-122e-40a8-9b14-bc25c7379c34-landing",
+    "product": "Runway",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web & Landing Pages"
+    ],
+    "reason": "split marketing homepage off a mixed web onboarding flow",
+    "slideCount": 1,
+    "action": "split-landing",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-808643f4-122e-40a8-9b14-bc25c7379c34",
+    "product": "Runway",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Web Sign-Up"
+    ],
+    "reason": "browser account-entry flow",
+    "slideCount": 3,
+    "action": "split-signup",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-808643f4-122e-40a8-9b14-bc25c7379c34-dashboard",
+    "product": "Runway",
+    "platform": "web",
+    "previous": [
+      "Onboarding"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "workspace/dashboard frames removed from sign-up carousel",
+    "slideCount": 1,
+    "action": "split-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-2aeb4bc9-a474-4696-92b6-5f1b3994a0a9",
+    "product": "Nextdoor",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-3c30bbb1-e158-4df3-9feb-98f512e41919",
+    "product": "Vipps",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-839dd8c6-fd52-486a-a599-39f5242de9ba",
+    "product": "stoic.",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-8a1dfb72-930d-4665-8de0-c67e54416dfd",
+    "product": "Saturn Calendar",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-5596d892-ccc6-40ad-b4aa-ce0c63b934a6",
+    "product": "Origin",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-e3a007ee-7cae-4e46-9789-699e00e5fcad",
+    "product": "On",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-3d951da4-8f9f-44d6-93af-ac3ddef8c85f",
+    "product": "Monarch",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-4c8338c3-0d7b-4ae5-b7be-fb646f9642dc",
+    "product": "Trust Wallet",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-28a542d5-06b8-4208-8b3f-2c3a70bbafca",
+    "product": "Ubank Money App",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-222a1563-a2d7-42ee-809d-88b50d59f26e",
+    "product": "Shipt",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-2701660c-de0a-4fe9-a1fb-88f97be59df6",
+    "product": "Swiggy",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-09cb884b-e129-4565-8b97-e3d5d61749c6",
+    "product": "Fanatics Live",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-68e5b2de-6097-4162-8e01-2e62fd2f0bff",
+    "product": "Panera Bread",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-539a9bad-2658-4773-a8b7-41545061e219",
+    "product": "Walmart",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-e2e34993-6892-4d75-8593-de19449caf77",
+    "product": "iFood",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-36e5a755-9c0d-4afb-ba4e-dff42cd39a47",
+    "product": "Ultrahuman",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-83ce1cea-df17-46d5-8a17-b8d05c219397",
+    "product": "DAZN",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-acbc4ad9-90dc-43b6-9d93-704735e15638",
+    "product": "Nextdoor",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-b347c161-f687-4d7e-bd4e-6edc524cc39e",
+    "product": "Chipotle",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-04517e3b-abac-4250-8af0-433d2c26d7de",
+    "product": "KakaoBank",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Navigation"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Mobile Navigation"
+    ],
+    "reason": "reclassified from ['Mobile Apps', 'Navigation'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-be6d28f4-b46f-4c3b-abe7-008205758f55",
+    "product": "Ease",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-5aa60e87-1a43-492d-9616-107268d3f5ce",
+    "product": "Antimetal",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-36860ef7-69eb-4cac-9ad4-cf2c5c097dba",
+    "product": "Mercury",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-61db1036-5bb3-426e-88f0-eb6ba3a91bff",
+    "product": "ISO Meet",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-570d1933-5cc4-430a-9d4a-8cf67b35403f",
+    "product": "Superpower",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "merged 2 same-company captures",
+    "slideCount": 6,
+    "action": "merge-landing",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-cf6bd0a1-8de8-438f-8b96-c96b17a5b47f",
+    "product": "ClickUp",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-1f16d8d7-71d9-483a-8110-80b9df0a0aa0",
+    "product": "Runway",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-103527de-a347-4c2b-a223-c0c2b40674b9",
+    "product": "Paraform",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-40eaa33f-a818-4076-aaa0-d6e5b87dd195",
+    "product": "Ada",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-120806fe-e3c4-4992-aee7-1f99024cc6ce",
+    "product": "Ramp",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "merged 2 same-company captures",
+    "slideCount": 6,
+    "action": "merge-landing",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-3f9e2262-ab09-4dbf-9d45-48b346d2e0f1",
+    "product": "T1 Energy",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-aa849334-7736-4f45-b3dd-dde64b86731e",
+    "product": "Aave",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-f90385f7-2714-4775-a5ec-d2128e94d2cf",
+    "product": "Midday",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-86454284-9d6c-4bc2-84e8-c02c51c2abe5",
+    "product": "Superpower",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-bc483029-6ba0-43c1-b8b8-902ad8297853",
+    "product": "Ramp",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-763c860b-0eb9-48ef-950c-4d63bc3935bd",
+    "product": "Current",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-c4e5884f-23c0-4c38-93b8-53b19583614f",
+    "product": "Oevra",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "reclassified from ['Web', 'Landing Pages', 'Typography'] by screen purpose",
+    "slideCount": 3,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-f9d28f9e-35f4-45c3-8817-81471c56100c",
+    "product": "Pinterest",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-ad595233-4ac1-4024-a0eb-823457d24912",
+    "product": "Beside",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-3573c390-df9c-4ca5-a6b1-2c02e9ae6e46",
+    "product": "Peacock",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-4f4cad1c-c29a-48d7-b3ac-6524ff40d44d",
+    "product": "Speak",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-36840e42-67f7-4ef2-9663-d1d1b174324c",
+    "product": "Chime",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-75679089-03fd-4c7c-ba25-0ee6e4b916ef",
+    "product": "Nibble",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-93063456-6a49-4534-a80c-7a65c0738be3",
+    "product": "Speak",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-517e42e1-b03a-4ec3-86bc-49c241f35c52",
+    "product": "Apple Wallet",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-4a2727b7-3557-4a7a-990e-d4dc3fcaf88a",
+    "product": "Speak",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-d4ce2b84-7cb3-48f2-93dc-bc84f9e61a73",
+    "product": "TextNow",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-2ded248b-fdd1-4ede-80c6-0d6a45b9f033",
+    "product": "Pinterest",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-e38617af-a063-47db-9a6b-b36214b76473",
+    "product": "Uber Eats",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-3023715f-a48a-4581-a866-fadce01bea57",
+    "product": "Yazio",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-fcf4e186-7362-49fc-a4a4-dbaf9fb43357",
+    "product": "Pinterest",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-6a6dafe3-26e7-42f3-bab4-9bc685eb1c90",
+    "product": "Pinterest",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-022a1abd-42ba-420b-813c-78d1ca65860b",
+    "product": "Uber Eats",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-f9f50b35-1ac9-4dd3-b06d-9b328c996fc1",
+    "product": "Mimo",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-96dd4950-68a4-4385-bcc9-c68f3254c86a",
+    "product": "yope",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-6b7f1157-df70-41b5-9880-16c8e8f1f562",
+    "product": "Mimo",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-ff30a224-3f42-41d4-8b36-a96f5e275082",
+    "product": "Netflix",
+    "platform": "ios",
+    "previous": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "final": [
+      "Mobile Apps",
+      "Motion"
+    ],
+    "reason": "canonical remap",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-260683ec-edbd-4a0e-a500-9a0e80b48847",
+    "product": "Mindtrip",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding"
+    ],
+    "final": [
+      "Dashboards",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-f7ee898b-bcd0-414b-97a2-1a6beb7defa9",
+    "product": "Nextdoor",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding",
+      "Landing Pages"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding', 'Landing Pages'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-d022ade0-0511-4d46-801c-f4e8fa393e3b",
+    "product": "Depop",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding",
+      "Landing Pages"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding', 'Landing Pages'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-fa47d11e-0857-4ddc-a515-c837358b7c68",
+    "product": "Midday",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding",
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding', 'Dashboards'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-054e6f15-693f-48e8-9f71-1cb3bf563445",
+    "product": "Databricks",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding"
+    ],
+    "final": [
+      "Dashboards",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-d02322ff-f5df-48c5-9455-bd730ad2c9ec",
+    "product": "Jobber",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding"
+    ],
+    "final": [
+      "Dashboards",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-70e05245-ddb8-42d2-8c1d-6fa22ba86b46",
+    "product": "Chronicle",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding"
+    ],
+    "final": [
+      "Web Sign-Up",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-3e8fc532-ec46-4abc-86da-047d2410c92a",
+    "product": "Krea AI",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding"
+    ],
+    "final": [
+      "Web Sign-Up",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-f73982f5-195e-43e3-8433-c69c7a24ef60",
+    "product": "Front",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding"
+    ],
+    "final": [
+      "Web Sign-Up",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-6b3e55f3-c3a3-4e0a-b60b-6c4d829d1834",
+    "product": "Okta",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding"
+    ],
+    "final": [
+      "Dashboards",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-3b40172a-7901-4a77-8d94-0970f2506166",
+    "product": "FLORA",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding"
+    ],
+    "final": [
+      "Dashboards",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-f4fc33a5-ab8f-42f6-bd78-f72d193bf539",
+    "product": "Lemni",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding"
+    ],
+    "final": [
+      "Web Sign-Up",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-c16d8928-a883-43aa-8af4-7473dcc5980b",
+    "product": "Google Workspace",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-16b7fee0-6dba-4dba-a523-30deb3548e0b",
+    "product": "Jasper",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding"
+    ],
+    "final": [
+      "Web Sign-Up",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-d66a0b5c-d682-4ca7-b6ce-4b7cb91f4944",
+    "product": "HBO Max",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding",
+      "Landing Pages"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding', 'Landing Pages'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-f78161f7-f03e-4787-aa1e-3da8cbb2bd0c",
+    "product": "v0",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding"
+    ],
+    "final": [
+      "Web Sign-Up",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-afb29739-a504-48e9-8c61-9f7beca2de05",
+    "product": "OpenSea",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding",
+      "Landing Pages"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding', 'Landing Pages'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-d8c1cfee-8f82-4c0c-98c4-1e1dfa3c911e",
+    "product": "Intercom",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding",
+      "Landing Pages"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding', 'Landing Pages'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-6001b198-44b3-454f-9e47-56a2cb4b05ec",
+    "product": "Twitch",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding",
+      "Landing Pages"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding', 'Landing Pages'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-9e2bdaac-00a2-47ce-a422-dd8cf7a66ecc",
+    "product": "Outseta",
+    "platform": "web",
+    "previous": [
+      "Web",
+      "Branding",
+      "Landing Pages"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Branding"
+    ],
+    "reason": "reclassified from ['Web', 'Branding', 'Landing Pages'] by screen purpose",
+    "slideCount": 1,
+    "action": "reclassify",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-86454284-9d6c-4bc2-84e8-c02c51c2abe5",
+    "product": "Superpower",
+    "platform": "web",
+    "previous": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "merged into original-570d1933-5cc4-430a-9d4a-8cf67b35403f",
+    "slideCount": 3,
+    "action": "merge-landing",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-bc483029-6ba0-43c1-b8b8-902ad8297853",
+    "product": "Ramp",
+    "platform": "web",
+    "previous": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "final": [
+      "Web & Landing Pages",
+      "Typography"
+    ],
+    "reason": "merged into original-120806fe-e3c4-4992-aee7-1f99024cc6ce",
+    "slideCount": 3,
+    "action": "merge-landing",
+    "whitespaceFix": "none"
+  },
+  {
+    "id": "original-45909568-a202-4ac0-8e70-e0fc5d5e6324",
+    "product": "Remote",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-a3072727-bc6a-4477-a560-9651a4efb914",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-bc7bb8a9-2e2c-4984-8ecb-3753812b3146",
+    "product": "Deel",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-ee8af58c-987b-4fb1-81e9-6517c0fbc707",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-79a31934-4ca2-4700-86a5-c180fa735404",
+    "product": "Navattic",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-5b908c10-a485-4dad-9030-37608f9b0c35",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-fd5c30e3-9acd-41a0-9eb2-fa2c7efe2dbd",
+    "product": "Navattic",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-5b908c10-a485-4dad-9030-37608f9b0c35",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-86697356-0d84-4739-8ab9-e3d62b81b83d",
+    "product": "Substack",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-90db0da6-7974-4e77-9509-51066dab3c0b",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-4e0f8f44-de8b-4e99-8c39-ec95ca2e7448",
+    "product": "Substack",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-90db0da6-7974-4e77-9509-51066dab3c0b",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-05780d19-3dc9-4000-a64a-838af651635a",
+    "product": "Manus",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-120c2856-780c-4ce1-9356-4c42ca789cea",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-6c181179-def9-4926-ab05-a47491b81bb7",
+    "product": "Rox",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-c259bb12-d530-49cb-8eb9-ccf9bf520221",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-ab8dcea1-9830-43e8-9487-fe6ce5910c84-dashboard",
+    "product": "Rox",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-c259bb12-d530-49cb-8eb9-ccf9bf520221",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-28bfc8bf-418e-4f54-81ae-a0a3fe73ef2b",
+    "product": "Maze",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-f2081b8c-ecba-4ed3-ba4d-2a678aa388ce",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-e064f4d1-4ee1-4748-ba66-f2172caa277d-dashboard",
+    "product": "Maze",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-f2081b8c-ecba-4ed3-ba4d-2a678aa388ce",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-01e83b3c-0c55-4613-9e4c-17f3fbbd4813",
+    "product": "Hootsuite",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-910698d4-4e0d-4c1f-b271-b0c25e194860",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-4a67a2be-a2f2-482b-bade-14409b623529",
+    "product": "Hootsuite",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-910698d4-4e0d-4c1f-b271-b0c25e194860",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  },
+  {
+    "id": "original-7f996659-bee1-4760-b1e2-7918e3816f20-dashboard",
+    "product": "Dialpad",
+    "platform": "web",
+    "previous": [
+      "Dashboards"
+    ],
+    "final": [
+      "Dashboards"
+    ],
+    "reason": "merged into original-6f48b680-0e25-4201-bfef-5b979d0a7029",
+    "slideCount": 1,
+    "action": "merge-dashboard",
+    "whitespaceFix": "css-padding"
+  }
+]

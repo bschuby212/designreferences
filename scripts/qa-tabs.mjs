@@ -20,7 +20,36 @@ const EXPECTED_RETIRED_DUPLICATES = [
   "https://mobbin.com/explore/sections/2f4ca455-4c8d-429e-a43a-593170bcd5d0",
   "https://mobbin.com/explore/sections/25505391-659c-4d67-978e-83b976c6e211",
 ];
-const REMOVED_NAV_ITEMS = ["All", "Favorites", "Recent", "Typography", "Branding"];
+const EXPECTED_CHIPS = [
+  "Mobile Apps",
+  "Web & Landing Pages",
+  "Dashboards",
+  "Mobile Onboarding",
+  "Web Sign-Up",
+  "Mobile Navigation",
+];
+const REMOVED_NAV_ITEMS = [
+  "All",
+  "Favorites",
+  "Recent",
+  "Typography",
+  "Branding",
+  "Motion",
+  "Web",
+  "Landing Pages",
+  "Onboarding",
+  "Navigation",
+];
+const WEB_SIGNUP_FLOW_KEYS = [
+  "original-ab8dcea1-9830-43e8-9487-fe6ce5910c84",
+  "original-e064f4d1-4ee1-4748-ba66-f2172caa277d",
+  "original-242ff3d6-866e-4a34-87eb-715354f9d45f",
+  "original-0c3206ce-2ec1-4408-8a00-24190ec7651d",
+  "original-ec2d5551-50bd-45c9-be09-b5a84a3f6605",
+  "original-7f996659-bee1-4760-b1e2-7918e3816f20",
+  "original-950c4839-2b7d-4a9e-9e15-52b1c5e77769",
+  "original-808643f4-122e-40a8-9b14-bc25c7379c34",
+];
 
 let failures = 0;
 const checks = [];
@@ -116,7 +145,7 @@ const stored = await page.evaluate(async () => {
 });
 
 const seeded = stored.filter((reference) => reference.seedKey);
-check("restored seeded reference count", seeded.length === 157, `${seeded.length}`);
+check("restored seeded reference count", seeded.length === 153, `${seeded.length}`);
 check(
   "every restored reference has a unique URL",
   new Set(seeded.map((reference) => reference.url)).size === seeded.length,
@@ -134,12 +163,12 @@ check(
 );
 check(
   "valid single-image references remain",
-  seeded.filter((reference) => reference.images === 1).length === 120,
+  seeded.filter((reference) => reference.images === 1).length === 109,
   `${seeded.filter((reference) => reference.images === 1).length}`,
 );
 check(
   "meaningful multi-image references remain",
-  seeded.filter((reference) => reference.images > 1).length === 37,
+  seeded.filter((reference) => reference.images > 1).length === 44,
   `${seeded.filter((reference) => reference.images > 1).length}`,
 );
 check(
@@ -148,26 +177,56 @@ check(
   "",
 );
 check(
-  "web onboarding flows are not tagged Web or Landing Pages",
+  "obsolete canvas names are gone",
+  seeded.every(
+    (reference) =>
+      !reference.categories.some((name) =>
+        ["Web", "Landing Pages", "Onboarding", "Navigation"].includes(name),
+      ),
+  ),
   seeded
-    .filter((reference) => /Web Onboarding Flow$/.test(reference.title))
-    .every(
-      (reference) =>
-        reference.categories.length === 1 && reference.categories[0] === "Onboarding",
-    ),
-  seeded
-    .filter((reference) => /Web Onboarding Flow$/.test(reference.title))
+    .filter((reference) =>
+      reference.categories.some((name) =>
+        ["Web", "Landing Pages", "Onboarding", "Navigation"].includes(name),
+      ),
+    )
     .map((reference) => `${reference.title}:${reference.categories.join("+")}`)
     .join(", "),
 );
 check(
-  "Navattic onboarding is absent from Web",
-  !seeded.some(
-    (reference) =>
-      reference.seedKey === "original-242ff3d6-866e-4a34-87eb-715354f9d45f" &&
-      reference.categories.includes("Web"),
+  "web account-entry flows sit on Web Sign-Up",
+  WEB_SIGNUP_FLOW_KEYS.every((key) =>
+    seeded.some(
+      (reference) =>
+        reference.seedKey === key && reference.categories.includes("Web Sign-Up"),
+    ),
   ),
-  "",
+  WEB_SIGNUP_FLOW_KEYS.filter(
+    (key) =>
+      !seeded.some(
+        (reference) =>
+          reference.seedKey === key && reference.categories.includes("Web Sign-Up"),
+      ),
+  ).join(", "),
+);
+check(
+  "web sign-up flows are absent from Web & Landing Pages",
+  seeded
+    .filter((reference) => reference.categories.includes("Web Sign-Up"))
+    .every((reference) => !reference.categories.includes("Web & Landing Pages")),
+  seeded
+    .filter(
+      (reference) =>
+        reference.categories.includes("Web Sign-Up") &&
+        reference.categories.includes("Web & Landing Pages"),
+    )
+    .map((reference) => reference.title)
+    .join(", "),
+);
+check(
+  "Mobile Apps membership stays at 72",
+  seeded.filter((reference) => reference.categories.includes("Mobile Apps")).length === 72,
+  `${seeded.filter((reference) => reference.categories.includes("Mobile Apps")).length}`,
 );
 check(
   "only the three exact duplicate source IDs are retired",
@@ -185,6 +244,11 @@ const defaultPressed = await page.locator('[data-nav-label="Mobile Apps"]').getA
 check(
   "removed navigation items are absent",
   REMOVED_NAV_ITEMS.every((label) => !rows.some((row) => row.label === label)),
+  rows.map((row) => row.label).join(", "),
+);
+check(
+  "chip labels match the six canonical canvases",
+  rows.map((row) => row.label).join("|") === EXPECTED_CHIPS.join("|"),
   rows.map((row) => row.label).join(", "),
 );
 check(
