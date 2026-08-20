@@ -76,10 +76,14 @@ export function AppShell() {
     collections.find((collection) => collection.name === "Mobile Apps")?.id ??
     null;
   const [view, setView] = useState<NavView | null>(null);
-  const activeView: NavView = view ??
-    (mobileAppsId
-      ? { type: "collection", id: mobileAppsId }
-      : { type: "all" });
+  const activeView = useMemo<NavView>(
+    () =>
+      view ??
+      (mobileAppsId
+        ? { type: "collection", id: mobileAppsId }
+        : { type: "all" }),
+    [view, mobileAppsId],
+  );
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [filters, setFilters] = useState<ActiveFilters>(EMPTY_FILTERS);
