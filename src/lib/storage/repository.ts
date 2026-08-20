@@ -12,7 +12,15 @@ function toReference(
   record: ReferenceRecord,
   blob: Blob | null,
 ): Reference {
-  return { ...record, thumbnailUrl: record.thumbnailUrl ?? null, thumbnail: blob };
+  return {
+    ...record,
+    thumbnailUrl: record.thumbnailUrl ?? null,
+    collectionIds: record.collectionIds ?? [],
+    screens: record.screens ?? [],
+    aspect: record.aspect ?? null,
+    seedKey: record.seedKey ?? null,
+    thumbnail: blob,
+  };
 }
 
 export interface LibraryRepository {
@@ -31,6 +39,10 @@ export interface LibraryRepository {
   renameCollection(id: string, name: string): Promise<void>;
   deleteCollection(id: string): Promise<void>;
   seedIfEmpty(): Promise<void>;
+  ensureCollections(names: string[]): Promise<Collection[]>;
+  deleteSeededReferences(): Promise<number>;
+  getMeta(key: string): Promise<string | null>;
+  setMeta(key: string, value: string): Promise<void>;
 }
 
 let seedLock: Promise<void> | null = null;
@@ -59,7 +71,10 @@ export const indexedDbRepository: LibraryRepository = {
       thumbnailUrl: input.thumbnailUrl ?? null,
       thumbnailType: input.thumbnailType,
       source: input.source,
-      collectionId: input.collectionId,
+      collectionIds: input.collectionIds ?? [],
+      screens: input.screens ?? [],
+      aspect: input.aspect ?? null,
+      seedKey: input.seedKey ?? null,
       tags: input.tags,
       notes: input.notes,
       favorite: input.favorite ?? false,
@@ -127,10 +142,16 @@ export const indexedDbRepository: LibraryRepository = {
   async deleteCollection(id) {
     await getDb().transaction("rw", getDb().collections, getDb().references, async () => {
       await getDb().collections.delete(id);
-      await getDb().references.where("collectionId").equals(id).modify({
-        collectionId: null,
-        updatedAt: now(),
-      });
+      const affected = await getDb()
+        .references.where("collectionIds")
+        .equals(id)
+        .toArray();
+      for (const record of affected) {
+        await getDb().references.update(record.id, {
+          collectionIds: (record.collectionIds ?? []).filter((c) => c !== id),
+          updatedAt: now(),
+        });
+      }
     });
   },
 
@@ -153,5 +174,51 @@ export const indexedDbRepository: LibraryRepository = {
       });
     }
     return seedLock;
+  },
+
+  /**
+   * Collections the seeded examples need. Missing ones are appended rather
+   * than recreated, so a renamed or deleted collection is not resurrected on
+   * top of the user's own ordering.
+   */
+  async ensureCollections(names) {
+    const existing = await getDb().collections.toArray();
+    const byName = new Map(existing.map((c) => [c.name.toLowerCase(), c]));
+    const created: Collection[] = [];
+    let sortOrder = existing.length;
+    for (const name of names) {
+      if (byName.has(name.toLowerCase())) continue;
+      const collection: Collection = {
+        id: uid(),
+        name,
+        createdAt: now(),
+        sortOrder: sortOrder++,
+      };
+      await getDb().collections.put(collection);
+      byName.set(name.toLowerCase(), collection);
+      created.push(collection);
+    }
+    return getDb().collections.orderBy("sortOrder").toArray();
+  },
+
+  /** Removes only seeded examples; references a user added have no seedKey. */
+  async deleteSeededReferences() {
+    const seeded = await getDb().references.filter((r) => Boolean(r.seedKey)).toArray();
+    await getDb().transaction("rw", getDb().references, getDb().thumbnails, async () => {
+      for (const record of seeded) {
+        await getDb().references.delete(record.id);
+        await getDb().thumbnails.delete(record.id);
+      }
+    });
+    return seeded.length;
+  },
+
+  async getMeta(key) {
+    const record = await getDb().meta.get(key);
+    return record?.value ?? null;
+  },
+
+  async setMeta(key, value) {
+    await getDb().meta.put({ key, value });
   },
 };

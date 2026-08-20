@@ -22,12 +22,24 @@ export type ThumbnailType =
 
 export type Density = "compact" | "medium" | "large";
 
+/** Portrait for phone screens, landscape for desktop captures. */
+export type Aspect = "portrait" | "landscape";
+
 export type NavView =
   | { type: "all" }
   | { type: "favorites" }
   | { type: "recent" }
   | { type: "collection"; id: string }
   | { type: "source"; source: SourceType };
+
+/**
+ * One frame of a reference. A reference is a set of screens rather than a
+ * single image so cards and the detail view can page through the real UI.
+ */
+export interface ReferenceScreen {
+  src: string;
+  label: string;
+}
 
 export interface Reference {
   id: string;
@@ -37,7 +49,11 @@ export interface Reference {
   thumbnailUrl: string | null;
   thumbnailType: ThumbnailType;
   source: SourceType;
-  collectionId: string | null;
+  collectionIds: string[];
+  screens: ReferenceScreen[];
+  aspect: Aspect | null;
+  /** Set on seeded examples so they can be replaced without touching user data. */
+  seedKey: string | null;
   tags: string[];
   notes: string;
   favorite: boolean;
@@ -52,12 +68,20 @@ export interface ReferenceRecord {
   thumbnailUrl: string | null;
   thumbnailType: ThumbnailType;
   source: SourceType;
-  collectionId: string | null;
+  collectionIds: string[];
+  screens: ReferenceScreen[];
+  aspect: Aspect | null;
+  seedKey: string | null;
   tags: string[];
   notes: string;
   favorite: boolean;
   createdAt: number;
   updatedAt: number;
+}
+
+export interface MetaRecord {
+  key: string;
+  value: string;
 }
 
 export interface ThumbnailRecord {
@@ -79,7 +103,10 @@ export interface CreateReferenceInput {
   thumbnailUrl?: string | null;
   thumbnailType: ThumbnailType;
   source: SourceType;
-  collectionId: string | null;
+  collectionIds: string[];
+  screens?: ReferenceScreen[];
+  aspect?: Aspect | null;
+  seedKey?: string | null;
   tags: string[];
   notes: string;
   favorite?: boolean;
@@ -103,9 +130,13 @@ export const DEFAULT_COLLECTIONS = [
   "Mobile Apps",
   "Web",
   "Dashboards",
+  "Landing Pages",
   "Onboarding",
   "Navigation",
   "Typography",
   "Motion",
   "Branding",
 ];
+
+/** Screens shown per reference before the carousel is considered complete. */
+export const MIN_SCREENS = 3;

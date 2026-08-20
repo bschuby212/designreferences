@@ -1,87 +1,57 @@
 "use client";
 
-import type { LinkPreview } from "@/lib/preview/types";
-import { getDb, repository } from "@/lib/storage";
-import { EXAMPLE_SEEDS } from "@/lib/storage/seed-examples";
-import type { Reference } from "@/lib/storage/types";
-import { base64ToBlob } from "@/lib/utils";
+import { repository } from "@/lib/storage";
+import { EXAMPLE_SEEDS, SEED_REVISION } from "@/lib/storage/seed-examples";
 
-const CONCURRENCY = 4;
+const REVISION_KEY = "seedRevision";
 
-async function preview(url: string, imageUrl?: string): Promise<LinkPreview | null> {
-  try {
-    const res = await fetch("/api/preview", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url, imageUrl }),
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as LinkPreview;
-  } catch {
-    return null;
-  }
-}
-
+/**
+ * Installs the seeded example references.
+ *
+ * Categories and screen sets change when the seed data is rebuilt, and the old
+ * behaviour of "insert anything whose URL is missing" left stale rows behind
+ * forever. Instead the stored revision is compared with the current one: on a
+ * mismatch every seeded reference is removed and rewritten, while references
+ * the user created (no seedKey) are left alone.
+ */
 export async function seedExampleReferences() {
   await repository.seedIfEmpty();
-  const collections = await getDb().collections.toArray();
-  const byName = new Map(collections.map((c) => [c.name, c.id]));
-  const existing = await getDb().references.toArray();
-  const seen = new Set(
-    existing.map((item) => `${item.collectionId ?? ""}:${item.url}`),
+
+  const storedRevision = await repository.getMeta(REVISION_KEY);
+  const references = await repository.listReferences();
+  const seeded = references.filter((reference) => reference.seedKey);
+  const upToDate =
+    storedRevision === SEED_REVISION && seeded.length === EXAMPLE_SEEDS.length;
+  if (upToDate) return;
+
+  const names = [...new Set(EXAMPLE_SEEDS.flatMap((seed) => seed.collections))];
+  const collections = await repository.ensureCollections(names);
+  const idByName = new Map(
+    collections.map((collection) => [collection.name.toLowerCase(), collection.id]),
   );
 
-  const pending = EXAMPLE_SEEDS.filter((item) => {
-    const collectionId = byName.get(item.collection);
-    if (!collectionId) return false;
-    return !seen.has(`${collectionId}:${item.url}`);
-  });
+  await repository.deleteSeededReferences();
 
-  // Save the product image URL first so tiles render immediately.
-  const created: Reference[] = [];
-  for (const item of pending) {
-    const collectionId = byName.get(item.collection);
-    if (!collectionId) continue;
-    created.push(
-      await repository.createReference({
-        title: item.title,
-        url: item.url,
-        thumbnail: null,
-        thumbnailUrl: item.imageUrl,
-        thumbnailType: "og",
-        source: "Mobbin",
-        collectionId,
-        tags: item.tags,
-        notes: "",
-      }),
-    );
+  // Oldest first so the newest seed still lands at the top of the gallery.
+  for (const seed of [...EXAMPLE_SEEDS].reverse()) {
+    const collectionIds = seed.collections
+      .map((name) => idByName.get(name.toLowerCase()))
+      .filter((id): id is string => Boolean(id));
+    await repository.createReference({
+      title: seed.title,
+      url: seed.url,
+      thumbnail: null,
+      thumbnailUrl: seed.screens[0]?.src ?? null,
+      thumbnailType: "og",
+      source: seed.source,
+      collectionIds,
+      screens: seed.screens.map((screen) => ({ ...screen })),
+      aspect: seed.aspect,
+      seedKey: seed.key,
+      tags: seed.tags,
+      notes: seed.notes,
+    });
   }
 
-  let index = 0;
-  async function worker() {
-    while (index < created.length) {
-      const currentIndex = index++;
-      const current = created[currentIndex];
-      const seed = pending[currentIndex];
-      const data = await preview(current.url, seed?.imageUrl);
-      if (!data) continue;
-      const thumbnail = data.thumbnail
-        ? base64ToBlob(data.thumbnail.data, data.thumbnail.mime)
-        : null;
-      await repository.updateReference(current.id, {
-        title: data.title || current.title,
-        url: data.url || current.url,
-        thumbnail,
-        thumbnailUrl: data.thumbnailUrl || seed?.imageUrl || current.thumbnailUrl,
-        thumbnailType: thumbnail
-          ? data.thumbnailType
-          : data.thumbnailUrl || seed?.imageUrl
-            ? "og"
-            : current.thumbnailType,
-        source: data.source ?? "Mobbin",
-      });
-    }
-  }
-
-  await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
+  await repository.setMeta(REVISION_KEY, SEED_REVISION);
 }
