@@ -15,7 +15,7 @@ import {
   type Reference,
 } from "@/lib/storage/types";
 import { cn, isHiddenNavCollection } from "@/lib/utils";
-import { AddMenu, EditorDialog, type EditorState } from "./editor-dialog";
+import { EditorDialog, type EditorState } from "./editor-dialog";
 import { DetailView, collectionNamesOf } from "./detail-view";
 import { FilterChips, FilterPanel } from "./filter-panel";
 import { Gallery } from "./gallery";
@@ -88,11 +88,9 @@ export function AppShell() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [filters, setFilters] = useState<ActiveFilters>(EMPTY_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [addOpen, setAddOpen] = useState(false);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const addRef = useClickOutside(addOpen && !mobile, () => setAddOpen(false));
   const filterRef = useClickOutside(filterOpen && !mobile, () =>
     setFilterOpen(false),
   );
@@ -166,24 +164,6 @@ export function AppShell() {
     const reference = references.find((item) => item.id === id);
     if (!reference) return;
     await updateReference(id, { favorite: !reference.favorite });
-  }
-
-  async function pasteImage() {
-    try {
-      const items = await navigator.clipboard.read();
-      for (const item of items) {
-        const type = item.types.find((t) => t.startsWith("image/"));
-        if (!type) continue;
-        const blob = await item.getType(type);
-        setEditor({
-          mode: "upload",
-          file: new File([blob], "pasted.png", { type: blob.type }),
-        });
-        return;
-      }
-    } catch {
-      setEditor({ mode: "upload" });
-    }
   }
 
   const filterActive =
@@ -261,7 +241,7 @@ export function AppShell() {
                 </IconButton>
                 <IconButton
                   label="Add reference"
-                  onClick={() => setAddOpen(true)}
+                  onClick={() => setEditor({ mode: "link" })}
                 >
                   <Plus size={18} strokeWidth={1.75} />
                 </IconButton>
@@ -299,32 +279,13 @@ export function AppShell() {
                 mobile={false}
               />
             </div>
-            <div className="relative" ref={addRef}>
-              <IconButton
-                label="Add reference"
-                className="h-10 w-10"
-                onClick={() => setAddOpen((v) => !v)}
-              >
-                <Plus size={18} strokeWidth={1.75} />
-              </IconButton>
-              <AddMenu
-                open={addOpen}
-                onClose={() => setAddOpen(false)}
-                mobile={false}
-                onLink={() => {
-                  setAddOpen(false);
-                  setEditor({ mode: "link" });
-                }}
-                onUpload={() => {
-                  setAddOpen(false);
-                  setEditor({ mode: "upload" });
-                }}
-                onPaste={() => {
-                  setAddOpen(false);
-                  void pasteImage();
-                }}
-              />
-            </div>
+            <IconButton
+              label="Add reference"
+              className="h-10 w-10"
+              onClick={() => setEditor({ mode: "link" })}
+            >
+              <Plus size={18} strokeWidth={1.75} />
+            </IconButton>
           </header>
         )}
 
@@ -370,26 +331,6 @@ export function AppShell() {
           onChange={setFilters}
           tags={tags}
           mobile
-        />
-      )}
-
-      {mobile && (
-        <AddMenu
-          open={addOpen}
-          onClose={() => setAddOpen(false)}
-          mobile
-          onLink={() => {
-            setAddOpen(false);
-            setEditor({ mode: "link" });
-          }}
-          onUpload={() => {
-            setAddOpen(false);
-            setEditor({ mode: "upload" });
-          }}
-          onPaste={() => {
-            setAddOpen(false);
-            void pasteImage();
-          }}
         />
       )}
 
@@ -442,6 +383,9 @@ export function AppShell() {
 
       <EditorDialog
         state={editor}
+        defaultCollectionIds={
+          activeView.type === "collection" ? [activeView.id] : []
+        }
         onClose={() => setEditor(null)}
         onSaved={() => undefined}
       />

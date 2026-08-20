@@ -119,7 +119,7 @@ export function Modal({
   title?: string;
   children: ReactNode;
   className?: string;
-  size?: "default" | "large";
+  size?: "default" | "large" | "wide";
 }) {
   const isClient = useIsClient();
 
@@ -155,7 +155,9 @@ export function Modal({
           "relative flex max-h-[94dvh] w-full flex-col rounded-t-xl bg-[var(--surface)] sm:rounded-xl",
           size === "large"
             ? "h-[calc(100dvh-32px)] sm:h-[calc(100dvh-48px)] sm:max-w-[min(1480px,calc(100vw-48px))]"
-            : "max-w-md",
+            : size === "wide"
+              ? "sm:max-w-2xl"
+              : "max-w-md",
           className,
         )}
       >

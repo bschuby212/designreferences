@@ -7,21 +7,19 @@ import {
   Camera,
   Clipboard,
   ImagePlus,
-  Link2,
   LoaderCircle,
   Upload,
   X,
 } from "lucide-react";
 import type { LinkPreview } from "@/lib/preview/types";
-import {
-  SOURCE_TYPES,
-  type Aspect,
-  type CreateReferenceInput,
-  type ReferenceScreen,
-  type SourceType,
-  type ThumbnailType,
+import { detectSource } from "@/lib/preview/detectSource";
+import type {
+  Aspect,
+  CreateReferenceInput,
+  ReferenceScreen,
+  ThumbnailType,
 } from "@/lib/storage/types";
-import { base64ToBlob, blobToDataUrl, cn, normalizeUrl } from "@/lib/utils";
+import { base64ToBlob, blobToDataUrl, cn, hostnameOf, normalizeUrl } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
 import { useBreakpoint, useObjectUrl } from "./hooks";
 import { Modal } from "./sheet";
@@ -41,24 +39,26 @@ export type EditorState =
 
 interface EditorDialogProps {
   state: EditorState | null;
+  defaultCollectionIds?: string[];
   onClose: () => void;
   onSaved: (id: string) => void;
 }
 
-export function EditorDialog({ state, onClose, onSaved }: EditorDialogProps) {
+export function EditorDialog({
+  state,
+  defaultCollectionIds = [],
+  onClose,
+  onSaved,
+}: EditorDialogProps) {
   const breakpoint = useBreakpoint();
   const mobile = breakpoint === "mobile";
-  const title =
-    state?.mode === "edit"
-      ? "Edit"
-      : state?.mode === "upload"
-        ? "Upload image"
-        : "Add link";
+  const title = state?.mode === "edit" ? "Edit" : "Add reference";
 
   const body = state ? (
     <EditorForm
       key={`${state.mode}-${state.mode === "edit" ? state.id : state.mode === "upload" ? state.file?.name ?? "new" : "link"}`}
       state={state}
+      defaultCollectionIds={defaultCollectionIds}
       onClose={onClose}
       onSaved={onSaved}
     />
@@ -72,7 +72,7 @@ export function EditorDialog({ state, onClose, onSaved }: EditorDialogProps) {
         side="bottom"
         title={title}
         swipeToDismiss
-        className="h-[94dvh]"
+        className="max-h-[90dvh]"
       >
         {body}
       </Sheet>
@@ -80,7 +80,7 @@ export function EditorDialog({ state, onClose, onSaved }: EditorDialogProps) {
   }
 
   return (
-    <Modal open={Boolean(state)} onClose={onClose} title={title}>
+    <Modal open={Boolean(state)} onClose={onClose} title={title} size="wide">
       {body}
     </Modal>
   );
@@ -88,15 +88,16 @@ export function EditorDialog({ state, onClose, onSaved }: EditorDialogProps) {
 
 function EditorForm({
   state,
+  defaultCollectionIds,
   onClose,
   onSaved,
 }: {
   state: EditorState;
+  defaultCollectionIds: string[];
   onClose: () => void;
   onSaved: (id: string) => void;
 }) {
-  const { collections, references, createReference, updateReference } =
-    useLibrary();
+  const { references, createReference, updateReference } = useLibrary();
   const existing =
     state.mode === "edit"
       ? references.find((r) => r.id === state.id)
@@ -108,18 +109,11 @@ function EditorForm({
     existing?.title ??
       (initialFile ? initialFile.name.replace(/\.[^.]+$/, "") : ""),
   );
-  const [source, setSource] = useState<SourceType>(
-    existing?.source ?? (state.mode === "upload" ? "Upload" : "Website"),
-  );
-  const [collectionIds, setCollectionIds] = useState<string[]>(
-    existing?.collectionIds ?? [],
-  );
   const [screens, setScreens] = useState<ReferenceScreen[]>(
     existing?.screens ?? [],
   );
   const [aspect, setAspect] = useState<Aspect>(existing?.aspect ?? "landscape");
   const [screenUrl, setScreenUrl] = useState("");
-  const [tags, setTags] = useState(existing?.tags.join(", ") ?? "");
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [thumbnail, setThumbnail] = useState<Blob | null>(
     initialFile ?? existing?.thumbnail ?? null,
@@ -131,12 +125,13 @@ function EditorForm({
   const [previewing, setPreviewing] = useState(false);
   const [saving, setSaving] = useState(false);
   const lastPreviewed = useRef("");
+  const previewTitle = useRef(existing?.title ?? "");
   const urlRef = useRef<HTMLInputElement>(null);
   const blobPreview = useObjectUrl(thumbnail);
   const previewUrl = blobPreview || thumbnailUrl || null;
 
   useEffect(() => {
-    if (state.mode === "link") {
+    if (state.mode !== "edit") {
       const t = window.setTimeout(() => urlRef.current?.focus(), 50);
       return () => window.clearTimeout(t);
     }
@@ -156,20 +151,33 @@ function EditorForm({
       const data = (await res.json()) as LinkPreview & { error?: string };
       if (!res.ok) return;
       setUrl(data.url || normalized);
-      if (data.title) setTitle((current) => current || data.title);
-      if (data.source) setSource(data.source);
+      if (data.title) {
+        previewTitle.current = data.title;
+        setTitle((current) => current || data.title);
+      }
       if (data.thumbnail) {
         setThumbnail(base64ToBlob(data.thumbnail.data, data.thumbnail.mime));
         setThumbnailType(data.thumbnailType);
       }
       if (data.thumbnailUrl) setThumbnailUrl(data.thumbnailUrl);
+      if (data.screens?.length) {
+        setScreens((current) => {
+          const next = [...current];
+          for (const src of data.screens) {
+            if (!next.some((screen) => screen.src === src)) {
+              next.push({ src, label: `Screen ${next.length + 1}` });
+            }
+          }
+          return next;
+        });
+      }
     } finally {
       setPreviewing(false);
     }
   }
 
   useEffect(() => {
-    if (state.mode !== "link") return;
+    if (state.mode === "edit") return;
     const normalized = normalizeUrl(url);
     if (!normalized) return;
     const timer = window.setTimeout(() => void runPreview(url), 450);
@@ -220,27 +228,36 @@ function EditorForm({
   async function save() {
     setSaving(true);
     try {
-      const parsedTags = tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean);
+      const normalized = normalizeUrl(url);
       const resolved = screens.length
         ? screens
         : thumbnailUrl
           ? [{ src: thumbnailUrl, label: "Screen 1" }]
           : [];
+      const resolvedTitle =
+        title.trim() ||
+        previewTitle.current.trim() ||
+        hostnameOf(normalized) ||
+        "Untitled";
       const payload: CreateReferenceInput = {
-        title: title.trim(),
-        url: normalizeUrl(url),
+        title: resolvedTitle,
+        url: normalized,
         thumbnail,
         thumbnailUrl: resolved[0]?.src ?? thumbnailUrl ?? null,
         thumbnailType: thumbnail || thumbnailUrl ? thumbnailType : "placeholder",
-        source: state.mode === "upload" && source === "Website" ? "Upload" : source,
-        collectionIds,
+        source: normalized
+          ? detectSource(normalized)
+          : thumbnail
+            ? "Upload"
+            : "Website",
+        collectionIds:
+          state.mode === "edit" && existing
+            ? existing.collectionIds
+            : defaultCollectionIds,
         screens: resolved,
         aspect,
         seedKey: existing?.seedKey ?? null,
-        tags: parsedTags,
+        tags: state.mode === "edit" && existing ? existing.tags : [],
         notes,
       };
       if (state.mode === "edit" && existing) {
@@ -261,48 +278,42 @@ function EditorForm({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3">
-        {state.mode === "link" && (
-          <Field label="URL">
-            <input
-              ref={urlRef}
-              value={url}
-              inputMode="url"
-              autoCapitalize="off"
-              autoCorrect="off"
-              placeholder="https://"
-              className={inputClass}
-              onChange={(e) => setUrl(e.target.value)}
-              onPaste={(e) => {
-                const text = e.clipboardData.getData("text");
-                if (text) window.setTimeout(() => void runPreview(text), 0);
-              }}
-            />
-          </Field>
-        )}
+        <Field label="URL">
+          <input
+            ref={urlRef}
+            value={url}
+            inputMode="url"
+            autoCapitalize="off"
+            autoCorrect="off"
+            placeholder="https://"
+            className={inputClass}
+            onChange={(e) => setUrl(e.target.value)}
+            onPaste={(e) => {
+              const text = e.clipboardData.getData("text");
+              if (text) window.setTimeout(() => void runPreview(text), 0);
+            }}
+          />
+        </Field>
 
         <div className="overflow-hidden rounded-[var(--radius)] bg-[var(--hover)]">
           {previewUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={previewUrl} alt="" className="block max-h-64 w-full object-contain" referrerPolicy="no-referrer" />
           ) : (
-            <div className="flex aspect-[16/10] flex-col items-center justify-center gap-2 text-[12px] text-[var(--muted-2)]">
+            <div className="flex h-28 flex-col items-center justify-center gap-2 text-[12px] text-[var(--muted-2)]">
               {previewing ? (
                 <>
                   <LoaderCircle size={16} className="animate-spin" />
                   Fetching preview
                 </>
-              ) : state.mode === "upload" || state.mode === "edit" ? (
-                <UploadPicker onPick={onPick} />
               ) : (
-                "Thumbnail appears after you paste a link"
+                "Paste a link or add an image"
               )}
             </div>
           )}
         </div>
 
-        {(state.mode === "upload" || (state.mode === "edit" && thumbnail)) && (
-          <UploadPicker onPick={onPick} compact />
-        )}
+        <UploadPicker onPick={onPick} compact />
 
         <Field label="Title">
           <input
@@ -312,29 +323,6 @@ function EditorForm({
             placeholder="Optional"
           />
         </Field>
-        <Field label="Source">
-          <select
-            value={source}
-            onChange={(e) => setSource(e.target.value as SourceType)}
-            className={inputClass}
-          >
-            {SOURCE_TYPES.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </Field>
-        {state.mode !== "link" && (
-          <Field label="Source URL">
-            <input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className={inputClass}
-              placeholder="Optional"
-            />
-          </Field>
-        )}
         <Field label={`Screens (${screens.length})`}>
           <div className="space-y-2">
             {screens.length > 0 && (
@@ -424,43 +412,6 @@ function EditorForm({
             <option value="portrait">Portrait (mobile)</option>
           </select>
         </Field>
-        <Field label="Collections">
-          <div className="flex flex-wrap gap-1.5">
-            {collections.map((collection) => {
-              const active = collectionIds.includes(collection.id);
-              return (
-                <button
-                  key={collection.id}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() =>
-                    setCollectionIds((current) =>
-                      current.includes(collection.id)
-                        ? current.filter((id) => id !== collection.id)
-                        : [...current, collection.id],
-                    )
-                  }
-                  className={cn(
-                    "min-h-9 rounded-full border px-3 text-[12px]",
-                    active
-                      ? "border-[var(--text)] bg-[var(--text)] text-white"
-                      : "border-[var(--border)] text-[var(--muted)] hover:bg-[var(--hover)]",
-                  )}
-                >
-                  {collection.name}
-                </button>
-              );
-            })}
-          </div>
-        </Field>
-        <Field label="Tags">
-          <input
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            className={inputClass}
-            placeholder="comma separated"
-          />
-        </Field>
         <Field label="Notes">
           <textarea
             value={notes}
@@ -471,11 +422,13 @@ function EditorForm({
         </Field>
       </div>
 
-      <div className="flex gap-2 border-t border-[var(--border)] px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
-        <GhostButton className="hidden sm:inline-flex" onClick={onClose}>
-          Cancel
-        </GhostButton>
-        <PrimaryButton className="flex-1" disabled={!canSave || saving} onClick={() => void save()}>
+      <div className="flex items-center justify-end gap-2 border-t border-[var(--border)] px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+        <GhostButton onClick={onClose}>Cancel</GhostButton>
+        <PrimaryButton
+          className="min-w-24 disabled:opacity-100"
+          disabled={!canSave || saving}
+          onClick={() => void save()}
+        >
           {saving ? "Saving…" : "Save"}
         </PrimaryButton>
       </div>
@@ -577,78 +530,6 @@ function MiniAction({
     >
       {icon}
       {label}
-    </button>
-  );
-}
-
-export function AddMenu({
-  open,
-  onClose,
-  onLink,
-  onUpload,
-  onPaste,
-  mobile,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onLink: () => void;
-  onUpload: () => void;
-  onPaste: () => void;
-  mobile: boolean;
-}) {
-  if (!open) return null;
-
-  const items = (
-    <div className="py-1">
-      <div className="px-3 py-2 text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--muted-2)]">
-        Create
-      </div>
-      <MenuItem icon={<Link2 size={15} />} onClick={onLink}>
-        Add Link
-      </MenuItem>
-      <MenuItem icon={<ImagePlus size={15} />} onClick={onUpload}>
-        Upload Image
-      </MenuItem>
-      {mobile && (
-        <MenuItem icon={<Clipboard size={15} />} onClick={onPaste}>
-          Paste Image
-        </MenuItem>
-      )}
-    </div>
-  );
-
-  if (mobile) {
-    return (
-      <Sheet open={open} onClose={onClose} side="bottom" title="Add reference">
-        <div className="px-2 pb-[max(16px,env(safe-area-inset-bottom))]">{items}</div>
-      </Sheet>
-    );
-  }
-
-  return (
-    <div className="absolute right-0 top-full z-30 mt-1 w-44 rounded-md border border-[var(--border)] bg-[var(--surface)] py-1 shadow-sm">
-      {items}
-    </div>
-  );
-}
-
-function MenuItem({
-  icon,
-  children,
-  onClick,
-}: {
-  icon: ReactNode;
-  children: ReactNode;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex min-h-11 w-full items-center gap-2.5 px-3 text-left text-[13px] hover:bg-[var(--hover)]"
-    >
-      <span className="text-[var(--muted)]">{icon}</span>
-      {children}
     </button>
   );
 }
