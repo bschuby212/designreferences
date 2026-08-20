@@ -11,11 +11,10 @@ Data stays in this browser (IndexedDB). No account required.
 
 ## References
 
-A reference is a set of screens, not a single image. Cards in the gallery and
-the detail view share one carousel component, so you can page through the real
-UI without opening anything: swipe on touch, arrows or arrow keys on a pointer,
-pagination dots and an `n/total` counter everywhere. Seeded examples carry at
-least three genuinely different screens.
+A reference can contain one complete image or several meaningful screens. Cards
+and the detail modal share one carousel component for multi-image references:
+swipe on touch, use arrows or arrow keys on a pointer, or select a pagination
+dot. Single-image references keep the same stable frame without carousel controls.
 
 A reference can belong to several collections at once (`collectionIds`), because
 a sign-up flow that starts on a marketing page honestly belongs under Web,
@@ -32,8 +31,9 @@ python3 scripts/build-seed-data.py    # screens -> public/screens, seeds -> seed
 python3 scripts/make-audit-sheets.py  # contact sheet per reference, for reviewing categories
 ```
 
-Collections are assigned by looking at the screens. Apps that cannot reach three
-distinct screens are left out rather than padded with duplicates or crops.
+Collections are assigned by looking at the actual interface. Single-image
+references remain visible; genuine Mobbin flows receive their available screens,
+and long pages receive top, middle, and lower 1440 × 1080 viewport captures.
 
 Seeding is keyed to `SEED_REVISION`: when the seed data changes, seeded rows are
 replaced and references you added yourself (no `seedKey`) are left alone.
@@ -44,6 +44,6 @@ Both scripts drive the running dev server with a real browser:
 
 ```bash
 npm run dev
-npm run qa:responsive   # 320/375/390/430/768/1280/1600, overflow, carousels, sheets
-npm run qa:tabs         # tab counts vs rendered cards, categories, search, filters, drawer
+npm run qa:responsive   # 320/375/390/430/768/1280/1600, overflow, carousels, modal
+npm run qa:tabs         # chip counts vs rendered cards, categories, search, filters
 ```

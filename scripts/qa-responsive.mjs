@@ -64,6 +64,8 @@ async function overflow(page) {
         (overflowX === "auto" || overflowX === "scroll") &&
         node.scrollWidth > node.clientWidth + 1
       ) {
+        if (node.matches("nav[aria-label='Library categories'] *")) continue;
+        if (node.matches("nav[aria-label='Library categories']")) continue;
         offenders.push({
           reason: "scrollable",
           tag: node.tagName.toLowerCase(),
@@ -187,20 +189,36 @@ for (const viewport of WIDTHS) {
         : ""),
   );
 
-  // Every card must expose at least three screens.
+  // The restored library intentionally contains both complete single images
+  // and meaningful multi-image references.
   const screenCounts = await page.evaluate(() =>
     [...document.querySelectorAll("article")].map(
       (card) => card.querySelectorAll("img").length,
     ),
   );
   check(
-    `${label}: every card has 3+ screens`,
-    screenCounts.length > 0 && screenCounts.every((n) => n >= 3),
+    `${label}: every card has at least one image`,
+    screenCounts.length > 0 && screenCounts.every((n) => n >= 1),
     `min ${Math.min(...screenCounts)} max ${Math.max(...screenCounts)}`,
   );
 
   // Card height must not change while paging.
-  const firstCard = page.locator("article").first();
+  const firstCard = page.locator("article").filter({
+    has: page.getByRole("button", { name: "Next screen" }),
+  }).first();
+  const singleCard = page.locator("article").filter({
+    hasNot: page.getByRole("button", { name: "Next screen" }),
+  }).first();
+  check(`${label}: multi-image carousel card exists`, (await firstCard.count()) === 1, "");
+  check(`${label}: single-image card exists`, (await singleCard.count()) === 1, "");
+  check(
+    `${label}: single-image card has no carousel controls`,
+    (await singleCard.getByRole("button", {
+      name: /^(Previous screen|Next screen|Show screen \d+)$/,
+    }).count()) === 0 &&
+      (await counterOf(page, "article:not(:has(button[aria-label='Next screen']))")) === null,
+    "",
+  );
   const beforeBox = await firstCard.boundingBox();
   const before = await counterOf(page);
   check(`${label}: card shows n/total badge`, Boolean(before), String(before));
@@ -306,22 +324,22 @@ for (const viewport of WIDTHS) {
       [...document.querySelectorAll(`[aria-label="${label}"]`)].filter(visible);
     return {
       sidebar: visible(document.querySelector("aside nav")),
+      chipNav: visible(document.querySelector("nav[aria-label='Library categories']")),
+      chipScrollable: (() => {
+        const nav = document.querySelector("nav[aria-label='Library categories'] > div");
+        return nav ? nav.scrollWidth > nav.clientWidth : false;
+      })(),
       hamburger: byLabel("Menu").length,
       density: byLabel("compact").length,
       actionsMenu: byLabel("Reference actions").length,
     };
   });
+  check(`${label}: side navigation is absent`, !chrome.sidebar, "");
+  check(`${label}: horizontal chip navigation is visible`, chrome.chipNav, "");
+  check(`${label}: no navigation drawer trigger`, chrome.hamburger === 0, "");
   if (viewport.width < 768) {
-    check(`${label}: no persistent sidebar`, !chrome.sidebar, "");
-    check(`${label}: hamburger present`, chrome.hamburger > 0, "");
+    check(`${label}: chip row scrolls within its container`, chrome.chipScrollable, "");
     check(`${label}: no density toggle`, chrome.density === 0, "");
-  } else {
-    check(`${label}: sidebar present`, chrome.sidebar, "");
-    check(
-      `${label}: hamburger hidden`,
-      chrome.hamburger === 0,
-      `found ${chrome.hamburger}`,
-    );
   }
   if (viewport.touch) {
     check(
@@ -337,9 +355,7 @@ for (const viewport of WIDTHS) {
   if (viewport.touch) await openTarget.tap();
   else await openTarget.click();
   await page.waitForTimeout(500);
-  const detail = viewport.width < 768
-    ? page.locator("[role='dialog']")
-    : page.locator("aside").filter({ hasText: "Screens" });
+  const detail = page.locator("[role='dialog']").filter({ hasText: "Notes" });
   const opened = (await detail.count()) > 0;
   check(`${label}: detail view opens`, opened, "");
 
@@ -352,6 +368,12 @@ for (const viewport of WIDTHS) {
       return badge?.textContent?.trim() ?? null;
     });
     check(`${label}: detail carousel has counter`, Boolean(detailBefore), String(detailBefore));
+    check(
+      `${label}: detail has one consolidated notes area`,
+      (await inDetail.getByText("Notes", { exact: true }).count()) === 1 &&
+        (await inDetail.getByText(/Comments/i).count()) === 0,
+      "",
+    );
 
     await inDetail.getByRole("button", { name: "Next screen" }).click();
     await page.waitForTimeout(400);
@@ -371,6 +393,20 @@ for (const viewport of WIDTHS) {
       (await detail.count()) > 0,
       "",
     );
+    const detailDots = inDetail.getByRole("button", { name: /Show screen \d+/ });
+    const detailDotCount = await detailDots.count();
+    if (detailDotCount > 1) {
+      await detailDots.first().click();
+      await page.waitForTimeout(250);
+      const afterDot = await inDetail.evaluate((node) => {
+        const badge = [...node.querySelectorAll("div")].find((item) =>
+          /^\d+\/\d+$/.test(item.textContent?.trim() ?? ""),
+        );
+        return badge?.textContent?.trim() ?? null;
+      });
+      check(`${label}: detail pagination dot works`, afterDot === `1/${detailDotCount}`, String(afterDot));
+      check(`${label}: detail dot does not dismiss modal`, (await detail.count()) > 0, "");
+    }
 
     const fits = await inDetail.evaluate((node) => {
       const rect = node.getBoundingClientRect();
@@ -383,7 +419,22 @@ for (const viewport of WIDTHS) {
       };
     });
     check(`${label}: detail fits viewport`, fits.withinViewport, "");
-    check(`${label}: detail scrolls internally`, fits.scrollable, "");
+    if (viewport.width < 768) {
+      check(`${label}: mobile detail scrolls internally`, fits.scrollable, "");
+    } else {
+      const modalSize = await inDetail.evaluate((node) => {
+        const rect = node.getBoundingClientRect();
+        return {
+          widthRatio: rect.width / window.innerWidth,
+          heightRatio: rect.height / window.innerHeight,
+        };
+      });
+      check(
+        `${label}: desktop modal uses most of the viewport`,
+        modalSize.widthRatio > 0.8 && modalSize.heightRatio > 0.8,
+        `${modalSize.widthRatio.toFixed(2)} × ${modalSize.heightRatio.toFixed(2)}`,
+      );
+    }
 
     if (viewport.touch) {
       const detailFrame = inDetail.locator("div[style*='aspect-ratio']").first();
@@ -421,6 +472,24 @@ for (const viewport of WIDTHS) {
     await inDetail.getByRole("button", { name: "Close" }).first().click();
     await page.waitForTimeout(400);
     check(`${label}: detail closes`, (await detail.count()) === 0, "");
+  }
+
+  const singleOpenTarget = singleCard.locator("button[aria-label^='Open ']").first();
+  if (viewport.touch) await singleOpenTarget.tap();
+  else await singleOpenTarget.click();
+  await page.waitForTimeout(350);
+  const singleDetail = page.locator("[role='dialog']").filter({ hasText: "Notes" });
+  check(`${label}: single-image detail opens`, (await singleDetail.count()) === 1, "");
+  if ((await singleDetail.count()) === 1) {
+    check(
+      `${label}: single-image detail has no carousel controls`,
+      (await singleDetail.getByRole("button", {
+        name: /^(Previous screen|Next screen|Show screen \d+)$/,
+      }).count()) === 0,
+      "",
+    );
+    await singleDetail.getByRole("button", { name: "Close" }).first().click();
+    await page.waitForTimeout(250);
   }
 
   const afterAll = await overflow(page);
