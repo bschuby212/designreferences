@@ -111,25 +111,20 @@ function Chip({
       data-nav-label={typeof children === "string" ? children : undefined}
       onClick={onClick}
       className={cn(
-        "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md px-2.5 text-[13px] whitespace-nowrap transition-colors",
+        "inline-flex h-8 shrink-0 items-center gap-1.5 border-b-2 px-2.5 text-[13px] whitespace-nowrap transition-colors",
         active
-          ? "bg-[var(--hover)] font-medium !text-[var(--text)]"
-          : "!text-[var(--muted-2)] hover:bg-[var(--hover)] hover:!text-[var(--muted)]",
+          ? "border-[var(--text)] font-medium !text-[var(--text)]"
+          : "border-transparent !text-[var(--muted)] hover:!text-[var(--text)]",
       )}
     >
       <Icon
         size={14}
         strokeWidth={1.75}
-        className={active ? "!text-[var(--text)]" : "!text-[var(--muted-2)]"}
+        className={active ? "!text-[var(--text)]" : "!text-[var(--muted)]"}
       />
       <span>{children}</span>
       {count !== undefined && (
-        <span
-          className={cn(
-            "text-[10px] tabular-nums",
-            active ? "!text-[var(--muted)]" : "!text-[var(--muted-2)]",
-          )}
-        >
+        <span className="text-[10px] tabular-nums !text-[var(--muted)]">
           {count}
         </span>
       )}
@@ -157,10 +152,10 @@ function SourceMenu({
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          "inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[13px] whitespace-nowrap transition-colors",
+          "inline-flex h-8 items-center gap-1.5 px-2.5 text-[13px] whitespace-nowrap transition-colors",
           source
-            ? "bg-[var(--hover)] font-medium !text-[var(--text)]"
-            : "!text-[var(--muted-2)] hover:bg-[var(--hover)] hover:!text-[var(--muted)]",
+            ? "font-medium !text-[var(--text)]"
+            : "!text-[var(--muted)] hover:!text-[var(--text)]",
         )}
       >
         <SourceGlyph type={source} />
