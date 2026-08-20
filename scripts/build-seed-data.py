@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import hashlib
 import json
 import os
 import re
@@ -33,6 +34,7 @@ from concurrent.futures import ThreadPoolExecutor
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "scripts", "mobbin-data.json")
 PUBLIC = os.path.join(ROOT, "public", "screens")
+PROBES = os.path.join(ROOT, "scripts", ".cache", "probes")
 MANIFEST = os.path.join(ROOT, "scripts", "seed-manifest.json")
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/122 Safari/537.36"
 
@@ -289,6 +291,44 @@ def build_references(data: list[dict]) -> list[dict]:
     return references
 
 
+def probe_weight(url: str) -> int:
+    """Rough "how much is on this screen" measure.
+
+    A tiny webp of a launch screen (a centred logo on flat colour) compresses
+    to a fraction of the size of a screen full of UI, which is enough to avoid
+    opening a carousel on an almost empty slide.
+    """
+    key = hashlib.sha1(("probe:" + url).encode()).hexdigest() + ".webp"
+    path = os.path.join(PROBES, key)
+    if os.path.exists(path):
+        return os.path.getsize(path)
+    os.makedirs(PROBES, exist_ok=True)
+    try:
+        request = urllib.request.Request(sized(url, 160), headers={"User-Agent": UA})
+        with urllib.request.urlopen(request, timeout=60) as response:
+            body = response.read()
+        with open(path, "wb") as handle:
+            handle.write(body)
+        return len(body)
+    except Exception:
+        return 0
+
+
+def trim_leading_blanks(candidates: list[str]) -> list[str]:
+    """Drops leading launch/splash screens, keeping flow order intact."""
+    if len(candidates) < 4:
+        return candidates
+    weights = [probe_weight(url) for url in candidates]
+    usable = [w for w in weights if w > 0]
+    if not usable:
+        return candidates
+    median = sorted(usable)[len(usable) // 2]
+    start = 0
+    while start < len(candidates) - 3 and weights[start] < median * 0.55:
+        start += 1
+    return candidates[start:]
+
+
 def download(job: tuple[str, str]) -> tuple[str, bool]:
     url, path = job
     if os.path.exists(path) and os.path.getsize(path) > 0:
@@ -322,11 +362,11 @@ def main() -> int:
     jobs: list[tuple[str, str]] = []
     for reference in references:
         candidates = reference["screenUrls"]
-        # iOS flows open on a launch screen that is little more than a centred
-        # logo. It is a real screen but a poor first slide, so start one later
-        # when the flow is long enough to spare it.
-        if reference["kind"] == "flow" and reference["platform"] == "ios" and len(candidates) >= 8:
-            candidates = candidates[1:]
+        # Flows open on a launch screen that is little more than a centred
+        # logo. Those are real screens but poor first slides, so skip past them
+        # while the flow has screens to spare.
+        if reference["kind"] == "flow":
+            candidates = trim_leading_blanks(candidates)
         picked = sample(candidates, args.limit_screens)
         width = 520 if reference["platform"] == "ios" else 900
         reference["screens"] = []

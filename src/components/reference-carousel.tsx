@@ -18,6 +18,7 @@ const RATIO: Record<Aspect, string> = {
 };
 
 const SWIPE_PX = 32;
+const SWIPE_CLICK_MS = 350;
 
 interface ReferenceCarouselProps {
   screens: ReferenceScreen[];
@@ -40,8 +41,10 @@ export function ReferenceCarousel({
   const [index, setIndex] = useState(0);
   const count = screens.length;
   const start = useRef<{ x: number; y: number } | null>(null);
-  const swiped = useRef(false);
   const axis = useRef<"none" | "x" | "y">("none");
+  // Time of the last swipe rather than a boolean: a flag that outlives the
+  // gesture ends up swallowing a later tap that was meant to open the card.
+  const swipedAt = useRef(0);
 
   // Compare the screens themselves rather than the array identity: the live
   // query hands back a fresh array on every write, and resetting to the first
@@ -83,7 +86,6 @@ export function ReferenceCarousel({
   const onTouchStart = (event: ReactTouchEvent) => {
     const touch = event.touches[0];
     start.current = { x: touch.clientX, y: touch.clientY };
-    swiped.current = false;
     axis.current = "none";
   };
 
@@ -105,7 +107,7 @@ export function ReferenceCarousel({
     const touch = event.changedTouches[0];
     const dx = touch.clientX - start.current.x;
     if (axis.current === "x" && Math.abs(dx) > SWIPE_PX) {
-      swiped.current = true;
+      swipedAt.current = Date.now();
       go(index + (dx < 0 ? 1 : -1));
     }
     start.current = null;
@@ -173,10 +175,9 @@ export function ReferenceCarousel({
             aria-label={`Open ${title}`}
             className="absolute inset-0 z-10 cursor-pointer"
             onClick={() => {
-              if (swiped.current) {
-                swiped.current = false;
-                return;
-              }
+              // Ignore only the click a browser synthesises at the end of a
+              // swipe, not every click after one.
+              if (Date.now() - swipedAt.current < SWIPE_CLICK_MS) return;
               onActivate();
             }}
           />
