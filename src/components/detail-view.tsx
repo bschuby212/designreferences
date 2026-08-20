@@ -1,254 +1,208 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { ExternalLink, Heart, Pencil, Send, Trash2, X } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { ExternalLink, Heart, Pencil, Trash2, X } from "lucide-react";
 import type { Collection, Reference } from "@/lib/storage/types";
-import { cleanDesignTitle } from "@/lib/storage/product-tags";
-import { formatSavedDate, heroShotUrl, isMotionSrc, isPhoneFrame } from "@/lib/utils";
-import { CollectionChip, CompanyHeading } from "./category-icons";
-import { referenceImageUrls, useObjectUrl, useThumbnailSrc } from "./hooks";
-import { ImageCarousel } from "./image-carousel";
-import { areaClass, IconButton } from "./ui";
-import { ZoomableImage } from "./zoomable-image";
+import { formatSavedDate, productName } from "@/lib/utils";
+import { ReferenceCarousel } from "./reference-carousel";
+import { areaClass, GhostButton, IconButton } from "./ui";
 
 interface DetailViewProps {
   reference: Reference;
-  collectionName?: string;
+  collectionNames?: string[];
   onClose: () => void;
   onFavorite: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onNotes: (notes: string) => void;
-  onAddComment: (text: string) => void;
-  onDeleteComment: (commentId: string) => void;
-  onSelectCollection?: (id: string) => void;
+  variant: "modal" | "sheet";
 }
 
 export function DetailView({
   reference,
-  collectionName,
+  collectionNames,
   onClose,
   onFavorite,
   onEdit,
   onDelete,
   onNotes,
-  onAddComment,
-  onDeleteComment,
-  onSelectCollection,
+  variant,
 }: DetailViewProps) {
-  const src = useThumbnailSrc(reference);
-  const blobSrc = useObjectUrl(reference.thumbnail);
-  const images = referenceImageUrls(reference).map(heroShotUrl);
-  const videoUrl = reference.videoUrl || images.find((url) => isMotionSrc(url)) || null;
-  const [comment, setComment] = useState("");
-  const phone = isPhoneFrame(collectionName, reference.url, src);
-  const cropTop = !phone;
-  const displaySrc = phone ? src : images[0] || src;
+  const modal = variant === "modal";
+  const company = productName(reference.title || "Untitled");
+  const [companyExtract, setCompanyExtract] = useState("");
 
-  const submitComment = () => {
-    const text = comment.trim();
-    if (!text) return;
-    onAddComment(text);
-    setComment("");
-  };
+  useEffect(() => {
+    let cancelled = false;
+    setCompanyExtract("");
+    const params = new URLSearchParams({ name: company });
+    void fetch(`/api/company?${params}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { extract?: string } | null) => {
+        if (!cancelled) setCompanyExtract(data?.extract?.trim() ?? "");
+      })
+      .catch(() => {
+        if (!cancelled) setCompanyExtract("");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [company]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[var(--surface)]">
-      <div className="flex items-center justify-between border-b border-[var(--border)] px-2 py-1.5">
-        <div className="flex items-center gap-0.5">
-          <IconButton
-            label={reference.favorite ? "Unfavorite" : "Favorite"}
-            onClick={onFavorite}
-          >
-            <Heart
-              size={16}
-              strokeWidth={1.75}
-              fill={reference.favorite ? "currentColor" : "none"}
-            />
-          </IconButton>
-          <IconButton label="Edit" onClick={onEdit}>
-            <Pencil size={16} strokeWidth={1.75} />
-          </IconButton>
-          <IconButton label="Delete" onClick={onDelete}>
-            <Trash2 size={16} strokeWidth={1.75} />
-          </IconButton>
-        </div>
-        <IconButton label="Close" onClick={onClose}>
-          <X size={16} strokeWidth={1.75} />
-        </IconButton>
-      </div>
-
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <div>
-          {videoUrl ? (
-            <div className="overflow-hidden bg-[var(--surface)]">
-              {/\.gif(\?|$)/i.test(videoUrl) ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={videoUrl}
-                  alt={cleanDesignTitle(reference.title) || "Reference"}
-                  className="max-h-[min(70vh,640px)] w-full object-contain object-top"
-                />
-              ) : (
-                <video
-                  src={videoUrl}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  className="max-h-[min(70vh,640px)] w-full object-contain object-top"
-                />
-              )}
-            </div>
-          ) : images.length > 1 ? (
-            <ImageCarousel
-              images={images}
-              alt={cleanDesignTitle(reference.title) || "Reference"}
-              primaryUrl={phone ? reference.thumbnailUrl : null}
-              primaryBlobSrc={phone ? blobSrc : null}
-              cropTop={cropTop}
-            />
-          ) : displaySrc ? (
-            <ZoomableImage
-              src={displaySrc}
-              alt={cleanDesignTitle(reference.title) || "Reference"}
-              cropTop={cropTop}
-            />
-          ) : (
-            <div className="flex aspect-[4/3] w-full items-center justify-center text-[12px] text-[var(--muted-2)]">
-              No image
-            </div>
-          )}
-        </div>
-
-        <div className="flex min-w-0 flex-col gap-4 p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-          <div className="flex min-w-0 items-center gap-2 overflow-hidden">
-                <CompanyHeading
-                  name={cleanDesignTitle(reference.title) || "Untitled"}
-                />
-                {collectionName ? (
-                  <CollectionChip
-                    name={collectionName}
-                    onClick={
-                      reference.collectionId && onSelectCollection
-                        ? () => onSelectCollection(reference.collectionId as string)
-                        : undefined
-                    }
-                  />
-                ) : null}
-              </div>
-              <div className="mt-1 text-[12px] text-[var(--muted-2)]">
-                {reference.source} · Saved {formatSavedDate(reference.createdAt)}
-              </div>
-            </div>
-            {reference.url && (
-              <a
-                href={reference.url}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-[var(--text)] px-3 text-[12px] font-medium text-white"
-              >
-                <ExternalLink size={13} strokeWidth={1.75} />
-                Open
-              </a>
-            )}
+    <div className="flex h-full min-h-0 flex-1 flex-col bg-[var(--surface)]">
+      {!modal && (
+        <div className="flex h-11 shrink-0 items-center justify-between border-b border-[var(--border)] px-2">
+          <div className="flex items-center gap-0.5">
+            <IconButton
+              label={reference.favorite ? "Unfavorite" : "Favorite"}
+              onClick={onFavorite}
+            >
+              <Heart
+                size={16}
+                strokeWidth={1.75}
+                fill={reference.favorite ? "currentColor" : "none"}
+              />
+            </IconButton>
+            <IconButton label="Edit" onClick={onEdit}>
+              <Pencil size={16} strokeWidth={1.75} />
+            </IconButton>
+            <IconButton label="Delete" onClick={onDelete}>
+              <Trash2 size={16} strokeWidth={1.75} />
+            </IconButton>
           </div>
+          <IconButton label="Close" onClick={onClose}>
+            <X size={16} strokeWidth={1.75} />
+          </IconButton>
+        </div>
+      )}
 
-          <Section label="Description">
+      <div
+        className={
+          modal
+            ? "grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_360px]"
+            : "min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        }
+      >
+        <section
+          aria-label="Reference media"
+          className={
+            modal
+              ? "flex min-h-0 items-center justify-center overflow-hidden bg-[var(--hover)]"
+              : "p-4 pb-0"
+          }
+        >
+          <div
+            className={
+              modal ? "h-full w-full" : "mx-auto w-full max-w-[420px]"
+            }
+          >
+            <ReferenceCarousel
+              screens={reference.screens}
+              aspect={reference.aspect}
+              title={reference.title || "Reference"}
+              variant="detail"
+              bleed={modal}
+              fit={
+                collectionNames?.includes("Dashboards") ? "dashboard" : "default"
+              }
+            />
+          </div>
+        </section>
+
+        <section
+          aria-label="Reference details"
+          className={
+            modal
+              ? "min-h-0 overflow-y-auto border-l border-[var(--border)] p-5"
+              : "p-4 pb-8"
+          }
+        >
+          {!modal && (
+            <h1 className="text-[18px] leading-snug font-medium tracking-tight">
+              {reference.title || "Untitled"}
+            </h1>
+          )}
+
+          <dl className={modal ? "space-y-2 text-[13px]" : "mt-4 space-y-2 text-[13px]"}>
+            <Row label="Source">{reference.source}</Row>
+            {collectionNames && collectionNames.length > 0 && (
+              <Row label={collectionNames.length > 1 ? "Categories" : "Category"}>
+                {collectionNames.join(", ")}
+              </Row>
+            )}
+            <Row label="Images">{reference.screens.length}</Row>
+            <Row label="Company">{company}</Row>
+            <Row label="Saved">{formatSavedDate(reference.createdAt)}</Row>
+          </dl>
+
+          {companyExtract && (
+            <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">
+              {companyExtract}
+            </p>
+          )}
+
+          {reference.url && (
+            <a
+              href={reference.url}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-[var(--text)] text-[13px] font-medium text-white"
+            >
+              <ExternalLink size={14} strokeWidth={1.75} />
+              Open source
+            </a>
+          )}
+
+          <label className="mt-5 flex flex-col gap-1.5">
+            <span className="text-[11px] font-medium tracking-wide text-[var(--muted)]">
+              Notes
+            </span>
             <textarea
               defaultValue={reference.notes}
               key={reference.id + reference.updatedAt}
               className={areaClass}
-              placeholder="Add a description…"
-              onBlur={(e) => {
-                if (e.target.value !== reference.notes) onNotes(e.target.value);
+              placeholder="Add notes or a description…"
+              onBlur={(event) => {
+                if (event.target.value !== reference.notes) {
+                  onNotes(event.target.value);
+                }
               }}
             />
-          </Section>
+          </label>
 
-          <Section label={`Comments${reference.comments.length ? ` (${reference.comments.length})` : ""}`}>
-            <div className="flex flex-col gap-2">
-              {reference.comments.length === 0 && (
-                <p className="text-[12px] text-[var(--muted-2)]">
-                  No comments yet.
-                </p>
-              )}
-              {reference.comments.map((item) => (
-                <div
-                  key={item.id}
-                  className="group/comment rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-3 py-2"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="min-w-0 flex-1 text-[13px] whitespace-pre-wrap break-words text-[var(--text)]">
-                      {item.text}
-                    </p>
-                    <button
-                      type="button"
-                      aria-label="Delete comment"
-                      title="Delete comment"
-                      onClick={() => onDeleteComment(item.id)}
-                      className="shrink-0 text-[var(--muted-2)] opacity-0 transition-opacity hover:text-[var(--danger)] group-hover/comment:opacity-100"
-                    >
-                      <X size={13} />
-                    </button>
-                  </div>
-                  <div className="mt-1 text-[10px] text-[var(--muted-2)]">
-                    {formatSavedDate(item.createdAt)}
-                  </div>
-                </div>
-              ))}
-
-              <div className="flex items-end gap-2">
-                <textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                      e.preventDefault();
-                      submitComment();
-                    }
-                  }}
-                  rows={2}
-                  className={areaClass.replace("min-h-[88px]", "min-h-[44px]")}
-                  placeholder="Add a comment…"
-                />
-                <button
-                  type="button"
-                  aria-label="Add comment"
-                  title="Add comment"
-                  onClick={submitComment}
-                  disabled={!comment.trim()}
-                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--text)] text-white disabled:bg-transparent disabled:text-[var(--muted-2)]"
-                >
-                  <Send size={15} strokeWidth={1.75} />
-                </button>
-              </div>
+          {!modal && (
+            <div className="mt-4 flex gap-2">
+              <GhostButton className="flex-1" onClick={onEdit}>
+                Edit
+              </GhostButton>
+              <GhostButton className="flex-1 text-[var(--danger)]" onClick={onDelete}>
+                Delete
+              </GhostButton>
             </div>
-          </Section>
-        </div>
+          )}
+        </section>
       </div>
     </div>
   );
 }
 
-function Section({ label, children }: { label: string; children: ReactNode }) {
+function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-medium tracking-wide text-[var(--muted)]">
-        {label}
-      </span>
-      {children}
+    <div className="grid grid-cols-[76px_1fr] gap-2">
+      <dt className="text-[var(--muted-2)]">{label}</dt>
+      <dd className="min-w-0 break-words">{children}</dd>
     </div>
   );
 }
 
-export function collectionNameOf(
+export function collectionNamesOf(
   collections: Collection[],
-  id: string | null,
+  ids: string[] | undefined,
 ) {
-  if (!id) return undefined;
-  return collections.find((c) => c.id === id)?.name;
+  if (!ids?.length) return [];
+  const byId = new Map(collections.map((collection) => [collection.id, collection.name]));
+  return ids
+    .map((id) => byId.get(id))
+    .filter((name): name is string => Boolean(name));
 }

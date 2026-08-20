@@ -1,70 +1,80 @@
 "use client";
 
-import type { Density, Reference } from "@/lib/storage/types";
-import { cn } from "@/lib/utils";
+import type { Reference } from "@/lib/storage/types";
 import { ReferenceCard } from "./reference-card";
 
 interface GalleryProps {
   references: Reference[];
-  density: Density;
-  collectionNames: Record<string, string>;
+  selectedId: string | null;
+  laptop?: boolean;
+  dashboardCollectionId?: string | null;
+  emptyTitle: string;
+  emptyHint: string;
   onOpen: (id: string) => void;
+  onFavorite: (id: string) => void;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
   onFiles: (files: File[]) => void;
-  onSelectCollection: (id: string) => void;
-  mode?: "grid" | "feed";
 }
 
 export function Gallery({
   references,
-  density,
-  collectionNames,
+  selectedId,
+  laptop = false,
+  dashboardCollectionId = null,
+  emptyTitle,
+  emptyHint,
   onOpen,
+  onFavorite,
+  onEdit,
+  onDelete,
   onFiles,
-  onSelectCollection,
-  mode = "grid",
 }: GalleryProps) {
-  const feed = mode === "feed";
+  const ordered = [...references].sort((a, b) => {
+    const aMulti = a.screens.length > 1 ? 1 : 0;
+    const bMulti = b.screens.length > 1 ? 1 : 0;
+    return bMulti - aMulti;
+  });
+
   return (
     <div
-      className={cn(
-        "h-full overflow-y-auto overscroll-contain px-4 pb-10 md:px-6 lg:px-8",
-        !feed && `density-${density}`,
-        feed && "snap-y snap-proximity",
-      )}
+      className="h-full overflow-y-auto overflow-x-hidden overscroll-contain px-4 pb-10 md:px-12"
       onDragOver={(e) => {
         if ([...e.dataTransfer.types].includes("Files")) e.preventDefault();
       }}
       onDrop={(e) => {
         e.preventDefault();
-        const files = [...e.dataTransfer.files].filter((file) =>
-          file.type.startsWith("image/"),
+        const files = [...e.dataTransfer.files].filter((f) =>
+          f.type.startsWith("image/"),
         );
         if (files.length) onFiles(files);
       }}
     >
       {references.length === 0 ? (
-        <div className="py-16 text-center text-[13px] text-[var(--muted-2)]" />
+        <div className="mx-auto max-w-[320px] px-4 py-16 text-center">
+          <p className="text-[14px] font-medium tracking-tight">{emptyTitle}</p>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--muted)]">
+            {emptyHint}
+          </p>
+        </div>
       ) : (
-        <div
-          className={cn(
-            feed
-              ? "mx-auto flex max-w-[420px] flex-col gap-8 pt-2 md:max-w-[560px]"
-              : "gallery-grid",
-          )}
-        >
-          {references.map((reference) => (
-            <div key={reference.id} className={cn(feed && "snap-start")}>
-              <ReferenceCard
-                reference={reference}
-                collectionName={
-                  reference.collectionId
-                    ? collectionNames[reference.collectionId]
-                    : undefined
-                }
-                onOpen={() => onOpen(reference.id)}
-                onSelectCollection={onSelectCollection}
-              />
-            </div>
+        <div className={laptop ? "gallery-flex gallery-laptop" : "gallery-flex"}>
+          {ordered.map((reference) => (
+            <ReferenceCard
+              key={reference.id}
+              reference={reference}
+              selected={reference.id === selectedId}
+              fit={
+                dashboardCollectionId &&
+                reference.collectionIds.includes(dashboardCollectionId)
+                  ? "dashboard"
+                  : "default"
+              }
+              onOpen={() => onOpen(reference.id)}
+              onFavorite={() => onFavorite(reference.id)}
+              onEdit={() => onEdit(reference.id)}
+              onDelete={() => onDelete(reference.id)}
+            />
           ))}
         </div>
       )}

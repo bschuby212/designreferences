@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed:weekly": "python3 scripts/scrape-mobbin-seeds.py --append"
+    "qa:responsive": "node scripts/qa-responsive.mjs",
+    "qa:tabs": "node scripts/qa-tabs.mjs",
+    "demo:mobile": "node scripts/demo-mobile.mjs"
   },
   "dependencies": {
     "cheerio": "^1.2.0",
@@ -25,6 +27,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
+    "playwright-core": "^1.62.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

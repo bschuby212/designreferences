@@ -1,85 +1,42 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import {
-  Columns2,
-  Columns3,
-  Columns4,
-  Filter,
-  Plus,
-  Search,
-} from "lucide-react";
-import { AppMark } from "./app-mark";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ArrowLeft, Heart, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import {
   EMPTY_FILTERS,
+  LAPTOP_NAV_COLLECTIONS,
   type ActiveFilters,
-  type Density,
   type NavView,
   type Reference,
+  type SourceType,
 } from "@/lib/storage/types";
-import { cn, imageAssetKey, uid } from "@/lib/utils";
-import { AddMenu, EditorDialog, type EditorState } from "./editor-dialog";
-import { DetailView, collectionNameOf } from "./detail-view";
-import { FilterChips, FilterPanel } from "./filter-panel";
+import { cn, isHiddenNavCollection } from "@/lib/utils";
+import { EditorDialog, type EditorState } from "./editor-dialog";
+import { DetailView, collectionNamesOf } from "./detail-view";
 import { Gallery } from "./gallery";
 import { useBreakpoint } from "./hooks";
 import { LibraryNav } from "./library-nav";
 import { useLibrary } from "./library-provider";
-import { Modal } from "./sheet";
-import { IconButton, inputClass, useClickOutside } from "./ui";
-
-const RECENT_MS = 14 * 24 * 60 * 60 * 1000;
-const DENSITY_KEY = "library-density";
-
-function readDensity(): Density {
-  const saved = window.localStorage.getItem(DENSITY_KEY);
-  if (saved === "compact" || saved === "medium" || saved === "large") return saved;
-  return "medium";
-}
-
-function subscribeDensity(onChange: () => void) {
-  window.addEventListener("storage", onChange);
-  window.addEventListener("library-density", onChange);
-  return () => {
-    window.removeEventListener("storage", onChange);
-    window.removeEventListener("library-density", onChange);
-  };
-}
-
-function shuffle<T>(items: T[], seed: number) {
-  const next = [...items];
-  let state = seed || 1;
-  for (let i = next.length - 1; i > 0; i--) {
-    state = (state * 16807) % 2147483647;
-    const j = state % (i + 1);
-    const current = next[i];
-    next[i] = next[j];
-    next[j] = current;
-  }
-  return next;
-}
+import { Modal, Sheet } from "./sheet";
+import { IconButton, inputClass } from "./ui";
 
 function matches(
   reference: Reference,
   view: NavView,
   search: string,
   filters: ActiveFilters,
-  collectionName: string,
+  collectionNames: string[],
 ) {
-  if (view.type === "favorites" && !reference.favorite) return false;
-  if (view.type === "recent" && Date.now() - reference.createdAt > RECENT_MS) {
+  if (view.type === "collection" && !reference.collectionIds.includes(view.id)) {
     return false;
   }
-  if (view.type === "collection" && reference.collectionId !== view.id) return false;
   if (view.type === "source" && reference.source !== view.source) return false;
-  if (filters.favorites && !reference.favorite) return false;
   if (filters.sources.length && !filters.sources.includes(reference.source)) {
     return false;
   }
   if (
     filters.collectionIds.length &&
-    (!reference.collectionId ||
-      !filters.collectionIds.includes(reference.collectionId))
+    !filters.collectionIds.some((id) => reference.collectionIds.includes(id))
   ) {
     return false;
   }
@@ -95,7 +52,7 @@ function matches(
     reference.title,
     reference.notes,
     reference.tags.join(" "),
-    collectionName,
+    collectionNames.join(" "),
     reference.source,
     reference.url,
   ]
@@ -110,71 +67,53 @@ export function AppShell() {
   const breakpoint = useBreakpoint();
   const mobile = breakpoint === "mobile";
 
-  const [view, setView] = useState<NavView>({ type: "all" });
-  const [feedKey, setFeedKey] = useState(0);
+  const mobileAppsId =
+    collections.find((collection) => collection.name === "Mobile Apps")?.id ??
+    null;
+  const [view, setView] = useState<NavView | null>(null);
+  const activeView = useMemo<NavView>(
+    () =>
+      view ??
+      (mobileAppsId
+        ? { type: "collection", id: mobileAppsId }
+        : { type: "all" }),
+    [view, mobileAppsId],
+  );
   const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [filters, setFilters] = useState<ActiveFilters>(EMPTY_FILTERS);
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [addOpen, setAddOpen] = useState(false);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const density = useSyncExternalStore<Density>(
-    subscribeDensity,
-    readDensity,
-    () => "medium",
-  );
-
-  const setDensity = (value: Density) => {
-    window.localStorage.setItem(DENSITY_KEY, value);
-    window.dispatchEvent(new Event("library-density"));
-  };
-
-  const addRef = useClickOutside(addOpen && !mobile, () => setAddOpen(false));
-  const filterRef = useClickOutside(filterOpen && !mobile, () =>
-    setFilterOpen(false),
-  );
 
   const visible = useMemo(() => {
-    const matched = references.filter((reference) =>
+    return references.filter((reference) =>
       matches(
         reference,
-        view,
+        activeView,
         search,
         filters,
-        collectionNameOf(collections, reference.collectionId) ?? "",
+        collectionNamesOf(collections, reference.collectionIds),
       ),
     );
-    const seen = new Set<string>();
-    const unique = matched.filter((reference) => {
-      const urlKey = imageAssetKey(reference.url);
-      const imageKey = imageAssetKey(reference.thumbnailUrl);
-      const keys = [
-        urlKey && `url:${urlKey}`,
-        imageKey && `img:${imageKey}`,
-        reference.title.trim() &&
-          `title:${reference.title.trim().toLowerCase()}`,
-      ].filter(Boolean) as string[];
-      if (keys.some((key) => seen.has(key))) return false;
-      for (const key of keys) seen.add(key);
-      return true;
-    });
-    if (view.type !== "feed") return unique;
-    return shuffle(unique, feedKey + 1);
-  }, [references, view, search, filters, collections, feedKey]);
+  }, [references, activeView, search, filters, collections]);
+
+  // Counts ignore the active view but respect search and filters, so each
+  // navigation chip agrees with the references it will render.
+  const counts = useMemo(() => {
+    const collectionCounts: Record<string, number> = {};
+    for (const reference of references) {
+      const names = collectionNamesOf(collections, reference.collectionIds);
+      if (!matches(reference, { type: "all" }, search, filters, names)) continue;
+      for (const id of reference.collectionIds) {
+        const name = collections.find((collection) => collection.id === id)?.name;
+        if (!name || isHiddenNavCollection(name)) continue;
+        collectionCounts[id] = (collectionCounts[id] ?? 0) + 1;
+      }
+    }
+    return { collections: collectionCounts };
+  }, [references, collections, search, filters]);
 
   const selected = references.find((r) => r.id === selectedId) ?? null;
-  const tags = useMemo(() => {
-    const set = new Set<string>();
-    for (const reference of references) {
-      for (const tag of reference.tags) set.add(tag);
-    }
-    return [...set].sort((a, b) => a.localeCompare(b));
-  }, [references]);
-
-  const collectionNames = useMemo(
-    () => Object.fromEntries(collections.map((c) => [c.id, c.name])),
-    [collections],
-  );
 
   const openDetail = useCallback(
     (id: string) => {
@@ -205,199 +144,218 @@ export function AppShell() {
     await updateReference(id, { favorite: !reference.favorite });
   }
 
-  async function addComment(id: string, text: string) {
-    const reference = references.find((item) => item.id === id);
-    if (!reference) return;
-    await updateReference(id, {
-      comments: [
-        ...reference.comments,
-        { id: uid(), text, createdAt: Date.now() },
-      ],
-    });
-  }
-
-  async function deleteComment(id: string, commentId: string) {
-    const reference = references.find((item) => item.id === id);
-    if (!reference) return;
-    await updateReference(id, {
-      comments: reference.comments.filter((item) => item.id !== commentId),
-    });
-  }
-
-  const selectCollection = useCallback((id: string) => {
-    setView({ type: "collection", id });
-    setSelectedId(null);
-  }, []);
-
-  function changeView(next: NavView) {
-    if (next.type === "feed" && view.type !== "feed") {
-      setFeedKey((key) => key + 1);
-    }
-    setView(next);
-  }
-
-  async function pasteImage() {
-    try {
-      const items = await navigator.clipboard.read();
-      for (const item of items) {
-        const type = item.types.find((t) => t.startsWith("image/"));
-        if (!type) continue;
-        const blob = await item.getType(type);
-        setEditor({
-          mode: "upload",
-          file: new File([blob], "pasted.png", { type: blob.type }),
-        });
-        return;
-      }
-    } catch {
-      setEditor({ mode: "upload" });
-    }
-  }
-
   const filterActive =
-    filters.favorites ||
-    filters.sources.length + filters.collectionIds.length + filters.tags.length >
-      0;
+    filters.sources.length + filters.collectionIds.length + filters.tags.length > 0;
+
+  // The empty state has to say which of search, filters or an empty tab is
+  // responsible, otherwise a correctly empty collection looks like a bug.
+  const empty = useMemo(() => {
+    const trimmed = search.trim();
+    if (trimmed) {
+      return {
+        title: `No matches for “${trimmed}”`,
+        hint: filterActive
+          ? "Try different words, or clear the active filters."
+          : "Try a different app name, collection or tag.",
+      };
+    }
+    if (filterActive) {
+      return {
+        title: "No references match these filters",
+        hint: "Clear a filter to widen the results.",
+      };
+    }
+    if (activeView.type === "collection") {
+      const name =
+        collections.find((collection) => collection.id === activeView.id)?.name ??
+        "this collection";
+      return {
+        title: `Nothing in ${name} yet`,
+        hint: "Add a reference to this collection, or move an existing one into it.",
+      };
+    }
+    return {
+      title: "Your library is empty",
+      hint: "Paste a link or upload a screenshot to start collecting references.",
+    };
+  }, [search, filterActive, activeView, collections]);
 
   return (
-    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-[var(--bg)]">
-      <header className="flex h-14 shrink-0 items-center gap-2 px-4 pt-[env(safe-area-inset-top)] md:px-6 lg:px-8">
-        <button
-          type="button"
-          onClick={() => changeView({ type: "all" })}
-          className="shrink-0"
-          aria-label="All references"
+    <div className="flex h-dvh min-h-0 min-w-0 flex-col overflow-hidden bg-[var(--bg)]">
+        {mobile ? (
+          <header className="flex h-[var(--header-h)] items-center gap-0.5 border-b border-[var(--border)] bg-[var(--bg)] px-1 pt-[env(safe-area-inset-top)]">
+            {searchOpen ? (
+              <>
+                <IconButton label="Back" onClick={() => setSearchOpen(false)}>
+                  <ArrowLeft size={16} strokeWidth={1.75} />
+                </IconButton>
+                <input
+                  autoFocus
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search references…"
+                  className={cn(inputClass, "h-10 border-transparent bg-transparent")}
+                />
+                {search && (
+                  <IconButton label="Clear" onClick={() => setSearch("")}>
+                    <X size={16} />
+                  </IconButton>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="min-w-0 flex-1 px-3 text-[14px] font-medium tracking-tight">
+                  Library
+                </div>
+                <IconButton label="Search" onClick={() => setSearchOpen(true)}>
+                  <Search size={16} strokeWidth={1.75} />
+                </IconButton>
+                <button
+                  type="button"
+                  aria-label="Add reference"
+                  onClick={() => setEditor({ mode: "link" })}
+                  className="inline-flex h-10 shrink-0 items-center gap-1 rounded-md px-2.5 text-[13px] font-medium text-[var(--text)] hover:bg-[var(--hover)]"
+                >
+                  <Plus size={16} strokeWidth={1.75} />
+                  Add
+                </button>
+              </>
+            )}
+          </header>
+        ) : (
+          <header className="flex h-[var(--header-h)] items-center gap-2 border-b border-[var(--border)] px-3">
+            <div className="relative min-w-0 flex-1">
+              <Search
+                size={14}
+                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[var(--muted-2)]"
+              />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search references…"
+                className={cn(inputClass, "h-10 pl-8")}
+              />
+            </div>
+            <button
+              type="button"
+              aria-label="Add reference"
+              onClick={() => setEditor({ mode: "link" })}
+              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md px-3 text-[13px] font-medium text-[var(--text)] hover:bg-[var(--hover)]"
+            >
+              <Plus size={16} strokeWidth={1.75} />
+              Add
+            </button>
+          </header>
+        )}
+
+        <LibraryNav
+          view={activeView}
+          onViewChange={setView}
+          counts={counts}
+          source={filters.sources[0] ?? ""}
+          onSourceChange={(source: SourceType | "") =>
+            setFilters({
+              sources: source ? [source] : [],
+              collectionIds: [],
+              tags: [],
+            })
+          }
+        />
+
+        <div className="flex min-h-0 flex-1">
+          <div className="min-w-0 flex-1 pt-3">
+            <Gallery
+              references={visible}
+              selectedId={selectedId}
+              laptop={
+                activeView.type === "collection" &&
+                (LAPTOP_NAV_COLLECTIONS as readonly string[]).includes(
+                  collections.find((collection) => collection.id === activeView.id)
+                    ?.name ?? "",
+                )
+              }
+              dashboardCollectionId={
+                collections.find((collection) => collection.name === "Dashboards")
+                  ?.id ?? null
+              }
+              emptyTitle={empty.title}
+              emptyHint={empty.hint}
+              onOpen={openDetail}
+              onFavorite={(id) => void toggleFavorite(id)}
+              onEdit={(id) => setEditor({ mode: "edit", id })}
+              onDelete={(id) => void deleteReference(id)}
+              onFiles={(files) =>
+                setEditor({ mode: "upload", file: files[0] })
+              }
+            />
+          </div>
+
+        </div>
+
+      {!mobile && selected && (
+        <Modal
+          open
+          onClose={closeDetail}
+          title={selected.title || "Reference"}
+          size="large"
+          actions={
+            <>
+              <IconButton
+                label={selected.favorite ? "Unfavorite" : "Favorite"}
+                onClick={() => void toggleFavorite(selected.id)}
+              >
+                <Heart
+                  size={16}
+                  strokeWidth={1.75}
+                  fill={selected.favorite ? "currentColor" : "none"}
+                />
+              </IconButton>
+              <IconButton
+                label="Edit"
+                onClick={() => setEditor({ mode: "edit", id: selected.id })}
+              >
+                <Pencil size={16} strokeWidth={1.75} />
+              </IconButton>
+              <IconButton
+                label="Delete"
+                onClick={() => {
+                  void deleteReference(selected.id);
+                  setSelectedId(null);
+                }}
+              >
+                <Trash2 size={16} strokeWidth={1.75} />
+              </IconButton>
+            </>
+          }
         >
-          <AppMark />
-        </button>
-
-        <div className="relative min-w-0 flex-1">
-          <Search
-            size={14}
-            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[var(--muted-2)]"
-          />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search references…"
-            className={cn(inputClass, "h-10 pl-8")}
-          />
-        </div>
-
-        <div className="relative shrink-0" ref={filterRef}>
-          <IconButton
-            label="Filter"
-            className={cn("h-10 w-10", filterActive && "text-[var(--text)]")}
-            onClick={() => setFilterOpen((v) => !v)}
-          >
-            <Filter size={16} strokeWidth={1.75} />
-          </IconButton>
-          {!mobile && (
-            <FilterPanel
-              open={filterOpen}
-              onClose={() => setFilterOpen(false)}
-              filters={filters}
-              onChange={setFilters}
-              tags={tags}
-              mobile={false}
-            />
-          )}
-        </div>
-
-        {view.type !== "feed" ? (
-          <DensityToggle density={density} onChange={setDensity} />
-        ) : null}
-
-        <div className="relative shrink-0" ref={addRef}>
-          <IconButton
-            label="Add reference"
-            className="h-10 w-10"
-            onClick={() => setAddOpen((v) => !v)}
-          >
-            <Plus size={18} strokeWidth={1.75} />
-          </IconButton>
-          {!mobile && (
-            <AddMenu
-              open={addOpen}
-              onClose={() => setAddOpen(false)}
-              mobile={false}
-              onLink={() => {
-                setAddOpen(false);
-                setEditor({ mode: "link" });
-              }}
-              onUpload={() => {
-                setAddOpen(false);
-                setEditor({ mode: "upload" });
-              }}
-              onPaste={() => {
-                setAddOpen(false);
-                void pasteImage();
-              }}
-            />
-          )}
-        </div>
-      </header>
-
-      <LibraryNav view={view} onViewChange={changeView} />
-
-      <FilterChips
-        filters={filters}
-        onChange={setFilters}
-        collectionNames={collectionNames}
-      />
-
-      <main className="min-h-0 flex-1 pt-4">
-        <Gallery
-          references={visible}
-          density={density}
-          collectionNames={collectionNames}
-          onOpen={openDetail}
-          onFiles={(files) => setEditor({ mode: "upload", file: files[0] })}
-          onSelectCollection={selectCollection}
-          mode={view.type === "feed" ? "feed" : "grid"}
-        />
-      </main>
-
-      {mobile && (
-        <FilterPanel
-          open={filterOpen}
-          onClose={() => setFilterOpen(false)}
-          filters={filters}
-          onChange={setFilters}
-          tags={tags}
-          mobile
-        />
-      )}
-
-      {mobile && (
-        <AddMenu
-          open={addOpen}
-          onClose={() => setAddOpen(false)}
-          mobile
-          onLink={() => {
-            setAddOpen(false);
-            setEditor({ mode: "link" });
-          }}
-          onUpload={() => {
-            setAddOpen(false);
-            setEditor({ mode: "upload" });
-          }}
-          onPaste={() => {
-            setAddOpen(false);
-            void pasteImage();
-          }}
-        />
-      )}
-
-      <Modal
-        open={Boolean(selected)}
-        onClose={closeDetail}
-        className="h-[92dvh] max-w-3xl sm:h-auto sm:max-h-[90vh]"
-      >
-        {selected && (
           <DetailView
             reference={selected}
-            collectionName={collectionNameOf(collections, selected.collectionId)}
+            collectionNames={collectionNamesOf(collections, selected.collectionIds)}
+            variant="modal"
+            onClose={closeDetail}
+            onFavorite={() => void toggleFavorite(selected.id)}
+            onEdit={() => setEditor({ mode: "edit", id: selected.id })}
+            onDelete={() => {
+              void deleteReference(selected.id);
+              setSelectedId(null);
+            }}
+            onNotes={(notes) => void updateReference(selected.id, { notes })}
+          />
+        </Modal>
+      )}
+
+      {mobile && selected && (
+        <Sheet
+          open
+          onClose={closeDetail}
+          side="bottom"
+          swipeToDismiss
+          className="h-[94dvh]"
+        >
+          <DetailView
+            reference={selected}
+            collectionNames={collectionNamesOf(collections, selected.collectionIds)}
+            variant="sheet"
             onClose={closeDetail}
             onFavorite={() => void toggleFavorite(selected.id)}
             onEdit={() => setEditor({ mode: "edit", id: selected.id })}
@@ -406,53 +364,18 @@ export function AppShell() {
               closeDetail();
             }}
             onNotes={(notes) => void updateReference(selected.id, { notes })}
-            onAddComment={(text) => void addComment(selected.id, text)}
-            onDeleteComment={(commentId) =>
-              void deleteComment(selected.id, commentId)
-            }
-            onSelectCollection={selectCollection}
           />
-        )}
-      </Modal>
+        </Sheet>
+      )}
 
       <EditorDialog
         state={editor}
+        defaultCollectionIds={
+          activeView.type === "collection" ? [activeView.id] : []
+        }
         onClose={() => setEditor(null)}
         onSaved={() => undefined}
       />
-    </div>
-  );
-}
-
-function DensityToggle({
-  density,
-  onChange,
-}: {
-  density: Density;
-  onChange: (density: Density) => void;
-}) {
-  const options: Array<[Density, typeof Columns4]> = [
-    ["compact", Columns4],
-    ["medium", Columns3],
-    ["large", Columns2],
-  ];
-  return (
-    <div className="hidden h-10 items-center rounded-md border border-[var(--border)] p-0.5 lg:flex">
-      {options.map(([value, Icon]) => (
-        <button
-          key={value}
-          type="button"
-          aria-label={value}
-          title={value}
-          onClick={() => onChange(value)}
-          className={cn(
-            "inline-flex h-9 w-9 items-center justify-center rounded text-[var(--muted)]",
-            density === value && "bg-[var(--hover)] text-[var(--text)]",
-          )}
-        >
-          <Icon size={14} strokeWidth={1.75} />
-        </button>
-      ))}
     </div>
   );
 }

@@ -1,3 +1,5 @@
+import { HIDDEN_NAV_COLLECTIONS } from "@/lib/storage/types";
+
 export function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
@@ -39,6 +41,19 @@ export function hostnameOf(url: string) {
   } catch {
     return "";
   }
+}
+
+export function isHiddenNavCollection(name: string) {
+  return (HIDDEN_NAV_COLLECTIONS as readonly string[]).includes(name);
+}
+
+/** Display-only product name. Stored titles stay unchanged for search. */
+export function productName(title: string) {
+  const cleaned = title
+    .replace(/\s+(iOS|Android|Web)\b[\s\S]*$/i, "")
+    .replace(/\s+section$/i, "")
+    .trim();
+  return cleaned || title.trim() || "Untitled";
 }
 
 export function formatSavedDate(ts: number) {

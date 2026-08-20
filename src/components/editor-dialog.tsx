@@ -1,16 +1,33 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Camera, Clipboard, ImagePlus, Link2, LoaderCircle, Upload } from "lucide-react";
-import type { LinkPreview } from "@/lib/preview/types";
 import {
-  SOURCE_TYPES,
-  type CreateReferenceInput,
-  type SourceType,
-  type ThumbnailType,
+  ArrowDown,
+  ArrowUp,
+  Camera,
+  Clipboard,
+  ImagePlus,
+  LoaderCircle,
+  Upload,
+  X,
+} from "lucide-react";
+import { classifyReference } from "@/lib/classify/category";
+import type { LinkPreview } from "@/lib/preview/types";
+import { detectSource } from "@/lib/preview/detectSource";
+import type {
+  Aspect,
+  CreateReferenceInput,
+  ReferenceScreen,
+  ThumbnailType,
 } from "@/lib/storage/types";
-import { cleanDesignTitle, parseTagInput } from "@/lib/storage/product-tags";
-import { base64ToBlob, cn, normalizeUrl } from "@/lib/utils";
+import {
+  base64ToBlob,
+  blobToDataUrl,
+  cn,
+  hostnameOf,
+  isHiddenNavCollection,
+  normalizeUrl,
+} from "@/lib/utils";
 import { useLibrary } from "./library-provider";
 import { useBreakpoint, useObjectUrl } from "./hooks";
 import { Modal } from "./sheet";
@@ -30,24 +47,26 @@ export type EditorState =
 
 interface EditorDialogProps {
   state: EditorState | null;
+  defaultCollectionIds?: string[];
   onClose: () => void;
   onSaved: (id: string) => void;
 }
 
-export function EditorDialog({ state, onClose, onSaved }: EditorDialogProps) {
+export function EditorDialog({
+  state,
+  defaultCollectionIds = [],
+  onClose,
+  onSaved,
+}: EditorDialogProps) {
   const breakpoint = useBreakpoint();
   const mobile = breakpoint === "mobile";
-  const title =
-    state?.mode === "edit"
-      ? "Edit"
-      : state?.mode === "upload"
-        ? "Upload image"
-        : "Add link";
+  const title = state?.mode === "edit" ? "Edit" : "Add reference";
 
   const body = state ? (
     <EditorForm
       key={`${state.mode}-${state.mode === "edit" ? state.id : state.mode === "upload" ? state.file?.name ?? "new" : "link"}`}
       state={state}
+      defaultCollectionIds={defaultCollectionIds}
       onClose={onClose}
       onSaved={onSaved}
     />
@@ -61,7 +80,7 @@ export function EditorDialog({ state, onClose, onSaved }: EditorDialogProps) {
         side="bottom"
         title={title}
         swipeToDismiss
-        className="h-[94dvh]"
+        className="max-h-[90dvh]"
       >
         {body}
       </Sheet>
@@ -69,7 +88,7 @@ export function EditorDialog({ state, onClose, onSaved }: EditorDialogProps) {
   }
 
   return (
-    <Modal open={Boolean(state)} onClose={onClose} title={title}>
+    <Modal open={Boolean(state)} onClose={onClose} title={title} size="wide">
       {body}
     </Modal>
   );
@@ -77,10 +96,12 @@ export function EditorDialog({ state, onClose, onSaved }: EditorDialogProps) {
 
 function EditorForm({
   state,
+  defaultCollectionIds,
   onClose,
   onSaved,
 }: {
   state: EditorState;
+  defaultCollectionIds: string[];
   onClose: () => void;
   onSaved: (id: string) => void;
 }) {
@@ -91,20 +112,26 @@ function EditorForm({
       ? references.find((r) => r.id === state.id)
       : undefined;
   const initialFile = state.mode === "upload" ? state.file : undefined;
+  const categoryOptions = collections.filter(
+    (collection) => !isHiddenNavCollection(collection.name),
+  );
 
   const [url, setUrl] = useState(existing?.url ?? "");
   const [title, setTitle] = useState(
-    existing
-      ? cleanDesignTitle(existing.title)
-      : initialFile
-        ? initialFile.name.replace(/\.[^.]+$/, "")
-        : "",
+    existing?.title ??
+      (initialFile ? initialFile.name.replace(/\.[^.]+$/, "") : ""),
   );
-  const [source, setSource] = useState<SourceType>(
-    existing?.source ?? (state.mode === "upload" ? "Upload" : "Website"),
+  const initialCollectionIds =
+    existing?.collectionIds ?? defaultCollectionIds;
+  const [categoryId, setCategoryId] = useState(
+    initialCollectionIds[0] ?? "",
   );
-  const [collectionId, setCollectionId] = useState(existing?.collectionId ?? "");
-  const [tags, setTags] = useState(existing?.tags.join(", ") ?? "");
+  const [categoryTouched, setCategoryTouched] = useState(false);
+  const [screens, setScreens] = useState<ReferenceScreen[]>(
+    existing?.screens ?? [],
+  );
+  const [aspect, setAspect] = useState<Aspect>(existing?.aspect ?? "landscape");
+  const [screenUrl, setScreenUrl] = useState("");
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [thumbnail, setThumbnail] = useState<Blob | null>(
     initialFile ?? existing?.thumbnail ?? null,
@@ -113,17 +140,16 @@ function EditorForm({
   const [thumbnailType, setThumbnailType] = useState<ThumbnailType>(
     existing?.thumbnailType ?? (state.mode === "upload" ? "upload" : "placeholder"),
   );
-  const [imageUrls, setImageUrls] = useState<string[]>(existing?.imageUrls ?? []);
-  const [videoUrl, setVideoUrl] = useState(existing?.videoUrl ?? "");
   const [previewing, setPreviewing] = useState(false);
   const [saving, setSaving] = useState(false);
   const lastPreviewed = useRef("");
+  const previewTitle = useRef(existing?.title ?? "");
   const urlRef = useRef<HTMLInputElement>(null);
   const blobPreview = useObjectUrl(thumbnail);
   const previewUrl = blobPreview || thumbnailUrl || null;
 
   useEffect(() => {
-    if (state.mode === "link") {
+    if (state.mode !== "edit") {
       const t = window.setTimeout(() => urlRef.current?.focus(), 50);
       return () => window.clearTimeout(t);
     }
@@ -143,22 +169,33 @@ function EditorForm({
       const data = (await res.json()) as LinkPreview & { error?: string };
       if (!res.ok) return;
       setUrl(data.url || normalized);
-      if (data.title) setTitle((current) => current || cleanDesignTitle(data.title));
-      if (data.source) setSource(data.source);
+      if (data.title) {
+        previewTitle.current = data.title;
+        setTitle((current) => current || data.title);
+      }
       if (data.thumbnail) {
         setThumbnail(base64ToBlob(data.thumbnail.data, data.thumbnail.mime));
         setThumbnailType(data.thumbnailType);
       }
       if (data.thumbnailUrl) setThumbnailUrl(data.thumbnailUrl);
-      setImageUrls(data.images ?? []);
-      setVideoUrl(data.videoUrl ?? "");
+      if (data.screens?.length) {
+        setScreens((current) => {
+          const next = [...current];
+          for (const src of data.screens) {
+            if (!next.some((screen) => screen.src === src)) {
+              next.push({ src, label: `Screen ${next.length + 1}` });
+            }
+          }
+          return next;
+        });
+      }
     } finally {
       setPreviewing(false);
     }
   }
 
   useEffect(() => {
-    if (state.mode !== "link") return;
+    if (state.mode === "edit") return;
     const normalized = normalizeUrl(url);
     if (!normalized) return;
     const timer = window.setTimeout(() => void runPreview(url), 450);
@@ -170,25 +207,102 @@ function EditorForm({
     setThumbnail(file);
     setThumbnailType("upload");
     setThumbnailUrl("");
-    setImageUrls([]);
     setTitle((current) => current || file.name.replace(/\.[^.]+$/, ""));
+    // Uploads become carousel screens too, stored inline so they survive a
+    // reload the same way seeded screens do.
+    void blobToDataUrl(file).then((src) => addScreen(src));
+  }
+
+  function addScreen(src: string) {
+    if (!src) return;
+    setScreens((current) =>
+      current.some((screen) => screen.src === src)
+        ? current
+        : [...current, { src, label: `Screen ${current.length + 1}` }],
+    );
+  }
+
+  function removeScreen(src: string) {
+    setScreens((current) =>
+      current
+        .filter((screen) => screen.src !== src)
+        .map((screen, index) => ({ ...screen, label: `Screen ${index + 1}` })),
+    );
+  }
+
+  function moveScreen(index: number, delta: number) {
+    setScreens((current) => {
+      const next = [...current];
+      const target = index + delta;
+      if (target < 0 || target >= next.length) return current;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next.map((screen, position) => ({
+        ...screen,
+        label: `Screen ${position + 1}`,
+      }));
+    });
   }
 
   async function save() {
     setSaving(true);
     try {
-      const parsedTags = parseTagInput(tags);
+      const normalized = normalizeUrl(url);
+      const resolved = screens.length
+        ? screens
+        : thumbnailUrl
+          ? [{ src: thumbnailUrl, label: "Screen 1" }]
+          : [];
+      const resolvedTitle =
+        title.trim() ||
+        previewTitle.current.trim() ||
+        hostnameOf(normalized) ||
+        "Untitled";
+      const classifiedCollectionIds = () => {
+        if (categoryTouched) return categoryId ? [categoryId] : [];
+        const currentName =
+          collections.find((collection) => collection.id === categoryId)?.name;
+        const names = classifyReference({
+          title: resolvedTitle,
+          url: normalized,
+          notes,
+          aspect,
+          screenLabels: resolved.map((screen) => screen.label),
+          originalCategory: currentName,
+        });
+        const ids = [
+          ...new Set(
+            names
+              .map(
+                (name) =>
+                  collections.find((collection) => collection.name === name)?.id,
+              )
+              .filter((id): id is string => Boolean(id)),
+          ),
+        ];
+        return ids.length ? ids : categoryId ? [categoryId] : [];
+      };
       const payload: CreateReferenceInput = {
-        title: cleanDesignTitle(title.trim()),
-        url: normalizeUrl(url),
+        title: resolvedTitle,
+        url: normalized,
         thumbnail,
-        thumbnailUrl: thumbnailUrl || null,
+        thumbnailUrl: resolved[0]?.src ?? thumbnailUrl ?? null,
         thumbnailType: thumbnail || thumbnailUrl ? thumbnailType : "placeholder",
-        imageUrls,
-        videoUrl: videoUrl || null,
-        source: state.mode === "upload" && source === "Website" ? "Upload" : source,
-        collectionId: collectionId || null,
-        tags: parsedTags,
+        source: normalized
+          ? detectSource(normalized)
+          : thumbnail
+            ? "Upload"
+            : "Website",
+        collectionIds: existing
+          ? existing.collectionIds.includes(categoryId)
+            ? existing.collectionIds
+            : categoryId
+              ? [categoryId]
+              : []
+          : classifiedCollectionIds(),
+        screens: resolved,
+        aspect,
+        seedKey: existing?.seedKey ?? null,
+        tags: state.mode === "edit" && existing ? existing.tags : [],
         notes,
       };
       if (state.mode === "edit" && existing) {
@@ -204,125 +318,164 @@ function EditorForm({
     }
   }
 
-  const normalizedUrl = normalizeUrl(url);
-  const duplicate =
-    state.mode !== "edit" && normalizedUrl
-      ? references.find((r) => normalizeUrl(r.url) === normalizedUrl)
-      : undefined;
   const canSave = Boolean(thumbnail || normalizeUrl(url) || title.trim());
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3">
-        {state.mode === "link" && (
-          <Field label="URL">
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
+        <Field label="URL">
+          <input
+            ref={urlRef}
+            value={url}
+            inputMode="url"
+            autoCapitalize="off"
+            autoCorrect="off"
+            placeholder="https://"
+            className={inputClass}
+            onChange={(e) => setUrl(e.target.value)}
+            onPaste={(e) => {
+              const text = e.clipboardData.getData("text");
+              if (text) window.setTimeout(() => void runPreview(text), 0);
+            }}
+          />
+        </Field>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Field label="Title">
             <input
-              ref={urlRef}
-              value={url}
-              inputMode="url"
-              autoCapitalize="off"
-              autoCorrect="off"
-              placeholder="https://"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               className={inputClass}
-              onChange={(e) => setUrl(e.target.value)}
-              onPaste={(e) => {
-                const text = e.clipboardData.getData("text");
-                if (text) window.setTimeout(() => void runPreview(text), 0);
-              }}
+              placeholder="Optional"
             />
           </Field>
-        )}
+          <Field label="Category">
+            <select
+              value={categoryId}
+              onChange={(e) => {
+                setCategoryTouched(true);
+                setCategoryId(e.target.value);
+              }}
+              className={inputClass}
+            >
+              <option value="">Select a category</option>
+              {categoryOptions.map((collection) => (
+                <option key={collection.id} value={collection.id}>
+                  {collection.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Frame">
+            <select
+              value={aspect}
+              onChange={(e) => setAspect(e.target.value as Aspect)}
+              className={inputClass}
+            >
+              <option value="landscape">Landscape (web)</option>
+              <option value="portrait">Portrait (mobile)</option>
+            </select>
+          </Field>
+        </div>
 
         <div className="overflow-hidden rounded-[var(--radius)] bg-[var(--hover)]">
           {previewUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={previewUrl} alt="" className="block max-h-64 w-full object-contain" referrerPolicy="no-referrer" />
           ) : (
-            <div className="flex aspect-[16/10] flex-col items-center justify-center gap-2 text-[12px] text-[var(--muted-2)]">
+            <div className="flex h-28 flex-col items-center justify-center gap-2 text-[12px] text-[var(--muted-2)]">
               {previewing ? (
                 <>
                   <LoaderCircle size={16} className="animate-spin" />
                   Fetching preview
                 </>
-              ) : state.mode === "upload" || state.mode === "edit" ? (
-                <UploadPicker onPick={onPick} />
               ) : (
-                "Thumbnail appears after you paste a link"
+                "Paste a link or add an image"
               )}
             </div>
           )}
         </div>
 
-        {imageUrls.length > 1 && (
-          <p className="text-[11px] text-[var(--muted)]">
-            {imageUrls.length} screens · shown as a carousel
-          </p>
-        )}
+        <UploadPicker onPick={onPick} compact />
 
-        {duplicate && (
-          <p className="rounded-[var(--radius)] bg-[var(--hover)] px-3 py-2 text-[11px] text-[var(--muted)]">
-            Already in your library
-            {duplicate.title ? ` as “${duplicate.title}”` : ""}. Saving won’t create
-            a duplicate.
-          </p>
-        )}
-
-        {(state.mode === "upload" || (state.mode === "edit" && thumbnail)) && (
-          <UploadPicker onPick={onPick} compact />
-        )}
-
-        <Field label="Title">
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className={inputClass}
-            placeholder="Optional"
-          />
-        </Field>
-        <Field label="Source">
-          <select
-            value={source}
-            onChange={(e) => setSource(e.target.value as SourceType)}
-            className={inputClass}
-          >
-            {SOURCE_TYPES.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </Field>
-        {state.mode !== "link" && (
-          <Field label="Source URL">
-            <input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className={inputClass}
-              placeholder="Optional"
-            />
-          </Field>
-        )}
-        <Field label="Collection">
-          <select
-            value={collectionId}
-            onChange={(e) => setCollectionId(e.target.value)}
-            className={inputClass}
-          >
-            <option value="">None</option>
-            {collections.map((collection) => (
-              <option key={collection.id} value={collection.id}>
-                {collection.name}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Tags">
-          <input
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            className={inputClass}
-            placeholder="comma separated"
-          />
+        <Field label={`Screens (${screens.length})`}>
+          <div className="space-y-2">
+            {screens.length > 0 && (
+              <ul className="space-y-1.5">
+                {screens.map((screen, index) => (
+                  <li
+                    key={screen.src}
+                    className="flex items-center gap-2 rounded-[var(--radius)] border border-[var(--border)] p-1.5"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={screen.src}
+                      alt={screen.label}
+                      className="h-10 w-10 shrink-0 rounded bg-[var(--hover)] object-contain"
+                      referrerPolicy="no-referrer"
+                    />
+                    <span className="min-w-0 flex-1 truncate text-[12px] text-[var(--muted)]">
+                      {screen.label}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label={`Move ${screen.label} earlier`}
+                      disabled={index === 0}
+                      className="grid h-9 w-7 place-items-center rounded text-[var(--muted-2)] hover:bg-[var(--hover)] disabled:opacity-30"
+                      onClick={() => moveScreen(index, -1)}
+                    >
+                      <ArrowUp size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Move ${screen.label} later`}
+                      disabled={index === screens.length - 1}
+                      className="grid h-9 w-7 place-items-center rounded text-[var(--muted-2)] hover:bg-[var(--hover)] disabled:opacity-30"
+                      onClick={() => moveScreen(index, 1)}
+                    >
+                      <ArrowDown size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${screen.label}`}
+                      className="grid h-9 w-7 place-items-center rounded text-[var(--danger)] hover:bg-[var(--danger-bg)]"
+                      onClick={() => removeScreen(screen.src)}
+                    >
+                      <X size={14} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="flex gap-2">
+              <input
+                value={screenUrl}
+                onChange={(e) => setScreenUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter") return;
+                  e.preventDefault();
+                  addScreen(normalizeUrl(screenUrl) || screenUrl.trim());
+                  setScreenUrl("");
+                }}
+                placeholder="Screen image URL"
+                className={inputClass}
+              />
+              <GhostButton
+                className="shrink-0 border border-[var(--border)]"
+                onClick={() => {
+                  addScreen(normalizeUrl(screenUrl) || screenUrl.trim());
+                  setScreenUrl("");
+                }}
+              >
+                Add
+              </GhostButton>
+            </div>
+            <p className="text-[11px] text-[var(--muted-2)]">
+              {screens.length > 1
+                ? `${screens.length} meaningful images will appear in the carousel.`
+                : "One complete image is valid; add more only for a flow or longer page."}
+            </p>
+          </div>
         </Field>
         <Field label="Notes">
           <textarea
@@ -334,11 +487,13 @@ function EditorForm({
         </Field>
       </div>
 
-      <div className="flex gap-2 border-t border-[var(--border)] px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
-        <GhostButton className="hidden sm:inline-flex" onClick={onClose}>
-          Cancel
-        </GhostButton>
-        <PrimaryButton className="flex-1" disabled={!canSave || saving} onClick={() => void save()}>
+      <div className="flex items-center justify-end gap-2 border-t border-[var(--border)] px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+        <GhostButton onClick={onClose}>Cancel</GhostButton>
+        <PrimaryButton
+          className="shrink-0 px-5 disabled:opacity-100"
+          disabled={!canSave || saving}
+          onClick={() => void save()}
+        >
           {saving ? "Saving…" : "Save"}
         </PrimaryButton>
       </div>
@@ -440,78 +595,6 @@ function MiniAction({
     >
       {icon}
       {label}
-    </button>
-  );
-}
-
-export function AddMenu({
-  open,
-  onClose,
-  onLink,
-  onUpload,
-  onPaste,
-  mobile,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onLink: () => void;
-  onUpload: () => void;
-  onPaste: () => void;
-  mobile: boolean;
-}) {
-  if (!open) return null;
-
-  const items = (
-    <div className="py-1">
-      <div className="px-3 py-2 text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--muted-2)]">
-        Create
-      </div>
-      <MenuItem icon={<Link2 size={15} />} onClick={onLink}>
-        Add Link
-      </MenuItem>
-      <MenuItem icon={<ImagePlus size={15} />} onClick={onUpload}>
-        Upload Image
-      </MenuItem>
-      {mobile && (
-        <MenuItem icon={<Clipboard size={15} />} onClick={onPaste}>
-          Paste Image
-        </MenuItem>
-      )}
-    </div>
-  );
-
-  if (mobile) {
-    return (
-      <Sheet open={open} onClose={onClose} side="bottom" title="Add reference">
-        <div className="px-2 pb-[max(16px,env(safe-area-inset-bottom))]">{items}</div>
-      </Sheet>
-    );
-  }
-
-  return (
-    <div className="absolute right-0 top-full z-30 mt-1 w-44 rounded-md border border-[var(--border)] bg-[var(--surface)] py-1 shadow-sm">
-      {items}
-    </div>
-  );
-}
-
-function MenuItem({
-  icon,
-  children,
-  onClick,
-}: {
-  icon: ReactNode;
-  children: ReactNode;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex min-h-11 w-full items-center gap-2.5 px-3 text-left text-[13px] hover:bg-[var(--hover)]"
-    >
-      <span className="text-[var(--muted)]">{icon}</span>
-      {children}
     </button>
   );
 }

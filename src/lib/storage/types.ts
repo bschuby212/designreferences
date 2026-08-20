@@ -22,19 +22,22 @@ export type ThumbnailType =
 
 export type Density = "compact" | "medium" | "large";
 
-export interface Comment {
-  id: string;
-  text: string;
-  createdAt: number;
-}
+/** Portrait for phone screens, landscape for desktop captures. */
+export type Aspect = "portrait" | "landscape";
 
 export type NavView =
   | { type: "all" }
-  | { type: "feed" }
-  | { type: "favorites" }
-  | { type: "recent" }
   | { type: "collection"; id: string }
   | { type: "source"; source: SourceType };
+
+/**
+ * One frame of a reference. A reference is a set of screens rather than a
+ * single image so cards and the detail view can page through the real UI.
+ */
+export interface ReferenceScreen {
+  src: string;
+  label: string;
+}
 
 export interface Reference {
   id: string;
@@ -43,14 +46,14 @@ export interface Reference {
   thumbnail: Blob | null;
   thumbnailUrl: string | null;
   thumbnailType: ThumbnailType;
-  imageUrls: string[];
-  videoUrl?: string | null;
-  logoUrl?: string | null;
   source: SourceType;
-  collectionId: string | null;
+  collectionIds: string[];
+  screens: ReferenceScreen[];
+  aspect: Aspect | null;
+  /** Set on seeded examples so they can be replaced without touching user data. */
+  seedKey: string | null;
   tags: string[];
   notes: string;
-  comments: Comment[];
   favorite: boolean;
   createdAt: number;
   updatedAt: number;
@@ -62,17 +65,21 @@ export interface ReferenceRecord {
   url: string;
   thumbnailUrl: string | null;
   thumbnailType: ThumbnailType;
-  imageUrls: string[];
-  videoUrl?: string | null;
-  logoUrl?: string | null;
   source: SourceType;
-  collectionId: string | null;
+  collectionIds: string[];
+  screens: ReferenceScreen[];
+  aspect: Aspect | null;
+  seedKey: string | null;
   tags: string[];
   notes: string;
-  comments: Comment[];
   favorite: boolean;
   createdAt: number;
   updatedAt: number;
+}
+
+export interface MetaRecord {
+  key: string;
+  value: string;
 }
 
 export interface ThumbnailRecord {
@@ -93,11 +100,11 @@ export interface CreateReferenceInput {
   thumbnail: Blob | null;
   thumbnailUrl?: string | null;
   thumbnailType: ThumbnailType;
-  imageUrls?: string[];
-  videoUrl?: string | null;
-  logoUrl?: string | null;
   source: SourceType;
-  collectionId: string | null;
+  collectionIds: string[];
+  screens?: ReferenceScreen[];
+  aspect?: Aspect | null;
+  seedKey?: string | null;
   tags: string[];
   notes: string;
   favorite?: boolean;
@@ -107,21 +114,50 @@ export interface ActiveFilters {
   sources: SourceType[];
   collectionIds: string[];
   tags: string[];
-  favorites: boolean;
 }
 
 export const EMPTY_FILTERS: ActiveFilters = {
   sources: [],
   collectionIds: [],
   tags: [],
-  favorites: false,
 };
 
-export const DEFAULT_COLLECTIONS = [
+export const CANONICAL_NAV_COLLECTIONS = [
   "Mobile Apps",
-  "Product Design",
-  "Website",
+  "Web & Landing Pages",
+  "Dashboards",
+  "Mobile Onboarding",
+  "Web Sign-Up",
+  "Mobile Navigation",
+] as const;
+
+export type CanonicalNavCollection = (typeof CANONICAL_NAV_COLLECTIONS)[number];
+
+export const DEFAULT_COLLECTIONS = [
+  ...CANONICAL_NAV_COLLECTIONS,
+  "Typography",
+  "Motion",
+  "Branding",
+];
+
+/** Kept in IndexedDB, but not shown as gallery canvases. */
+export const HIDDEN_NAV_COLLECTIONS = [
+  "Typography",
+  "Branding",
+  "Motion",
+] as const;
+
+/** Landscape 2-up gallery canvases. */
+export const LAPTOP_NAV_COLLECTIONS = [
+  "Web & Landing Pages",
+  "Dashboards",
+  "Web Sign-Up",
+] as const;
+
+/** Old chip names that must not be recreated after migration. */
+export const OBSOLETE_NAV_COLLECTIONS = [
+  "Web",
+  "Landing Pages",
   "Onboarding",
   "Navigation",
-  "Motion",
-];
+] as const;

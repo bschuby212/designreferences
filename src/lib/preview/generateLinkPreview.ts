@@ -1,7 +1,6 @@
 import * as cheerio from "cheerio";
 import { detectSource } from "./detectSource";
 import type { LinkPreview } from "./types";
-import { cleanDesignTitle } from "@/lib/storage/product-tags";
 import type { ThumbnailType } from "@/lib/storage/types";
 
 const USER_AGENT =
@@ -64,75 +63,8 @@ function isGenericOg(url: string) {
   return /\/og_image\.png(?:\?|$)/i.test(url) || /\/og\.png(?:\?|$)/i.test(url);
 }
 
-const MAX_IMAGES = 30;
-
 function cdnAsset(kind: "app_screens" | "sites", id: string, ext: string) {
-  if (kind === "sites") {
-    return `${MOBBIN_CDN}/${kind}/${id}.${ext}?f=png&w=1440&h=1080&q=70&fit=crop&crop=top`;
-  }
   return `${MOBBIN_CDN}/${kind}/${id}.${ext}?f=png&w=1200&q=70&fit=shrink-cover`;
-}
-
-function bestImgSrc(tag: string) {
-  const srcset =
-    tag.match(/\bsrcSet="([^"]+)"/i)?.[1] ||
-    tag.match(/\bsrcset="([^"]+)"/i)?.[1];
-  const src = tag.match(/\bsrc="([^"]+)"/i)?.[1];
-  const pick = (raw: string) => decodeEntities(raw).trim();
-  if (srcset) {
-    const parts = srcset
-      .split(",")
-      .map((part) => pick(part).split(/\s+/)[0])
-      .filter(Boolean);
-    if (parts.length > 0) return parts[parts.length - 1];
-  }
-  return src ? pick(src) : "";
-}
-
-/** Only the screens that belong to this flow (alt: "Screen 3 of 12 of the … flow"). */
-function mobbinFlowImageUrls(html: string) {
-  const expected = Number(html.match(/Screen\s+1\s+of\s+(\d+)/i)?.[1] || 0);
-  const ids: string[] = [];
-  const seenIds = new Set<string>();
-  for (const match of html.matchAll(/content\/app_screens\/([0-9a-f-]{36})/gi)) {
-    const id = match[1].toLowerCase();
-    if (seenIds.has(id)) continue;
-    seenIds.add(id);
-    ids.push(id);
-  }
-  const stable = (expected > 1 ? ids.slice(0, expected) : ids)
-    .slice(0, MAX_IMAGES)
-    .map((id) => cdnAsset("app_screens", id, "png"));
-  if (stable.length > 1) return stable;
-
-  const screens: Array<{ index: number; url: string }> = [];
-  const seen = new Set<string>();
-  for (const match of html.matchAll(/<img\b[^>]*>/gi)) {
-    const tag = match[0];
-    const alt = tag.match(/\balt="([^"]*)"/i)?.[1] ?? "";
-    const numbered = alt.match(/Screen\s+(\d+)\s+of\s+(\d+)/i);
-    if (!numbered || !/flow/i.test(alt)) continue;
-    const uuid = tag.match(/content\/app_screens\/([0-9a-f-]{36})/i)?.[1];
-    const url = uuid ? cdnAsset("app_screens", uuid, "png") : bestImgSrc(tag);
-    if (!url || seen.has(url)) continue;
-    seen.add(url);
-    screens.push({ index: Number(numbered[1]), url });
-  }
-  screens.sort((a, b) => a.index - b.index);
-  return screens.slice(0, MAX_IMAGES).map((item) => item.url);
-}
-
-function pageVideoUrl($: cheerio.CheerioAPI, pageUrl: string) {
-  const og = absUrl(
-    meta($, "og:video", "og:video:url", "og:video:secure_url", "twitter:player:stream"),
-    pageUrl,
-  );
-  if (og && /\.(mp4|webm|mov|m4v)(\?|$)/i.test(og)) return og;
-  const src =
-    $("video source[src]").first().attr("src") || $("video[src]").first().attr("src");
-  const video = absUrl(src, pageUrl);
-  if (video && /\.(mp4|webm|mov|m4v)(\?|$)/i.test(video)) return video;
-  return null;
 }
 
 function productImagesFromHtml(
@@ -219,8 +151,8 @@ async function fetchImage(url: string) {
 
 async function fetchScreenshot(url: string) {
   const shots = [
-    `https://s.wordpress.com/mshots/v1/${encodeURIComponent(url)}?w=1440&h=1080`,
-    `https://image.thum.io/get/width/1440/crop/1080/noanimate/${url}`,
+    `https://s.wordpress.com/mshots/v1/${encodeURIComponent(url)}?w=1200`,
+    `https://image.thum.io/get/width/1200/noanimate/${url}`,
   ];
   for (const shot of shots) {
     const image = await fetchImage(shot);
@@ -229,10 +161,68 @@ async function fetchScreenshot(url: string) {
   return null;
 }
 
+function tweetStatusId(url: string) {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, "");
+    if (!/^(x|twitter|mobile\.twitter)\.com$/.test(host)) return null;
+    return parsed.pathname.match(/\/status(?:es)?\/(\d+)/)?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function tweetScreens(url: string) {
+  const id = tweetStatusId(url);
+  if (!id) return { title: "", photos: [] as string[] };
+  try {
+    const res = await fetchWithTimeout(
+      `https://api.fxtwitter.com/status/${id}`,
+      {
+        headers: {
+          "User-Agent": USER_AGENT,
+          Accept: "application/json",
+        },
+      },
+    );
+    if (!res.ok) return { title: "", photos: [] as string[] };
+    const data = (await res.json()) as {
+      tweet?: {
+        text?: string;
+        author?: { name?: string; screen_name?: string };
+        media?: {
+          photos?: Array<{ url?: string }>;
+          all?: Array<{ type?: string; url?: string }>;
+        };
+      };
+    };
+    const tweet = data.tweet;
+    const photos = [
+      ...(tweet?.media?.photos ?? []).map((photo) => photo.url),
+      ...(tweet?.media?.all ?? [])
+        .filter((item) => item.type === "photo" || item.type === "image")
+        .map((item) => item.url),
+    ].filter((src): src is string => Boolean(src));
+    const author = tweet?.author?.name || tweet?.author?.screen_name || "";
+    const text = (tweet?.text ?? "").replace(/\s+/g, " ").trim();
+    const title = author || text ? [author, text].filter(Boolean).join(" — ") : "";
+    return { title, photos: [...new Set(photos)] };
+  } catch {
+    return { title: "", photos: [] as string[] };
+  }
+}
+
+function withScreens(
+  preview: Omit<LinkPreview, "screens">,
+  screens: string[],
+): LinkPreview {
+  const unique = [...new Set(screens.filter(Boolean))];
+  return { ...preview, screens: unique };
+}
+
 export async function generateLinkPreview(
   rawUrl: string,
   preferredImageUrl?: string,
-  options: { metaOnly?: boolean } = {},
 ): Promise<LinkPreview> {
   let url: string;
   try {
@@ -243,18 +233,17 @@ export async function generateLinkPreview(
 
   const source = detectSource(url);
   const hostname = new URL(url).hostname.replace(/^www\./, "");
+  const tweet = source === "X" ? await tweetScreens(url) : { title: "", photos: [] as string[] };
   const empty: LinkPreview = {
     title: hostname,
     url,
     siteName: hostname,
     favicon: `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`,
     source,
-    thumbnailUrl: preferredImageUrl || null,
+    thumbnailUrl: preferredImageUrl || tweet.photos[0] || null,
     thumbnail: null,
     thumbnailType: "placeholder",
-    images: preferredImageUrl ? [preferredImageUrl] : [],
-    videoUrl: null,
-    logoUrl: null,
+    screens: tweet.photos,
   };
 
   let html = "";
@@ -282,23 +271,28 @@ export async function generateLinkPreview(
     // Preview can still succeed from a known product image URL.
   }
 
-  let title = "";
+  let title = tweet.title;
   let siteName = hostname;
   let favicon = empty.favicon;
   const candidates: Array<{ url: string; type: ThumbnailType }> = [];
-  let screenUrls: string[] = [];
-  let videoUrl: string | null = null;
+
   if (preferredImageUrl) {
     candidates.push({ url: preferredImageUrl, type: "og" });
+  }
+  for (const photo of tweet.photos) {
+    if (!candidates.some((item) => item.url === photo)) {
+      candidates.push({ url: photo, type: "twitter" });
+    }
   }
 
   if (html) {
     const $ = cheerio.load(html);
-    title = cleanDesignTitle(
-      decodeEntities(
-        meta($, "og:title", "twitter:title") || $("title").first().text() || "",
-      ),
-    );
+    title = decodeEntities(
+      tweet.title ||
+        meta($, "og:title", "twitter:title") ||
+        $("title").first().text() ||
+        "",
+    ).replace(/\s*\|\s*Mobbin.*$/i, "");
     siteName = decodeEntities(meta($, "og:site_name") || hostname);
 
     const iconHref =
@@ -306,87 +300,63 @@ export async function generateLinkPreview(
       $('link[rel="icon"]').attr("href") ||
       $('link[rel="shortcut icon"]').attr("href");
     favicon = absUrl(iconHref, url) || empty.favicon;
-    videoUrl = pageVideoUrl($, url);
 
     for (const candidate of productImagesFromHtml(html, url, $)) {
       if (!candidates.some((item) => item.url === candidate.url)) {
         candidates.push(candidate);
       }
     }
-
-    // Screen/section pages embed dozens of *related* app screens in the HTML.
-    // Prefer stable app_screens UUIDs over encrypted file.webp URLs.
-    if (source === "Mobbin" && /\/flows\//.test(url)) {
-      screenUrls = mobbinFlowImageUrls(html);
-    }
   }
 
-  if (options.metaOnly) {
-    return {
-      ...empty,
-      title: title || hostname,
-      siteName,
-      favicon,
-      logoUrl: null,
-    };
-  }
-
-  // When a page exposes multiple screens (e.g. a Mobbin flow), keep every image
-  // so the reference can render a carousel. The first screen is the primary.
-  const multiImage = screenUrls.length > 1;
-  const primaryCandidates = multiImage
-    ? screenUrls.map((imageUrl) => ({ url: imageUrl, type: "og" as ThumbnailType }))
-    : candidates;
-
-  for (const candidate of primaryCandidates) {
+  for (const candidate of candidates) {
     const thumbnail = await fetchImage(candidate.url);
     if (thumbnail) {
-      return {
-        title: title || hostname,
-        url,
-        siteName,
-        favicon,
-        source,
-        thumbnailUrl: candidate.url,
-        thumbnail,
-        thumbnailType: candidate.type,
-        images: multiImage ? screenUrls : [candidate.url],
-        videoUrl,
-        logoUrl: null,
-      };
+      return withScreens(
+        {
+          title: title || tweet.title || hostname,
+          url,
+          siteName,
+          favicon,
+          source,
+          thumbnailUrl: candidate.url,
+          thumbnail,
+          thumbnailType: candidate.type,
+        },
+        tweet.photos.length ? tweet.photos : [candidate.url],
+      );
     }
   }
 
   const thumbnailUrl =
-    (multiImage ? screenUrls[0] : candidates[0]?.url) || preferredImageUrl || null;
+    tweet.photos[0] || candidates[0]?.url || preferredImageUrl || null;
   if (source !== "Mobbin") {
     const screenshot = await fetchScreenshot(url);
     if (screenshot) {
-      return {
-        title: title || hostname,
-        url,
-        siteName,
-        favicon,
-        source,
-        thumbnailUrl,
-        thumbnail: screenshot,
-        thumbnailType: "screenshot",
-        images: thumbnailUrl ? [thumbnailUrl] : [],
-        videoUrl,
-        logoUrl: null,
-      };
+      return withScreens(
+        {
+          title: title || tweet.title || hostname,
+          url,
+          siteName,
+          favicon,
+          source,
+          thumbnailUrl,
+          thumbnail: screenshot,
+          thumbnailType: "screenshot",
+        },
+        tweet.photos,
+      );
     }
   }
 
-  return {
-    ...empty,
-    title: title || hostname,
-    siteName,
-    favicon,
-    thumbnailUrl,
-    thumbnailType: thumbnailUrl ? "og" : "placeholder",
-    images: multiImage ? screenUrls : thumbnailUrl ? [thumbnailUrl] : [],
-    videoUrl,
-    logoUrl: null,
-  };
+  return withScreens(
+    {
+      ...empty,
+      title: title || tweet.title || hostname,
+      siteName,
+      favicon,
+      thumbnailUrl,
+      thumbnailType: thumbnailUrl ? "twitter" : "placeholder",
+    },
+    tweet.photos,
+  );
 }

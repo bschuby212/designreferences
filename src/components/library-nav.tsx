@@ -1,270 +1,264 @@
 "use client";
 
-import { useState } from "react";
-import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
-import { SOURCE_TYPES, type NavView } from "@/lib/storage/types";
-import { cn } from "@/lib/utils";
-import { AllIcon, CollectionIcon, SourceIcon } from "./category-icons";
+import { useState, type ComponentType } from "react";
+import {
+  Award,
+  Check,
+  ChevronDown,
+  Clapperboard,
+  Compass,
+  Folder,
+  Globe,
+  Image,
+  Layers,
+  LayoutDashboard,
+  LogIn,
+  Palette,
+  PanelTop,
+  PenTool,
+  Smartphone,
+  Sparkles,
+  Target,
+  Upload,
+  type LucideProps,
+} from "lucide-react";
+import {
+  SOURCE_TYPES,
+  type NavView,
+  type SourceType,
+} from "@/lib/storage/types";
+import { cn, isHiddenNavCollection } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
-import { inputClass, useClickOutside } from "./ui";
+import { useClickOutside } from "./ui";
+
+export interface NavCounts {
+  collections: Record<string, number>;
+}
+
+type Icon = ComponentType<LucideProps>;
+
+const CATEGORY_ICONS: Record<string, Icon> = {
+  "Mobile Apps": Smartphone,
+  "Web & Landing Pages": PanelTop,
+  Dashboards: LayoutDashboard,
+  "Mobile Onboarding": Sparkles,
+  "Web Sign-Up": LogIn,
+  "Mobile Navigation": Compass,
+  Motion: Clapperboard,
+};
+
+const SOURCE_ICONS: Record<string, Icon> = {
+  "": Layers,
+  Dribbble: Target,
+  Behance: Palette,
+  Figma: PenTool,
+  Mobbin: Smartphone,
+  Awwwards: Award,
+  Pinterest: Image,
+  Website: Globe,
+  Upload: Upload,
+};
+
+function SourceGlyph({
+  type,
+  className,
+}: {
+  type: string;
+  className?: string;
+}) {
+  if (type === "X") {
+    return (
+      <span
+        aria-hidden
+        className={cn(
+          "grid h-3.5 w-3.5 place-items-center text-[11px] font-semibold",
+          className,
+        )}
+      >
+        𝕏
+      </span>
+    );
+  }
+  const Glyph = SOURCE_ICONS[type] ?? Layers;
+  return <Glyph size={14} strokeWidth={1.75} className={className} />;
+}
 
 interface LibraryNavProps {
   view: NavView;
   onViewChange: (view: NavView) => void;
+  counts?: NavCounts;
+  source?: SourceType | "";
+  onSourceChange?: (source: SourceType | "") => void;
 }
 
-type NavTab = "collections" | "sources" | "feed";
-
-function Pill({
+function Chip({
   active,
-  onClick,
+  icon: Icon,
+  count,
   children,
+  onClick,
 }: {
   active: boolean;
-  onClick: () => void;
+  icon: Icon;
+  count?: number;
   children: React.ReactNode;
+  onClick: () => void;
 }) {
   return (
     <button
       type="button"
+      aria-pressed={active}
+      data-nav-label={typeof children === "string" ? children : undefined}
       onClick={onClick}
       className={cn(
-        "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] whitespace-nowrap transition-all",
+        "relative z-10 inline-flex h-10 shrink-0 items-center gap-1.5 border-b px-2.5 text-[13px] whitespace-nowrap transition-colors",
         active
-          ? "bg-[var(--chip-active)] font-medium text-[var(--text)] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_0_0_0.5px_rgba(0,0,0,0.04)]"
-          : "bg-transparent text-[var(--muted)] hover:text-[var(--text)]",
+          ? "border-[var(--text)] font-medium !text-[var(--text)]"
+          : "border-transparent !text-[var(--muted)] hover:!text-[var(--text)]",
       )}
     >
-      {children}
+      <Icon
+        size={14}
+        strokeWidth={1.75}
+        className={active ? "!text-[var(--text)]" : "!text-[var(--muted)]"}
+      />
+      <span>{children}</span>
+      {count !== undefined && (
+        <span
+          className={cn(
+            "ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--preview)] px-1.5 text-[10px] font-medium tabular-nums",
+            active ? "!text-[var(--text)]" : "!text-[var(--muted)]",
+          )}
+        >
+          {count}
+        </span>
+      )}
     </button>
   );
 }
 
-function Segmented({
-  tab,
+function SourceMenu({
+  source,
   onChange,
 }: {
-  tab: NavTab;
-  onChange: (tab: NavTab) => void;
+  source: SourceType | "";
+  onChange: (source: SourceType | "") => void;
 }) {
-  const options: Array<[NavTab, string]> = [
-    ["collections", "Collections"],
-    ["sources", "Sources"],
-    ["feed", "Feed"],
-  ];
+  const [open, setOpen] = useState(false);
+  const ref = useClickOutside(open, () => setOpen(false));
+  const label = source || "All sources";
+
   return (
-    <div className="flex shrink-0 rounded-full bg-[var(--chip-track)] p-[3px]">
-      {options.map(([value, label]) => (
-        <button
-          key={value}
-          type="button"
-          onClick={() => onChange(value)}
-          className={cn(
-            "rounded-full px-3 py-[5px] text-[12px] font-medium whitespace-nowrap transition-all",
-            tab === value
-              ? "bg-[var(--chip-active)] text-[var(--text)] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_0_0_0.5px_rgba(0,0,0,0.04)]"
-              : "text-[var(--muted)] hover:text-[var(--text)]",
-          )}
+    <div className="relative shrink-0" ref={ref}>
+      <button
+        type="button"
+        aria-label="Source"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+        className={cn(
+          "inline-flex h-10 items-center gap-1.5 px-2.5 text-[13px] whitespace-nowrap transition-colors",
+          source
+            ? "font-medium !text-[var(--text)]"
+            : "!text-[var(--muted)] hover:!text-[var(--text)]",
+        )}
+      >
+        <SourceGlyph type={source} />
+        {label}
+        <ChevronDown size={12} strokeWidth={1.75} className="opacity-70" />
+      </button>
+      {open && (
+        <div
+          role="listbox"
+          aria-label="Source"
+          className="absolute top-full left-0 z-30 mt-1 min-w-[11rem] rounded-md border border-[var(--border)] bg-[var(--surface)] py-1 shadow-sm"
         >
-          {label}
-        </button>
-      ))}
+          {["", ...SOURCE_TYPES].map((type) => {
+            const value = type as SourceType | "";
+            const selected = source === value;
+            return (
+              <button
+                key={value || "all"}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                className={cn(
+                  "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px]",
+                  selected
+                    ? "bg-[var(--hover)] text-[var(--text)]"
+                    : "text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--text)]",
+                )}
+                onClick={() => {
+                  onChange(value);
+                  setOpen(false);
+                }}
+              >
+                <SourceGlyph type={value} />
+                <span className="flex-1">{value || "All sources"}</span>
+                {selected && <Check size={12} strokeWidth={2} />}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
 
-export function LibraryNav({ view, onViewChange }: LibraryNavProps) {
-  const { collections, createCollection, renameCollection, deleteCollection } =
-    useLibrary();
-  const [tab, setTab] = useState<NavTab>(
-    view.type === "source" ? "sources" : view.type === "feed" ? "feed" : "collections",
-  );
-  const [creating, setCreating] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [menuId, setMenuId] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const menuRef = useClickOutside(Boolean(menuId), () => setMenuId(null));
-
-  async function submitNew() {
-    const name = newName.trim();
-    if (!name) {
-      setCreating(false);
-      return;
-    }
-    const created = await createCollection(name);
-    setNewName("");
-    setCreating(false);
-    onViewChange({ type: "collection", id: created.id });
-  }
-
-  async function submitRename() {
-    if (!editingId) return;
-    const name = editName.trim();
-    if (name) await renameCollection(editingId, name);
-    setEditingId(null);
-  }
+export function LibraryNav({
+  view,
+  onViewChange,
+  counts,
+  source = "",
+  onSourceChange,
+}: LibraryNavProps) {
+  const { collections } = useLibrary();
 
   return (
-    <div className="flex items-center gap-2 border-b border-[var(--border)] px-4 py-2.5 md:px-6 lg:px-8">
-      <Segmented
-        tab={tab}
-        onChange={(next) => {
-          setTab(next);
-          if (next === "collections") onViewChange({ type: "all" });
-          if (next === "feed") onViewChange({ type: "feed" });
-        }}
-      />
-
-      {tab !== "feed" ? (
-      <>
-      <div className="mx-1 h-5 w-px shrink-0 bg-[var(--border)]" />
-
-      <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto rounded-full bg-[var(--chip-track)] p-[3px]">
-        <Pill active={view.type === "all"} onClick={() => onViewChange({ type: "all" })}>
-          <AllIcon size={13} strokeWidth={1.75} />
-          All
-        </Pill>
-
-        {tab === "collections"
-          ? collections.map((collection) => {
-              const active =
-                view.type === "collection" && view.id === collection.id;
-              if (editingId === collection.id) {
-                return (
-                  <input
-                    key={collection.id}
-                    autoFocus
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    onBlur={() => void submitRename()}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") void submitRename();
-                      if (e.key === "Escape") setEditingId(null);
-                    }}
-                    className={cn(inputClass, "h-8 w-32 shrink-0 rounded-full")}
-                  />
-                );
-              }
-              return (
-                <div key={collection.id} className="relative shrink-0">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onViewChange({ type: "collection", id: collection.id })
-                    }
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                      setMenuId((id) =>
-                        id === collection.id ? null : collection.id,
-                      );
-                    }}
-                    title="Right-click to rename or delete"
-                    className={cn(
-                      "inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-[13px] whitespace-nowrap transition-all",
-                      active
-                        ? "bg-[var(--chip-active)] font-medium text-[var(--text)] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_0_0_0.5px_rgba(0,0,0,0.04)]"
-                        : "bg-transparent text-[var(--muted)] hover:text-[var(--text)]",
-                    )}
-                  >
-                    <CollectionIcon
-                      name={collection.name}
-                      size={13}
-                      strokeWidth={1.75}
-                    />
-                    {collection.name}
-                  </button>
-                  {menuId === collection.id && (
-                    <div
-                      ref={menuRef}
-                      className="absolute right-0 top-9 z-30 w-36 rounded-md border border-[var(--border)] bg-[var(--surface)] py-1 shadow-md"
-                    >
-                      <button
-                        type="button"
-                        className="flex h-10 w-full items-center gap-2 px-3 text-left text-[13px] text-[var(--text)] hover:bg-[var(--hover)]"
-                        onClick={() => {
-                          setEditingId(collection.id);
-                          setEditName(collection.name);
-                          setMenuId(null);
-                        }}
-                      >
-                        <Pencil size={13} /> Rename
-                      </button>
-                      <button
-                        type="button"
-                        className="flex h-10 w-full items-center gap-2 px-3 text-left text-[13px] text-[var(--danger)] hover:bg-[var(--danger-bg)]"
-                        onClick={() => {
-                          void deleteCollection(collection.id);
-                          if (active) onViewChange({ type: "all" });
-                          setMenuId(null);
-                        }}
-                      >
-                        <Trash2 size={13} /> Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })
-          : SOURCE_TYPES.map((source) => (
-              <Pill
-                key={source}
-                active={view.type === "source" && view.source === source}
-                onClick={() => onViewChange({ type: "source", source })}
-              >
-                <SourceIcon source={source} size={13} strokeWidth={1.75} />
-                {source}
-              </Pill>
-            ))}
-
-        {tab === "collections" &&
-          (creating ? (
-            <div className="flex shrink-0 items-center gap-1">
-              <input
-                autoFocus
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") void submitNew();
-                  if (e.key === "Escape") setCreating(false);
-                }}
-                placeholder="Name"
-                className={cn(inputClass, "h-8 w-32 rounded-full")}
-              />
-              <button
-                type="button"
-                aria-label="Save collection"
-                onClick={() => void submitNew()}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--text)]"
-              >
-                <Check size={15} />
-              </button>
-              <button
-                type="button"
-                aria-label="Cancel"
-                onClick={() => setCreating(false)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--text)]"
-              >
-                <X size={15} />
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              aria-label="New collection"
-              title="New collection"
-              onClick={() => {
-                setCreating(true);
-                setNewName("");
-              }}
-              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[var(--muted)] transition-all hover:bg-[var(--chip-active)] hover:text-[var(--text)] hover:shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
-            >
-              <Plus size={15} />
-            </button>
-          ))}
+    <nav
+      aria-label="Library categories"
+      className="relative px-2 md:px-4"
+    >
+      <div className="flex min-w-0 max-w-full items-center gap-1">
+        <div className="no-scrollbar min-w-0 flex-1 overflow-x-auto">
+          <div className="flex w-max items-center gap-0.5">
+            {collections
+              .filter((collection) => !isHiddenNavCollection(collection.name))
+              .map((collection) => (
+                <Chip
+                  key={collection.id}
+                  active={view.type === "collection" && view.id === collection.id}
+                  icon={CATEGORY_ICONS[collection.name] ?? Folder}
+                  count={counts?.collections[collection.id] ?? 0}
+                  onClick={() =>
+                    onViewChange({ type: "collection", id: collection.id })
+                  }
+                >
+                  {collection.name}
+                </Chip>
+              ))}
+          </div>
+        </div>
+        {onSourceChange && (
+          <>
+            <div className="mx-1 h-4 w-px shrink-0 bg-[var(--border)]" />
+            <SourceMenu source={source} onChange={onSourceChange} />
+          </>
+        )}
       </div>
-      </>
-      ) : null}
-    </div>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[var(--border)]"
+      />
+    </nav>
   );
+}
+
+export function viewLabel(
+  view: NavView,
+  collections: { id: string; name: string }[],
+) {
+  if (view.type === "all") return "All references";
+  if (view.type === "source") return view.source;
+  return collections.find((collection) => collection.id === view.id)?.name ?? "Collection";
 }

@@ -10,7 +10,6 @@ import {
 } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getDb, repository } from "@/lib/storage";
-import { RETIRED_SEED_URLS } from "@/lib/storage/seed-examples";
 import { seedExampleReferences } from "@/lib/storage/seed-examples-runner";
 import type {
   Collection,
@@ -49,9 +48,8 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void (async () => {
       try {
-        await repository.seedIfEmpty();
-        // Heal libraries seeded before dedup/junk fixes existed.
-        await repository.dedupeReferences(RETIRED_SEED_URLS);
+        // Creates the default collections and installs the seeded examples;
+        // safe to call more than once.
         await seedExampleReferences();
       } catch (error) {
         console.error("Failed to seed library", error);
@@ -65,9 +63,10 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     return records.map((record) => ({
       ...record,
       thumbnailUrl: record.thumbnailUrl ?? null,
-      imageUrls: record.imageUrls ?? [],
-      comments: record.comments ?? [],
-      videoUrl: record.videoUrl ?? null,
+      collectionIds: record.collectionIds ?? [],
+      screens: record.screens ?? [],
+      aspect: record.aspect ?? null,
+      seedKey: record.seedKey ?? null,
       thumbnail: byId.get(record.id) ?? null,
     }));
   }, [records, thumbs]);

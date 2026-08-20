@@ -110,16 +110,35 @@ export function Modal({
   open,
   onClose,
   title,
+  actions,
   children,
   className,
+  size = "default",
 }: {
   open: boolean;
   onClose: () => void;
   title?: string;
+  actions?: ReactNode;
   children: ReactNode;
   className?: string;
+  size?: "default" | "large" | "wide";
 }) {
   const isClient = useIsClient();
+
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onClose]);
+
   if (!isClient || !open) return null;
 
   return createPortal(
@@ -136,15 +155,23 @@ export function Modal({
         aria-label={title}
         className={cn(
           "relative flex max-h-[94dvh] w-full flex-col rounded-t-xl bg-[var(--surface)] sm:rounded-xl",
-          className ?? "max-w-md",
+          size === "large"
+            ? "h-[calc(100dvh-32px)] sm:h-[calc(100dvh-48px)] sm:max-w-[min(1480px,calc(100vw-48px))]"
+            : size === "wide"
+              ? "sm:max-w-[min(1120px,calc(100vw-48px))]"
+              : "max-w-md",
+          className,
         )}
       >
         {title && (
           <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] px-3">
-            <h2 className="truncate text-[13px] font-medium">{title}</h2>
-            <IconButton label="Close" onClick={onClose}>
-              <X size={16} strokeWidth={1.75} />
-            </IconButton>
+            <h2 className="min-w-0 truncate text-[13px] font-medium">{title}</h2>
+            <div className="flex shrink-0 items-center">
+              {actions}
+              <IconButton label="Close" onClick={onClose}>
+                <X size={16} strokeWidth={1.75} />
+              </IconButton>
+            </div>
           </div>
         )}
         {children}
