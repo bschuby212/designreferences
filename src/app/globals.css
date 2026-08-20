@@ -19,7 +19,7 @@
   --radius: 6px;
   --header-h: 52px;
   --gap: 8px;
-  --min-col: 220px;
+  --cols: 3;
 }
 
 @theme inline {
@@ -72,24 +72,34 @@ button {
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--min-col)), 1fr));
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
   gap: var(--gap);
   align-items: start;
 }
 
 .density-compact {
-  --min-col: 160px;
-  --gap: 6px;
+  --cols: 4;
+  --gap: 14px;
 }
 
 .density-medium {
-  --min-col: 220px;
-  --gap: 8px;
+  --cols: 3;
+  --gap: 16px;
 }
 
 .density-large {
-  --min-col: 300px;
-  --gap: 12px;
+  --cols: 2;
+  --gap: 18px;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .gallery-grid,
+  .density-compact .gallery-grid,
+  .density-medium .gallery-grid,
+  .density-large .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
 }
 
 @media (max-width: 767px) {
@@ -98,11 +108,11 @@ button {
   .density-medium .gallery-grid,
   .density-large .gallery-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+    gap: 10px;
   }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 380px) {
   .gallery-grid,
   .density-compact .gallery-grid,
   .density-medium .gallery-grid,
