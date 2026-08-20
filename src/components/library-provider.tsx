@@ -62,6 +62,10 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     return records.map((record) => ({
       ...record,
       thumbnailUrl: record.thumbnailUrl ?? null,
+      collectionIds: record.collectionIds ?? [],
+      screens: record.screens ?? [],
+      aspect: record.aspect ?? null,
+      seedKey: record.seedKey ?? null,
       thumbnail: byId.get(record.id) ?? null,
     }));
   }, [records, thumbs]);

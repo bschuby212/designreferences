@@ -4,12 +4,12 @@ import { type ReactNode } from "react";
 import { ExternalLink, Heart, Pencil, Trash2, X } from "lucide-react";
 import type { Collection, Reference } from "@/lib/storage/types";
 import { formatSavedDate } from "@/lib/utils";
-import { useThumbnailSrc } from "./hooks";
+import { ReferenceCarousel } from "./reference-carousel";
 import { areaClass, GhostButton, IconButton } from "./ui";
 
 interface DetailViewProps {
   reference: Reference;
-  collectionName?: string;
+  collectionNames?: string[];
   onClose: () => void;
   onFavorite: () => void;
   onEdit: () => void;
@@ -20,7 +20,7 @@ interface DetailViewProps {
 
 export function DetailView({
   reference,
-  collectionName,
+  collectionNames,
   onClose,
   onFavorite,
   onEdit,
@@ -28,8 +28,6 @@ export function DetailView({
   onNotes,
   variant,
 }: DetailViewProps) {
-  const src = useThumbnailSrc(reference);
-
   return (
     <div className="flex h-full min-h-0 flex-col bg-[var(--surface)]">
       <div className="flex items-center justify-between px-2">
@@ -56,21 +54,14 @@ export function DetailView({
         </IconButton>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-8">
-        <div className="overflow-hidden rounded-[var(--radius)] bg-[var(--hover)]">
-          {src ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={src}
-              alt={reference.title || "Reference"}
-              className="block h-auto w-full"
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <div className="flex aspect-[4/3] items-center justify-center text-[12px] text-[var(--muted-2)]">
-              No image
-            </div>
-          )}
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
+        <div className="mx-auto w-full max-w-[420px]">
+          <ReferenceCarousel
+            screens={reference.screens}
+            aspect={reference.aspect}
+            title={reference.title || "Reference"}
+            variant="detail"
+          />
         </div>
 
         <h1 className="mt-4 text-[16px] leading-snug font-medium tracking-tight">
@@ -91,7 +82,12 @@ export function DetailView({
               </a>
             </Row>
           )}
-          {collectionName && <Row label="Collection">{collectionName}</Row>}
+          {collectionNames && collectionNames.length > 0 && (
+            <Row label={collectionNames.length > 1 ? "Collections" : "Collection"}>
+              {collectionNames.join(", ")}
+            </Row>
+          )}
+          <Row label="Screens">{reference.screens.length}</Row>
           {reference.tags.length > 0 && (
             <Row label="Tags">{reference.tags.join(", ")}</Row>
           )}
@@ -149,10 +145,13 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-export function collectionNameOf(
+export function collectionNamesOf(
   collections: Collection[],
-  id: string | null,
+  ids: string[] | undefined,
 ) {
-  if (!id) return undefined;
-  return collections.find((c) => c.id === id)?.name;
+  if (!ids?.length) return [];
+  const byId = new Map(collections.map((c) => [c.id, c.name]));
+  return ids
+    .map((id) => byId.get(id))
+    .filter((name): name is string => Boolean(name));
 }

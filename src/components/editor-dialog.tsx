@@ -1,15 +1,28 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Camera, Clipboard, ImagePlus, Link2, LoaderCircle, Upload } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Camera,
+  Clipboard,
+  ImagePlus,
+  Link2,
+  LoaderCircle,
+  Upload,
+  X,
+} from "lucide-react";
 import type { LinkPreview } from "@/lib/preview/types";
 import {
+  MIN_SCREENS,
   SOURCE_TYPES,
+  type Aspect,
   type CreateReferenceInput,
+  type ReferenceScreen,
   type SourceType,
   type ThumbnailType,
 } from "@/lib/storage/types";
-import { base64ToBlob, cn, normalizeUrl } from "@/lib/utils";
+import { base64ToBlob, blobToDataUrl, cn, normalizeUrl } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
 import { useBreakpoint, useObjectUrl } from "./hooks";
 import { Modal } from "./sheet";
@@ -99,7 +112,14 @@ function EditorForm({
   const [source, setSource] = useState<SourceType>(
     existing?.source ?? (state.mode === "upload" ? "Upload" : "Website"),
   );
-  const [collectionId, setCollectionId] = useState(existing?.collectionId ?? "");
+  const [collectionIds, setCollectionIds] = useState<string[]>(
+    existing?.collectionIds ?? [],
+  );
+  const [screens, setScreens] = useState<ReferenceScreen[]>(
+    existing?.screens ?? [],
+  );
+  const [aspect, setAspect] = useState<Aspect>(existing?.aspect ?? "landscape");
+  const [screenUrl, setScreenUrl] = useState("");
   const [tags, setTags] = useState(existing?.tags.join(", ") ?? "");
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [thumbnail, setThumbnail] = useState<Blob | null>(
@@ -163,6 +183,39 @@ function EditorForm({
     setThumbnailType("upload");
     setThumbnailUrl("");
     setTitle((current) => current || file.name.replace(/\.[^.]+$/, ""));
+    // Uploads become carousel screens too, stored inline so they survive a
+    // reload the same way seeded screens do.
+    void blobToDataUrl(file).then((src) => addScreen(src));
+  }
+
+  function addScreen(src: string) {
+    if (!src) return;
+    setScreens((current) =>
+      current.some((screen) => screen.src === src)
+        ? current
+        : [...current, { src, label: `Screen ${current.length + 1}` }],
+    );
+  }
+
+  function removeScreen(src: string) {
+    setScreens((current) =>
+      current
+        .filter((screen) => screen.src !== src)
+        .map((screen, index) => ({ ...screen, label: `Screen ${index + 1}` })),
+    );
+  }
+
+  function moveScreen(index: number, delta: number) {
+    setScreens((current) => {
+      const next = [...current];
+      const target = index + delta;
+      if (target < 0 || target >= next.length) return current;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next.map((screen, position) => ({
+        ...screen,
+        label: `Screen ${position + 1}`,
+      }));
+    });
   }
 
   async function save() {
@@ -172,14 +225,22 @@ function EditorForm({
         .split(",")
         .map((t) => t.trim())
         .filter(Boolean);
+      const resolved = screens.length
+        ? screens
+        : thumbnailUrl
+          ? [{ src: thumbnailUrl, label: "Screen 1" }]
+          : [];
       const payload: CreateReferenceInput = {
         title: title.trim(),
         url: normalizeUrl(url),
         thumbnail,
-        thumbnailUrl: thumbnailUrl || null,
+        thumbnailUrl: resolved[0]?.src ?? thumbnailUrl ?? null,
         thumbnailType: thumbnail || thumbnailUrl ? thumbnailType : "placeholder",
         source: state.mode === "upload" && source === "Website" ? "Upload" : source,
-        collectionId: collectionId || null,
+        collectionIds,
+        screens: resolved,
+        aspect,
+        seedKey: existing?.seedKey ?? null,
         tags: parsedTags,
         notes,
       };
@@ -275,19 +336,130 @@ function EditorForm({
             />
           </Field>
         )}
-        <Field label="Collection">
+        <Field label={`Screens (${screens.length})`}>
+          <div className="space-y-2">
+            {screens.length > 0 && (
+              <ul className="space-y-1.5">
+                {screens.map((screen, index) => (
+                  <li
+                    key={screen.src}
+                    className="flex items-center gap-2 rounded-[var(--radius)] border border-[var(--border)] p-1.5"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={screen.src}
+                      alt={screen.label}
+                      className="h-10 w-10 shrink-0 rounded bg-[var(--hover)] object-contain"
+                      referrerPolicy="no-referrer"
+                    />
+                    <span className="min-w-0 flex-1 truncate text-[12px] text-[var(--muted)]">
+                      {screen.label}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label={`Move ${screen.label} earlier`}
+                      disabled={index === 0}
+                      className="grid h-9 w-7 place-items-center rounded text-[var(--muted-2)] hover:bg-[var(--hover)] disabled:opacity-30"
+                      onClick={() => moveScreen(index, -1)}
+                    >
+                      <ArrowUp size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Move ${screen.label} later`}
+                      disabled={index === screens.length - 1}
+                      className="grid h-9 w-7 place-items-center rounded text-[var(--muted-2)] hover:bg-[var(--hover)] disabled:opacity-30"
+                      onClick={() => moveScreen(index, 1)}
+                    >
+                      <ArrowDown size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${screen.label}`}
+                      className="grid h-9 w-7 place-items-center rounded text-[var(--danger)] hover:bg-[var(--danger-bg)]"
+                      onClick={() => removeScreen(screen.src)}
+                    >
+                      <X size={14} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="flex gap-2">
+              <input
+                value={screenUrl}
+                onChange={(e) => setScreenUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter") return;
+                  e.preventDefault();
+                  addScreen(normalizeUrl(screenUrl) || screenUrl.trim());
+                  setScreenUrl("");
+                }}
+                placeholder="Screen image URL"
+                className={inputClass}
+              />
+              <GhostButton
+                className="shrink-0 border border-[var(--border)]"
+                onClick={() => {
+                  addScreen(normalizeUrl(screenUrl) || screenUrl.trim());
+                  setScreenUrl("");
+                }}
+              >
+                Add
+              </GhostButton>
+            </div>
+            <p
+              className={cn(
+                "text-[11px]",
+                screens.length >= MIN_SCREENS
+                  ? "text-[var(--muted-2)]"
+                  : "text-[var(--danger)]",
+              )}
+            >
+              {screens.length >= MIN_SCREENS
+                ? "Carousel ready."
+                : `Add at least ${MIN_SCREENS} screens for a complete carousel.`}
+            </p>
+          </div>
+        </Field>
+        <Field label="Frame">
           <select
-            value={collectionId}
-            onChange={(e) => setCollectionId(e.target.value)}
+            value={aspect}
+            onChange={(e) => setAspect(e.target.value as Aspect)}
             className={inputClass}
           >
-            <option value="">None</option>
-            {collections.map((collection) => (
-              <option key={collection.id} value={collection.id}>
-                {collection.name}
-              </option>
-            ))}
+            <option value="landscape">Landscape (web)</option>
+            <option value="portrait">Portrait (mobile)</option>
           </select>
+        </Field>
+        <Field label="Collections">
+          <div className="flex flex-wrap gap-1.5">
+            {collections.map((collection) => {
+              const active = collectionIds.includes(collection.id);
+              return (
+                <button
+                  key={collection.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() =>
+                    setCollectionIds((current) =>
+                      current.includes(collection.id)
+                        ? current.filter((id) => id !== collection.id)
+                        : [...current, collection.id],
+                    )
+                  }
+                  className={cn(
+                    "min-h-9 rounded-full border px-3 text-[12px]",
+                    active
+                      ? "border-[var(--text)] bg-[var(--text)] text-white"
+                      : "border-[var(--border)] text-[var(--muted)] hover:bg-[var(--hover)]",
+                  )}
+                >
+                  {collection.name}
+                </button>
+              );
+            })}
+          </div>
         </Field>
         <Field label="Tags">
           <input

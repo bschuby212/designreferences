@@ -16,11 +16,19 @@ import { cn } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
 import { IconButton, inputClass, useClickOutside } from "./ui";
 
+export interface NavCounts {
+  all: number;
+  favorites: number;
+  recent: number;
+  collections: Record<string, number>;
+}
+
 interface LibraryNavProps {
   view: NavView;
   onViewChange: (view: NavView) => void;
   onNavigate?: () => void;
   showTitle?: boolean;
+  counts?: NavCounts;
 }
 
 function SectionLabel({
@@ -43,11 +51,16 @@ function SectionLabel({
 function NavButton({
   active,
   icon,
+  count,
+  reserveAction,
   children,
   onClick,
 }: {
   active: boolean;
   icon: ReactNode;
+  count?: number;
+  /** Leaves room for the row's hover menu so the count is never covered. */
+  reserveAction?: boolean;
   children: ReactNode;
   onClick: () => void;
 }) {
@@ -63,7 +76,18 @@ function NavButton({
       )}
     >
       <span className="shrink-0 text-[var(--muted-2)]">{icon}</span>
-      <span className="truncate">{children}</span>
+      <span className="min-w-0 flex-1 truncate">{children}</span>
+      {count !== undefined && (
+        <span
+          className={cn(
+            "shrink-0 text-[11px] tabular-nums",
+            active ? "text-[var(--muted)]" : "text-[var(--muted-2)]",
+            reserveAction && "mr-8",
+          )}
+        >
+          {count}
+        </span>
+      )}
     </button>
   );
 }
@@ -73,6 +97,7 @@ export function LibraryNav({
   onViewChange,
   onNavigate,
   showTitle = true,
+  counts,
 }: LibraryNavProps) {
   const { collections, createCollection, renameCollection, deleteCollection } =
     useLibrary();
@@ -118,6 +143,7 @@ export function LibraryNav({
       <NavButton
         active={view.type === "all"}
         icon={<LayoutGrid size={15} strokeWidth={1.75} />}
+        count={counts?.all}
         onClick={() => go({ type: "all" })}
       >
         All References
@@ -125,6 +151,7 @@ export function LibraryNav({
       <NavButton
         active={view.type === "favorites"}
         icon={<Heart size={15} strokeWidth={1.75} />}
+        count={counts?.favorites}
         onClick={() => go({ type: "favorites" })}
       >
         Favorites
@@ -132,6 +159,7 @@ export function LibraryNav({
       <NavButton
         active={view.type === "recent"}
         icon={<Clock size={15} strokeWidth={1.75} />}
+        count={counts?.recent}
         onClick={() => go({ type: "recent" })}
       >
         Recently Added
@@ -193,6 +221,8 @@ export function LibraryNav({
             <NavButton
               active={active}
               icon={<Folder size={15} strokeWidth={1.75} />}
+              count={counts ? (counts.collections[collection.id] ?? 0) : undefined}
+              reserveAction
               onClick={() => go({ type: "collection", id: collection.id })}
             >
               {collection.name}

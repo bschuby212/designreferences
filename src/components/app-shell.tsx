@@ -21,7 +21,7 @@ import {
 } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
 import { AddMenu, EditorDialog, type EditorState } from "./editor-dialog";
-import { DetailView, collectionNameOf } from "./detail-view";
+import { DetailView, collectionNamesOf } from "./detail-view";
 import { FilterChips, FilterPanel } from "./filter-panel";
 import { Gallery } from "./gallery";
 import { useBreakpoint } from "./hooks";
@@ -53,13 +53,15 @@ function matches(
   view: NavView,
   search: string,
   filters: ActiveFilters,
-  collectionName: string,
+  collectionNames: string[],
 ) {
   if (view.type === "favorites" && !reference.favorite) return false;
   if (view.type === "recent" && Date.now() - reference.createdAt > RECENT_MS) {
     return false;
   }
-  if (view.type === "collection" && reference.collectionId !== view.id) return false;
+  if (view.type === "collection" && !reference.collectionIds.includes(view.id)) {
+    return false;
+  }
   if (view.type === "source" && reference.source !== view.source) return false;
   if (filters.favorites && !reference.favorite) return false;
   if (filters.sources.length && !filters.sources.includes(reference.source)) {
@@ -67,8 +69,7 @@ function matches(
   }
   if (
     filters.collectionIds.length &&
-    (!reference.collectionId ||
-      !filters.collectionIds.includes(reference.collectionId))
+    !filters.collectionIds.some((id) => reference.collectionIds.includes(id))
   ) {
     return false;
   }
@@ -84,7 +85,7 @@ function matches(
     reference.title,
     reference.notes,
     reference.tags.join(" "),
-    collectionName,
+    collectionNames.join(" "),
     reference.source,
     reference.url,
   ]
@@ -131,10 +132,32 @@ export function AppShell() {
         view,
         search,
         filters,
-        collectionNameOf(collections, reference.collectionId) ?? "",
+        collectionNamesOf(collections, reference.collectionIds),
       ),
     );
   }, [references, view, search, filters, collections]);
+
+  // Counts ignore the active view but respect search and filters, so the
+  // sidebar always agrees with what a tab will actually show.
+  const counts = useMemo(() => {
+    const collectionCounts: Record<string, number> = {};
+    let all = 0;
+    let favorites = 0;
+    let recent = 0;
+    for (const reference of references) {
+      const names = collectionNamesOf(collections, reference.collectionIds);
+      if (!matches(reference, { type: "all" }, search, filters, names)) continue;
+      all += 1;
+      if (reference.favorite) favorites += 1;
+      if (matches(reference, { type: "recent" }, search, filters, names)) {
+        recent += 1;
+      }
+      for (const id of reference.collectionIds) {
+        collectionCounts[id] = (collectionCounts[id] ?? 0) + 1;
+      }
+    }
+    return { all, favorites, recent, collections: collectionCounts };
+  }, [references, collections, search, filters]);
 
   const selected = references.find((r) => r.id === selectedId) ?? null;
   const tags = useMemo(() => {
@@ -202,10 +225,55 @@ export function AppShell() {
     filters.sources.length + filters.collectionIds.length + filters.tags.length >
       0;
 
+  // The empty state has to say which of search, filters or an empty tab is
+  // responsible, otherwise a correctly empty collection looks like a bug.
+  const empty = useMemo(() => {
+    const trimmed = search.trim();
+    if (trimmed) {
+      return {
+        title: `No matches for “${trimmed}”`,
+        hint: filterActive
+          ? "Try different words, or clear the active filters."
+          : "Try a different app name, collection or tag.",
+      };
+    }
+    if (filterActive) {
+      return {
+        title: "No references match these filters",
+        hint: "Clear a filter to widen the results.",
+      };
+    }
+    if (view.type === "favorites") {
+      return {
+        title: "No favorites yet",
+        hint: "Tap the heart on a reference to keep it here.",
+      };
+    }
+    if (view.type === "recent") {
+      return {
+        title: "Nothing added recently",
+        hint: "References added in the last two weeks show up here.",
+      };
+    }
+    if (view.type === "collection") {
+      const name =
+        collections.find((collection) => collection.id === view.id)?.name ??
+        "this collection";
+      return {
+        title: `Nothing in ${name} yet`,
+        hint: "Add a reference to this collection, or move an existing one into it.",
+      };
+    }
+    return {
+      title: "Your library is empty",
+      hint: "Paste a link or upload a screenshot to start collecting references.",
+    };
+  }, [search, filterActive, view, collections]);
+
   return (
     <div className="flex h-dvh min-h-0 overflow-hidden bg-[var(--bg)]">
       <aside className="hidden h-full w-[var(--sidebar-w)] shrink-0 border-r border-[var(--border)] bg-[var(--bg)] md:flex md:flex-col">
-        <LibraryNav view={view} onViewChange={setView} />
+        <LibraryNav view={view} onViewChange={setView} counts={counts} />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -329,6 +397,8 @@ export function AppShell() {
               references={visible}
               density={density}
               compactMeta={mobile}
+              emptyTitle={empty.title}
+              emptyHint={empty.hint}
               onOpen={openDetail}
               onFavorite={(id) => void toggleFavorite(id)}
               onEdit={(id) => setEditor({ mode: "edit", id })}
@@ -343,9 +413,9 @@ export function AppShell() {
             <aside className="h-full w-[var(--panel-w)] shrink-0 border-l border-[var(--border)] bg-[var(--surface)]">
               <DetailView
                 reference={selected}
-                collectionName={collectionNameOf(
+                collectionNames={collectionNamesOf(
                   collections,
-                  selected.collectionId,
+                  selected.collectionIds,
                 )}
                 variant="panel"
                 onClose={closeDetail}
@@ -375,6 +445,7 @@ export function AppShell() {
           onViewChange={setView}
           onNavigate={() => setMenuOpen(false)}
           showTitle={false}
+          counts={counts}
         />
       </Sheet>
 
@@ -419,7 +490,7 @@ export function AppShell() {
         >
           <DetailView
             reference={selected}
-            collectionName={collectionNameOf(collections, selected.collectionId)}
+            collectionNames={collectionNamesOf(collections, selected.collectionIds)}
             variant="sheet"
             onClose={closeDetail}
             onFavorite={() => void toggleFavorite(selected.id)}
