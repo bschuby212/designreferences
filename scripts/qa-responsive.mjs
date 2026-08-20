@@ -28,6 +28,7 @@ const WIDTHS = [
   { width: 430, height: 932, touch: true },
   { width: 768, height: 1024, touch: true },
   { width: 1280, height: 900, touch: false },
+  { width: 1440, height: 950, touch: false },
   { width: 1600, height: 1000, touch: false },
 ];
 
@@ -198,6 +199,24 @@ for (const viewport of WIDTHS) {
     screenCounts.length > 0 && screenCounts.every((n) => n >= 1),
     `min ${Math.min(...screenCounts)} max ${Math.max(...screenCounts)}`,
   );
+  const cardPresentation = await page.evaluate(() => {
+    const cards = [...document.querySelectorAll("article")];
+    return {
+      titled: cards.every((card) =>
+        Boolean(card.querySelector("button.line-clamp-2")?.textContent?.trim()),
+      ),
+      styled: cards.every((card) => {
+        const style = getComputedStyle(card);
+        return (
+          style.borderStyle !== "none" &&
+          parseFloat(style.borderRadius) > 0 &&
+          style.backgroundColor !== "rgba(0, 0, 0, 0)"
+        );
+      }),
+    };
+  });
+  check(`${label}: every card shows its reference name`, cardPresentation.titled, "");
+  check(`${label}: every thumbnail has complete card styling`, cardPresentation.styled, "");
 
   // Card height must not change while paging.
   const firstCard = page.locator("article").filter({
@@ -217,6 +236,12 @@ for (const viewport of WIDTHS) {
     "",
   );
   const beforeBox = await firstCard.boundingBox();
+  const frameBox = await firstCard.locator("div[style*='aspect-ratio']").first().boundingBox();
+  check(
+    `${label}: card thumbnail frame is 4:3`,
+    Boolean(frameBox) && Math.abs(frameBox.width / frameBox.height - 4 / 3) < 0.02,
+    frameBox ? `${Math.round(frameBox.width)}×${Math.round(frameBox.height)}` : "missing",
+  );
   const before = await counterIn(firstCard);
   check(`${label}: card shows n/total badge`, Boolean(before), String(before));
 
@@ -486,6 +511,49 @@ for (const viewport of WIDTHS) {
       "",
     );
     await singleDetail.getByRole("button", { name: "Close" }).first().click();
+    await page.waitForTimeout(250);
+  }
+
+  if (viewport.width >= 1280) {
+    await page.locator('[data-nav-label="Web"]').click();
+    await page.waitForTimeout(400);
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll("article img")]
+        .slice(0, 12)
+        .every((image) => image.complete && image.naturalWidth > 0),
+    );
+    const desktopThumbs = await page.evaluate(() =>
+      [...document.querySelectorAll("article img")].slice(0, 20).map((image) => {
+        const style = getComputedStyle(image);
+        return {
+          naturalWidth: image.naturalWidth,
+          naturalHeight: image.naturalHeight,
+          objectFit: style.objectFit,
+          objectPosition: style.objectPosition,
+        };
+      }),
+    );
+    check(
+      `${label}: web thumbnails use 1440×1080 source frames`,
+      desktopThumbs.length > 0 &&
+        desktopThumbs.every(
+          (image) => image.naturalWidth === 1440 && image.naturalHeight === 1080,
+        ),
+      JSON.stringify(desktopThumbs.slice(0, 2)),
+    );
+    check(
+      `${label}: web thumbnails preserve proportions and align top`,
+      desktopThumbs.every(
+        (image) =>
+          image.objectFit === "contain" &&
+          (image.objectPosition.endsWith("0%") || image.objectPosition.includes("top")),
+      ),
+      JSON.stringify(desktopThumbs.slice(0, 2)),
+    );
+    if (SHOTS) {
+      await page.screenshot({ path: `${SHOTS}/web-gallery-${viewport.width}.png` });
+    }
+    await page.locator('[data-nav-label="All"]').click();
     await page.waitForTimeout(250);
   }
 

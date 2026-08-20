@@ -20,6 +20,7 @@ const EXPECTED_RETIRED_DUPLICATES = [
   "https://mobbin.com/explore/sections/2f4ca455-4c8d-429e-a43a-593170bcd5d0",
   "https://mobbin.com/explore/sections/25505391-659c-4d67-978e-83b976c6e211",
 ];
+const REMOVED_NAV_ITEMS = ["Favorites", "Recent", "Typography"];
 
 let failures = 0;
 const checks = [];
@@ -158,6 +159,11 @@ const rows = await navRows();
 const report = { total: seeded.length, retired: EXPECTED_RETIRED_DUPLICATES, chips: {} };
 console.log("\n=== navigation chips ===");
 for (const row of rows) console.log(`  ${row.label}: ${row.count}`);
+check(
+  "removed navigation items are absent",
+  REMOVED_NAV_ITEMS.every((label) => !rows.some((row) => row.label === label)),
+  rows.map((row) => row.label).join(", "),
+);
 
 for (const row of rows) {
   await page.locator(`[data-nav-label="${row.label}"]`).click();
@@ -176,7 +182,7 @@ for (const row of rows) {
 
 const categoryLabels = rows
   .map((row) => row.label)
-  .filter((label) => !["All", "Favorites", "Recent"].includes(label));
+  .filter((label) => label !== "All");
 for (const category of categoryLabels) {
   const expected = seeded.filter((reference) => reference.categories.includes(category)).length;
   const actual = report.chips[category]?.rendered;
@@ -202,6 +208,13 @@ check("search empty state includes the query", Boolean(none.empty?.includes("zzz
 await search.fill("");
 
 await page.getByRole("button", { name: "Filter" }).first().click();
+for (const label of ["Favorites", "Typography"]) {
+  check(
+    `filter panel excludes ${label}`,
+    (await page.getByRole("button", { name: label, exact: true }).count()) === 0,
+    "",
+  );
+}
 await page.getByRole("button", { name: "Dashboards", exact: true }).last().click();
 await page.waitForTimeout(350);
 const filtered = await galleryState();
