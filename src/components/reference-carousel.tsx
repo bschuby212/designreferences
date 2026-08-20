@@ -180,7 +180,7 @@ export function ReferenceCarousel({
               key={screen.src}
               className={cn(
                 "h-full w-full shrink-0",
-                fill && "flex items-center justify-center",
+                fill && "flex items-center justify-center py-8",
                 card &&
                   kind === "portrait" &&
                   "flex items-center justify-center px-5 py-6",
