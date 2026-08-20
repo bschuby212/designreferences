@@ -30,6 +30,12 @@ export function Gallery({
   onSelectCollection,
   onFiles,
 }: GalleryProps) {
+  const ordered = [...references].sort((a, b) => {
+    const aMulti = a.screens.length > 1 ? 1 : 0;
+    const bMulti = b.screens.length > 1 ? 1 : 0;
+    return bMulti - aMulti;
+  });
+
   return (
     <div
       className="h-full overflow-y-auto overflow-x-hidden overscroll-contain px-4 pb-10 md:px-8"
@@ -53,7 +59,7 @@ export function Gallery({
         </div>
       ) : (
         <div className="gallery-flex">
-          {references.map((reference) => (
+          {ordered.map((reference) => (
             <ReferenceCard
               key={reference.id}
               reference={reference}

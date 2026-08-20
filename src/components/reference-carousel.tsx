@@ -126,11 +126,8 @@ export function ReferenceCarousel({
 
   const arrowSize = variant === "detail" ? 18 : 15;
   const arrowClass = cn(
-    "absolute top-1/2 z-20 grid -translate-y-1/2 place-items-center rounded-full bg-[var(--surface)]/85 text-[var(--text)] shadow-sm ring-1 ring-[var(--border)] backdrop-blur transition-opacity",
+    "absolute top-1/2 z-20 grid -translate-y-1/2 place-items-center rounded-full bg-[var(--surface)] text-[var(--text)] shadow-sm ring-1 ring-[var(--border)]",
     variant === "detail" ? "h-9 w-9" : "h-7 w-7",
-    // Visible by default on touch devices; on pointer devices they fade in
-    // with the card so the grid stays calm.
-    "[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100",
   );
 
   const dots = count > 1 && (
