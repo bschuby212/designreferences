@@ -159,10 +159,16 @@ const rows = await navRows();
 const report = { total: seeded.length, retired: EXPECTED_RETIRED_DUPLICATES, chips: {} };
 console.log("\n=== navigation chips ===");
 for (const row of rows) console.log(`  ${row.label}: ${row.count}`);
+const defaultPressed = await page.locator('[data-nav-label="Mobile Apps"]').getAttribute("aria-pressed");
 check(
   "removed navigation items are absent",
   REMOVED_NAV_ITEMS.every((label) => !rows.some((row) => row.label === label)),
   rows.map((row) => row.label).join(", "),
+);
+check(
+  "default canvas is Mobile Apps",
+  rows[0]?.label === "Mobile Apps" && defaultPressed === "true",
+  `${rows[0]?.label ?? ""} pressed=${defaultPressed}`,
 );
 
 for (const row of rows) {
@@ -186,13 +192,6 @@ for (const category of categoryLabels) {
   const actual = report.chips[category]?.rendered;
   check(`${category}: stored membership matches gallery`, expected === actual, `${expected} vs ${actual}`);
 }
-
-check(
-  "default canvas is Mobile Apps",
-  rows[0]?.label === "Mobile Apps" &&
-    (await page.locator('[data-nav-label="Mobile Apps"]').getAttribute("aria-pressed")) === "true",
-  rows[0]?.label ?? "",
-);
 
 await page.locator('[data-nav-label="Mobile Apps"]').click();
 const search = page.getByPlaceholder("Search references…");
