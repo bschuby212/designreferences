@@ -1,12 +1,10 @@
 "use client";
 
-import type { Density, Reference } from "@/lib/storage/types";
-import { cn } from "@/lib/utils";
+import type { Reference } from "@/lib/storage/types";
 import { ReferenceCard } from "./reference-card";
 
 interface GalleryProps {
   references: Reference[];
-  density: Density;
   selectedId: string | null;
   collectionNames: Record<string, string>;
   emptyTitle: string;
@@ -21,7 +19,6 @@ interface GalleryProps {
 
 export function Gallery({
   references,
-  density,
   selectedId,
   collectionNames,
   emptyTitle,
@@ -35,10 +32,7 @@ export function Gallery({
 }: GalleryProps) {
   return (
     <div
-      className={cn(
-        "h-full overflow-y-auto overflow-x-hidden overscroll-contain px-3 pb-8 md:px-4",
-        `density-${density}`,
-      )}
+      className="h-full overflow-y-auto overflow-x-hidden overscroll-contain px-4 pb-10 md:px-6"
       onDragOver={(e) => {
         if ([...e.dataTransfer.types].includes("Files")) e.preventDefault();
       }}
@@ -58,7 +52,7 @@ export function Gallery({
           </p>
         </div>
       ) : (
-        <div className="gallery-grid">
+        <div className="gallery-flex">
           {references.map((reference) => (
             <ReferenceCard
               key={reference.id}

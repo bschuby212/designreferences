@@ -79,7 +79,7 @@ async function galleryState() {
             ?.replace(/^Open /, "") ?? "?",
       ),
       images: cards.map((card) => card.querySelectorAll("img").length),
-      empty: document.querySelector(".gallery-grid")
+      empty: document.querySelector(".gallery-flex")
         ? null
         : [...document.querySelectorAll("p")]
             .map((node) => node.textContent?.trim())

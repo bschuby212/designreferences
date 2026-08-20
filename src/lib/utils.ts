@@ -31,6 +31,15 @@ export function hostnameOf(url: string) {
   }
 }
 
+/** Display-only product name. Stored titles stay unchanged for search. */
+export function productName(title: string) {
+  const cleaned = title
+    .replace(/\s+(iOS|Android|Web)\b[\s\S]*$/i, "")
+    .replace(/\s+section$/i, "")
+    .trim();
+  return cleaned || title.trim() || "Untitled";
+}
+
 export function formatSavedDate(ts: number) {
   return new Intl.DateTimeFormat(undefined, {
     month: "short",

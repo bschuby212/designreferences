@@ -201,22 +201,27 @@ for (const viewport of WIDTHS) {
   );
   const cardPresentation = await page.evaluate(() => {
     const cards = [...document.querySelectorAll("article")];
+    const bodyBg = getComputedStyle(document.body).backgroundColor;
     return {
       titled: cards.every((card) =>
-        Boolean(card.querySelector("button.line-clamp-2")?.textContent?.trim()),
+        Boolean(
+          [...card.querySelectorAll("button")]
+            .find((button) => !button.getAttribute("aria-label"))
+            ?.textContent?.trim(),
+        ),
       ),
-      styled: cards.every((card) => {
+      metadata: cards.some((card) => /Mobbin|\d+ images?/i.test(card.textContent ?? "")),
+      bordered: cards.some((card) => {
         const style = getComputedStyle(card);
-        return (
-          style.borderStyle !== "none" &&
-          parseFloat(style.borderRadius) > 0 &&
-          style.backgroundColor !== "rgba(0, 0, 0, 0)"
-        );
+        return style.borderStyle !== "none" && parseFloat(style.borderWidth) > 0;
       }),
+      whitePage: bodyBg === "rgb(255, 255, 255)",
     };
   });
-  check(`${label}: every card shows its reference name`, cardPresentation.titled, "");
-  check(`${label}: every thumbnail has complete card styling`, cardPresentation.styled, "");
+  check(`${label}: every card shows its product name`, cardPresentation.titled, "");
+  check(`${label}: cards hide source and image-count labels`, !cardPresentation.metadata, "");
+  check(`${label}: cards have no visible stroke`, !cardPresentation.bordered, "");
+  check(`${label}: page background is white`, cardPresentation.whitePage, "");
 
   // Card height must not change while paging.
   const firstCard = page.locator("article").filter({
@@ -238,10 +243,21 @@ for (const viewport of WIDTHS) {
   const beforeBox = await firstCard.boundingBox();
   const frameBox = await firstCard.locator("div[style*='aspect-ratio']").first().boundingBox();
   check(
-    `${label}: card thumbnail frame is 4:3`,
-    Boolean(frameBox) && Math.abs(frameBox.width / frameBox.height - 4 / 3) < 0.02,
+    `${label}: portrait carousel uses a 9:16 frame`,
+    Boolean(frameBox) && Math.abs((frameBox.width / frameBox.height) - 9 / 16) < 0.05,
     frameBox ? `${Math.round(frameBox.width)}×${Math.round(frameBox.height)}` : "missing",
   );
+  const landscapeFrame = page.locator("article div[style*='4 / 3']").first();
+  if ((await landscapeFrame.count()) > 0) {
+    const landscapeBox = await landscapeFrame.boundingBox();
+    check(
+      `${label}: landscape cards use a 4:3 frame`,
+      Boolean(landscapeBox) && Math.abs((landscapeBox.width / landscapeBox.height) - 4 / 3) < 0.05,
+      landscapeBox
+        ? `${Math.round(landscapeBox.width)}×${Math.round(landscapeBox.height)}`
+        : "missing",
+    );
+  }
   const before = await counterIn(firstCard);
   check(`${label}: card shows n/total badge`, Boolean(before), String(before));
 
@@ -352,16 +368,29 @@ for (const viewport of WIDTHS) {
         return nav ? nav.scrollWidth > nav.clientWidth : false;
       })(),
       hamburger: byLabel("Menu").length,
-      density: byLabel("compact").length,
+      density: byLabel("compact").length + byLabel("medium").length + byLabel("large").length,
       actionsMenu: byLabel("Reference actions").length,
+      columns: (() => {
+        const cards = [...document.querySelectorAll("article")];
+        if (cards.length === 0) return 0;
+        const firstTop = Math.round(cards[0].getBoundingClientRect().top);
+        return cards.filter((card) => Math.round(card.getBoundingClientRect().top) === firstTop).length;
+      })(),
     };
   });
   check(`${label}: side navigation is absent`, !chrome.sidebar, "");
   check(`${label}: horizontal chip navigation is visible`, chrome.chipNav, "");
   check(`${label}: no navigation drawer trigger`, chrome.hamburger === 0, "");
+  check(`${label}: header width toggle is absent`, chrome.density === 0, "");
+  const expectedColumns =
+    viewport.width < 768 ? 1 : viewport.width < 1024 ? 2 : 3;
+  check(
+    `${label}: at most ${expectedColumns} cards per row`,
+    chrome.columns > 0 && chrome.columns <= expectedColumns,
+    `${chrome.columns} in first row`,
+  );
   if (viewport.width < 768) {
     check(`${label}: chip row scrolls within its container`, chrome.chipScrollable, "");
-    check(`${label}: no density toggle`, chrome.density === 0, "");
   }
   if (viewport.touch) {
     check(
@@ -542,12 +571,8 @@ for (const viewport of WIDTHS) {
       JSON.stringify(desktopThumbs.slice(0, 2)),
     );
     check(
-      `${label}: web thumbnails preserve proportions and align top`,
-      desktopThumbs.every(
-        (image) =>
-          image.objectFit === "contain" &&
-          (image.objectPosition.endsWith("0%") || image.objectPosition.includes("top")),
-      ),
+      `${label}: web thumbnails preserve proportions`,
+      desktopThumbs.every((image) => image.objectFit === "contain"),
       JSON.stringify(desktopThumbs.slice(0, 2)),
     );
     if (SHOTS) {

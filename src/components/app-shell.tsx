@@ -1,11 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
-  Columns2,
-  Columns3,
-  Columns4,
   Filter,
   Plus,
   Search,
@@ -14,7 +11,6 @@ import {
 import {
   EMPTY_FILTERS,
   type ActiveFilters,
-  type Density,
   type NavView,
   type Reference,
 } from "@/lib/storage/types";
@@ -28,23 +24,6 @@ import { LibraryNav } from "./library-nav";
 import { useLibrary } from "./library-provider";
 import { Modal, Sheet } from "./sheet";
 import { IconButton, inputClass, useClickOutside } from "./ui";
-
-const DENSITY_KEY = "library-density";
-
-function readDensity(): Density {
-  const saved = window.localStorage.getItem(DENSITY_KEY);
-  if (saved === "compact" || saved === "medium" || saved === "large") return saved;
-  return "medium";
-}
-
-function subscribeDensity(onChange: () => void) {
-  window.addEventListener("storage", onChange);
-  window.addEventListener("library-density", onChange);
-  return () => {
-    window.removeEventListener("storage", onChange);
-    window.removeEventListener("library-density", onChange);
-  };
-}
 
 function matches(
   reference: Reference,
@@ -101,16 +80,6 @@ export function AppShell() {
   const [addOpen, setAddOpen] = useState(false);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const density = useSyncExternalStore<Density>(
-    subscribeDensity,
-    readDensity,
-    () => "medium",
-  );
-
-  const setDensity = (value: Density) => {
-    window.localStorage.setItem(DENSITY_KEY, value);
-    window.dispatchEvent(new Event("library-density"));
-  };
 
   const addRef = useClickOutside(addOpen && !mobile, () => setAddOpen(false));
   const filterRef = useClickOutside(filterOpen && !mobile, () =>
@@ -322,7 +291,6 @@ export function AppShell() {
                 mobile={false}
               />
             </div>
-            <DensityToggle density={density} onChange={setDensity} />
             <div className="relative" ref={addRef}>
               <IconButton
                 label="Add reference"
@@ -364,7 +332,6 @@ export function AppShell() {
           <div className="min-w-0 flex-1 pt-3">
             <Gallery
               references={visible}
-              density={density}
               selectedId={selectedId}
               collectionNames={collectionNames}
               emptyTitle={empty.title}
@@ -465,39 +432,6 @@ export function AppShell() {
         onClose={() => setEditor(null)}
         onSaved={() => undefined}
       />
-    </div>
-  );
-}
-
-function DensityToggle({
-  density,
-  onChange,
-}: {
-  density: Density;
-  onChange: (density: Density) => void;
-}) {
-  const options: Array<[Density, typeof Columns4]> = [
-    ["compact", Columns4],
-    ["medium", Columns3],
-    ["large", Columns2],
-  ];
-  return (
-    <div className="hidden h-10 items-center rounded-md border border-[var(--border)] p-0.5 lg:flex">
-      {options.map(([value, Icon]) => (
-        <button
-          key={value}
-          type="button"
-          aria-label={value}
-          title={value}
-          onClick={() => onChange(value)}
-          className={cn(
-            "inline-flex h-9 w-9 items-center justify-center rounded text-[var(--muted)]",
-            density === value && "bg-[var(--hover)] text-[var(--text)]",
-          )}
-        >
-          <Icon size={14} strokeWidth={1.75} />
-        </button>
-      ))}
     </div>
   );
 }

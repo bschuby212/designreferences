@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 /** Frame ratios keep the card height identical on every slide. */
 const RATIO: Record<Aspect, string> = {
-  portrait: "9 / 19.5",
+  portrait: "9 / 16",
   landscape: "4 / 3",
 };
 
@@ -68,16 +68,15 @@ export function ReferenceCarousel({
   );
 
   const ratio = RATIO[aspect ?? "landscape"];
-  const frameRatio = variant === "card" ? "4 / 3" : ratio;
 
   if (count === 0) {
     return (
       <div
         className={cn(
-          "flex items-center justify-center rounded-[var(--radius)] bg-[var(--hover)] text-[11px] text-[var(--muted-2)]",
+          "flex items-center justify-center rounded-[var(--radius)] bg-white text-[11px] text-[var(--muted-2)]",
           className,
         )}
-        style={{ aspectRatio: frameRatio }}
+        style={{ aspectRatio: ratio }}
       >
         No screens
       </div>
@@ -143,8 +142,8 @@ export function ReferenceCarousel({
       }}
     >
       <div
-        className="relative overflow-hidden rounded-[var(--radius)] bg-[var(--hover)]"
-        style={{ aspectRatio: frameRatio }}
+        className="relative overflow-hidden rounded-[var(--radius)] bg-[var(--bg)]"
+        style={{ aspectRatio: ratio }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -159,10 +158,7 @@ export function ReferenceCarousel({
               key={screen.src}
               src={screen.src}
               alt={`${title} — ${screen.label}`}
-              className={cn(
-                "h-full w-full shrink-0 select-none object-contain",
-                variant === "card" && "object-top",
-              )}
+              className="h-full w-full shrink-0 select-none object-contain"
               draggable={false}
               loading={position === 0 ? "eager" : "lazy"}
               decoding="async"
@@ -225,9 +221,9 @@ export function ReferenceCarousel({
         )}
       </div>
 
-      {(variant === "card" || count > 1) && (
-        <div className="mt-1 flex h-7 items-center justify-center gap-0.5">
-          {count > 1 && screens.map((screen, position) => (
+      {count > 1 && (
+        <div className="mt-1 flex items-center justify-center gap-0.5">
+          {screens.map((screen, position) => (
             <button
               key={screen.src}
               type="button"
