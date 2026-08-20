@@ -106,16 +106,13 @@ async function overflow(page) {
   });
 }
 
-/** Reads the "n/total" badge of the first card's carousel. */
-function counterOf(page, scope = "article") {
-  return page.evaluate((selector) => {
-    const host = document.querySelector(selector);
-    if (!host) return null;
+function counterIn(locator) {
+  return locator.evaluate((host) => {
     const badge = [...host.querySelectorAll("div")].find((node) =>
       /^\d+\/\d+$/.test(node.textContent?.trim() ?? ""),
     );
     return badge ? badge.textContent.trim() : null;
-  }, scope);
+  });
 }
 
 async function swipe(page, handle, dx) {
@@ -216,17 +213,17 @@ for (const viewport of WIDTHS) {
     (await singleCard.getByRole("button", {
       name: /^(Previous screen|Next screen|Show screen \d+)$/,
     }).count()) === 0 &&
-      (await counterOf(page, "article:not(:has(button[aria-label='Next screen']))")) === null,
+      (await counterIn(singleCard)) === null,
     "",
   );
   const beforeBox = await firstCard.boundingBox();
-  const before = await counterOf(page);
+  const before = await counterIn(firstCard);
   check(`${label}: card shows n/total badge`, Boolean(before), String(before));
 
   if (viewport.touch) {
     const frame = firstCard.locator("div[style*='aspect-ratio']").first();
     await swipe(page, frame, -140);
-    const afterSwipe = await counterOf(page);
+    const afterSwipe = await counterIn(firstCard);
     check(
       `${label}: swipe advances carousel`,
       Boolean(afterSwipe) && afterSwipe !== before,
@@ -241,7 +238,7 @@ for (const viewport of WIDTHS) {
     await firstCard.hover();
     const next = firstCard.getByRole("button", { name: "Next screen" });
     await next.click();
-    const afterArrow = await counterOf(page);
+    const afterArrow = await counterIn(firstCard);
     check(
       `${label}: arrow advances carousel`,
       Boolean(afterArrow) && afterArrow !== before,
@@ -255,12 +252,12 @@ for (const viewport of WIDTHS) {
   }
 
   // Dots work on both input types.
-  const dotBefore = await counterOf(page);
+  const dotBefore = await counterIn(firstCard);
   const dots = firstCard.getByRole("button", { name: /Show screen \d+/ });
   const dotCount = await dots.count();
   if (dotCount >= 3) {
     await dots.nth(2).click();
-    const dotAfter = await counterOf(page);
+    const dotAfter = await counterIn(firstCard);
     check(
       `${label}: pagination dot jumps to screen`,
       dotAfter === `3/${dotAfter?.split("/")[1]}` && dotAfter !== dotBefore,
@@ -277,7 +274,7 @@ for (const viewport of WIDTHS) {
         (await page.locator("[role='dialog']").count()) +
         (await page.locator("aside").filter({ hasText: "Screens" }).count());
       if (detailOpen > 0) opened += 1;
-      const seen = await counterOf(page);
+      const seen = await counterIn(firstCard);
       if (seen !== `${position + 1}/${dotCount}`) {
         check(`${label}: dot ${position + 1} selects its screen`, false, String(seen));
       }

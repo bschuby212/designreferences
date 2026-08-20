@@ -38,7 +38,13 @@ def slug(value: str) -> str:
 
 
 def asset_key(url: str) -> str:
-    return url.split("?")[0].rstrip("/").rsplit("/", 1)[-1]
+    base = url.split("?")[0].rstrip("/")
+    # Mobbin's signed flow images all use the path ``file.webp``; the ``enc``
+    # signature is the image identity, so dropping the query collapses a whole
+    # flow into one frame.
+    if base.endswith("/file.webp"):
+        return url
+    return base.rsplit("/", 1)[-1]
 
 
 def ts(value: str) -> str:
@@ -63,8 +69,6 @@ def download(url: str) -> str:
 def viewport_capture(job: tuple[str, str, str]) -> str:
     """Create a 1440 x 1080 crop at top, center, or bottom."""
     url, output, position = job
-    if os.path.exists(output) and os.path.getsize(output) > 500:
-        return output
     source = download(url)
     os.makedirs(os.path.dirname(output), exist_ok=True)
     y = {
