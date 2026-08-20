@@ -20,7 +20,7 @@ export interface ExampleSeed {
   aspect: "portrait" | "landscape";
 }
 
-export const SEED_REVISION = "2026-08-full-library-3";
+export const SEED_REVISION = "2026-08-full-library-4";
 
 export const EXAMPLE_SEEDS: ExampleSeed[] = [
   {
@@ -1005,7 +1005,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-ab8dcea1-9830-43e8-9487-fe6ce5910c84",
     title: "Rox Web Onboarding Flow",
     url: "https://mobbin.com/explore/flows/ab8dcea1-9830-43e8-9487-fe6ce5910c84",
-    collections: ["Web", "Onboarding", "Landing Pages"],
+    collections: ["Onboarding"],
     screens: [
       { src: "/screens/restored/original-ab8dcea1-9830-43e8-9487-fe6ce5910c84/01.webp", label: "Flow screen 1" },
       { src: "/screens/restored/original-ab8dcea1-9830-43e8-9487-fe6ce5910c84/02.webp", label: "Flow screen 2" },
@@ -1023,7 +1023,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-e064f4d1-4ee1-4748-ba66-f2172caa277d",
     title: "Maze Web Onboarding Flow",
     url: "https://mobbin.com/explore/flows/e064f4d1-4ee1-4748-ba66-f2172caa277d",
-    collections: ["Web", "Onboarding", "Landing Pages"],
+    collections: ["Onboarding"],
     screens: [
       { src: "/screens/restored/original-e064f4d1-4ee1-4748-ba66-f2172caa277d/01.webp", label: "Flow screen 1" },
       { src: "/screens/restored/original-e064f4d1-4ee1-4748-ba66-f2172caa277d/02.webp", label: "Flow screen 2" },
@@ -1041,7 +1041,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-242ff3d6-866e-4a34-87eb-715354f9d45f",
     title: "Navattic Web Onboarding Flow",
     url: "https://mobbin.com/explore/flows/242ff3d6-866e-4a34-87eb-715354f9d45f",
-    collections: ["Web", "Onboarding", "Landing Pages"],
+    collections: ["Onboarding"],
     screens: [
       { src: "/screens/restored/original-242ff3d6-866e-4a34-87eb-715354f9d45f/01.webp", label: "Flow screen 1" },
       { src: "/screens/restored/original-242ff3d6-866e-4a34-87eb-715354f9d45f/02.webp", label: "Flow screen 2" },
@@ -1059,7 +1059,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-0c3206ce-2ec1-4408-8a00-24190ec7651d",
     title: "Copy.ai Web Onboarding Flow",
     url: "https://mobbin.com/explore/flows/0c3206ce-2ec1-4408-8a00-24190ec7651d",
-    collections: ["Web", "Onboarding", "Landing Pages"],
+    collections: ["Onboarding"],
     screens: [
       { src: "/screens/restored/original-0c3206ce-2ec1-4408-8a00-24190ec7651d/01.webp", label: "Flow screen 1" },
       { src: "/screens/restored/original-0c3206ce-2ec1-4408-8a00-24190ec7651d/02.webp", label: "Flow screen 2" },
@@ -1095,7 +1095,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-ec2d5551-50bd-45c9-be09-b5a84a3f6605",
     title: "Shop Web Onboarding Flow",
     url: "https://mobbin.com/explore/flows/ec2d5551-50bd-45c9-be09-b5a84a3f6605",
-    collections: ["Web", "Onboarding", "Landing Pages"],
+    collections: ["Onboarding"],
     screens: [
       { src: "/screens/restored/original-ec2d5551-50bd-45c9-be09-b5a84a3f6605/01.webp", label: "Flow screen 1" },
       { src: "/screens/restored/original-ec2d5551-50bd-45c9-be09-b5a84a3f6605/02.webp", label: "Flow screen 2" },
@@ -1113,7 +1113,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-7f996659-bee1-4760-b1e2-7918e3816f20",
     title: "Dialpad Web Onboarding Flow",
     url: "https://mobbin.com/explore/flows/7f996659-bee1-4760-b1e2-7918e3816f20",
-    collections: ["Web", "Onboarding", "Landing Pages"],
+    collections: ["Onboarding"],
     screens: [
       { src: "/screens/restored/original-7f996659-bee1-4760-b1e2-7918e3816f20/01.webp", label: "Flow screen 1" },
       { src: "/screens/restored/original-7f996659-bee1-4760-b1e2-7918e3816f20/02.webp", label: "Flow screen 2" },
@@ -1131,7 +1131,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-950c4839-2b7d-4a9e-9e15-52b1c5e77769",
     title: "Manus Web Onboarding Flow",
     url: "https://mobbin.com/explore/flows/950c4839-2b7d-4a9e-9e15-52b1c5e77769",
-    collections: ["Web", "Onboarding"],
+    collections: ["Onboarding"],
     screens: [
       { src: "/screens/restored/original-950c4839-2b7d-4a9e-9e15-52b1c5e77769/01.webp", label: "Flow screen 1" },
       { src: "/screens/restored/original-950c4839-2b7d-4a9e-9e15-52b1c5e77769/02.webp", label: "Flow screen 2" },
@@ -1149,7 +1149,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-808643f4-122e-40a8-9b14-bc25c7379c34",
     title: "Runway Web Onboarding Flow",
     url: "https://mobbin.com/explore/flows/808643f4-122e-40a8-9b14-bc25c7379c34",
-    collections: ["Web", "Onboarding", "Landing Pages"],
+    collections: ["Onboarding"],
     screens: [
       { src: "/screens/restored/original-808643f4-122e-40a8-9b14-bc25c7379c34/01.webp", label: "Flow screen 1" },
       { src: "/screens/restored/original-808643f4-122e-40a8-9b14-bc25c7379c34/02.webp", label: "Flow screen 2" },
