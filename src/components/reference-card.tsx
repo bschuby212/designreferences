@@ -9,40 +9,30 @@ import {
   Trash2,
 } from "lucide-react";
 import type { Reference } from "@/lib/storage/types";
-import { cn, isHiddenNavCollection, productName } from "@/lib/utils";
+import { cn, productName } from "@/lib/utils";
 import { ReferenceCarousel } from "./reference-carousel";
 import { useClickOutside } from "./ui";
 
 interface ReferenceCardProps {
   reference: Reference;
-  collectionNames: string[];
   selected?: boolean;
   onOpen: () => void;
   onFavorite: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  onSelectCollection?: (id: string) => void;
 }
 
 export function ReferenceCard({
   reference,
-  collectionNames,
   selected,
   onOpen,
   onFavorite,
   onEdit,
   onDelete,
-  onSelectCollection,
 }: ReferenceCardProps) {
   const [menu, setMenu] = useState(false);
   const menuRef = useClickOutside(menu, () => setMenu(false));
   const name = productName(reference.title || "Untitled");
-  const categoryIndex = collectionNames.findIndex(
-    (label) => !isHiddenNavCollection(label),
-  );
-  const category = categoryIndex >= 0 ? collectionNames[categoryIndex] : undefined;
-  const categoryId =
-    categoryIndex >= 0 ? reference.collectionIds[categoryIndex] : undefined;
 
   return (
     <article
@@ -166,18 +156,6 @@ export function ReferenceCard({
         >
           {name}
         </button>
-        {category && categoryId ? (
-          <button
-            type="button"
-            className="mt-0.5 block text-[12px] text-[var(--muted-2)] hover:text-[var(--muted)]"
-            onClick={(event) => {
-              event.stopPropagation();
-              onSelectCollection?.(categoryId);
-            }}
-          >
-            {category}
-          </button>
-        ) : null}
       </div>
     </article>
   );

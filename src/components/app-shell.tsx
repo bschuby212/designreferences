@@ -341,14 +341,19 @@ export function AppShell() {
             <Gallery
               references={visible}
               selectedId={selectedId}
-              collectionNames={collectionNames}
+              laptop={
+                activeView.type === "collection" &&
+                ["Web", "Dashboards", "Landing Pages"].includes(
+                  collections.find((collection) => collection.id === activeView.id)
+                    ?.name ?? "",
+                )
+              }
               emptyTitle={empty.title}
               emptyHint={empty.hint}
               onOpen={openDetail}
               onFavorite={(id) => void toggleFavorite(id)}
               onEdit={(id) => setEditor({ mode: "edit", id })}
               onDelete={(id) => void deleteReference(id)}
-              onSelectCollection={(id) => setView({ type: "collection", id })}
               onFiles={(files) =>
                 setEditor({ mode: "upload", file: files[0] })
               }

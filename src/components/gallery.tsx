@@ -6,28 +6,26 @@ import { ReferenceCard } from "./reference-card";
 interface GalleryProps {
   references: Reference[];
   selectedId: string | null;
-  collectionNames: Record<string, string>;
+  laptop?: boolean;
   emptyTitle: string;
   emptyHint: string;
   onOpen: (id: string) => void;
   onFavorite: (id: string) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
-  onSelectCollection: (id: string) => void;
   onFiles: (files: File[]) => void;
 }
 
 export function Gallery({
   references,
   selectedId,
-  collectionNames,
+  laptop = false,
   emptyTitle,
   emptyHint,
   onOpen,
   onFavorite,
   onEdit,
   onDelete,
-  onSelectCollection,
   onFiles,
 }: GalleryProps) {
   const ordered = [...references].sort((a, b) => {
@@ -58,20 +56,16 @@ export function Gallery({
           </p>
         </div>
       ) : (
-        <div className="gallery-flex">
+        <div className={laptop ? "gallery-flex gallery-laptop" : "gallery-flex"}>
           {ordered.map((reference) => (
             <ReferenceCard
               key={reference.id}
               reference={reference}
-              collectionNames={reference.collectionIds
-                .map((id) => collectionNames[id])
-                .filter((name): name is string => Boolean(name))}
               selected={reference.id === selectedId}
               onOpen={() => onOpen(reference.id)}
               onFavorite={() => onFavorite(reference.id)}
               onEdit={() => onEdit(reference.id)}
               onDelete={() => onDelete(reference.id)}
-              onSelectCollection={onSelectCollection}
             />
           ))}
         </div>

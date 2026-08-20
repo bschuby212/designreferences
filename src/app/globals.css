@@ -71,21 +71,32 @@ button {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: 40px 48px;
+  gap: 32px 28px;
 }
 
 .gallery-flex > * {
-  flex: 1 1 calc((100% - 48px) / 2);
-  max-width: calc((100% - 48px) / 2);
+  flex: 1 1 calc((100% - 56px) / 3);
+  max-width: calc((100% - 56px) / 3);
   min-width: 0;
 }
 
+.gallery-flex.gallery-laptop {
+  gap: 40px 48px;
+}
+
+.gallery-flex.gallery-laptop > * {
+  flex: 1 1 calc((100% - 48px) / 2);
+  max-width: calc((100% - 48px) / 2);
+}
+
 @media (max-width: 767px) {
-  .gallery-flex {
+  .gallery-flex,
+  .gallery-flex.gallery-laptop {
     gap: 22px;
   }
 
-  .gallery-flex > * {
+  .gallery-flex > *,
+  .gallery-flex.gallery-laptop > * {
     flex-basis: 100%;
     max-width: 100%;
   }
