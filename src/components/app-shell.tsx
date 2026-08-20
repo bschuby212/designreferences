@@ -1,29 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ArrowLeft,
-  Filter,
-  Plus,
-  Search,
-  X,
-} from "lucide-react";
+import { ArrowLeft, Plus, Search, X } from "lucide-react";
 import {
   EMPTY_FILTERS,
   type ActiveFilters,
   type NavView,
   type Reference,
+  type SourceType,
 } from "@/lib/storage/types";
 import { cn, isHiddenNavCollection } from "@/lib/utils";
 import { EditorDialog, type EditorState } from "./editor-dialog";
 import { DetailView, collectionNamesOf } from "./detail-view";
-import { FilterChips, FilterPanel } from "./filter-panel";
 import { Gallery } from "./gallery";
 import { useBreakpoint } from "./hooks";
 import { LibraryNav } from "./library-nav";
 import { useLibrary } from "./library-provider";
 import { Modal, Sheet } from "./sheet";
-import { IconButton, inputClass, useClickOutside } from "./ui";
+import { IconButton, inputClass } from "./ui";
 
 function matches(
   reference: Reference,
@@ -87,13 +81,8 @@ export function AppShell() {
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [filters, setFilters] = useState<ActiveFilters>(EMPTY_FILTERS);
-  const [filterOpen, setFilterOpen] = useState(false);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  const filterRef = useClickOutside(filterOpen && !mobile, () =>
-    setFilterOpen(false),
-  );
 
   const visible = useMemo(() => {
     return references.filter((reference) =>
@@ -124,18 +113,6 @@ export function AppShell() {
   }, [references, collections, search, filters]);
 
   const selected = references.find((r) => r.id === selectedId) ?? null;
-  const tags = useMemo(() => {
-    const set = new Set<string>();
-    for (const reference of references) {
-      for (const tag of reference.tags) set.add(tag);
-    }
-    return [...set].sort((a, b) => a.localeCompare(b));
-  }, [references]);
-
-  const collectionNames = useMemo(
-    () => Object.fromEntries(collections.map((c) => [c.id, c.name])),
-    [collections],
-  );
 
   const openDetail = useCallback(
     (id: string) => {
@@ -233,13 +210,6 @@ export function AppShell() {
                   <Search size={16} strokeWidth={1.75} />
                 </IconButton>
                 <IconButton
-                  label="Filter"
-                  className={filterActive ? "text-[var(--text)]" : undefined}
-                  onClick={() => setFilterOpen(true)}
-                >
-                  <Filter size={16} strokeWidth={1.75} />
-                </IconButton>
-                <IconButton
                   label="Add reference"
                   onClick={() => setEditor({ mode: "link" })}
                 >
@@ -262,23 +232,6 @@ export function AppShell() {
                 className={cn(inputClass, "h-10 pl-8")}
               />
             </div>
-            <div className="relative" ref={filterRef}>
-              <IconButton
-                label="Filter"
-                className={cn("h-10 w-10", filterActive && "text-[var(--text)]")}
-                onClick={() => setFilterOpen((v) => !v)}
-              >
-                <Filter size={16} strokeWidth={1.75} />
-              </IconButton>
-              <FilterPanel
-                open={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                filters={filters}
-                onChange={setFilters}
-                tags={tags}
-                mobile={false}
-              />
-            </div>
             <IconButton
               label="Add reference"
               className="h-10 w-10"
@@ -289,12 +242,18 @@ export function AppShell() {
           </header>
         )}
 
-        <LibraryNav view={activeView} onViewChange={setView} counts={counts} />
-
-        <FilterChips
-          filters={filters}
-          onChange={setFilters}
-          collectionNames={collectionNames}
+        <LibraryNav
+          view={activeView}
+          onViewChange={setView}
+          counts={counts}
+          source={filters.sources[0] ?? ""}
+          onSourceChange={(source: SourceType | "") =>
+            setFilters({
+              sources: source ? [source] : [],
+              collectionIds: [],
+              tags: [],
+            })
+          }
         />
 
         <div className="flex min-h-0 flex-1">
@@ -322,17 +281,6 @@ export function AppShell() {
           </div>
 
         </div>
-
-      {mobile && (
-        <FilterPanel
-          open={filterOpen}
-          onClose={() => setFilterOpen(false)}
-          filters={filters}
-          onChange={setFilters}
-          tags={tags}
-          mobile
-        />
-      )}
 
       {!mobile && selected && (
         <Modal

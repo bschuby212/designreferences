@@ -233,15 +233,16 @@ const none = await galleryState();
 check("search empty state includes the query", Boolean(none.empty?.includes("zzzznotfound")), none.empty ?? "");
 await search.fill("");
 
-await page.getByRole("button", { name: "Filter" }).first().click();
+const sourceFilter = page.getByLabel("Source");
+const sourceOptions = await sourceFilter.locator("option").allTextContents();
 for (const label of ["Favorites", "Typography", "Branding"]) {
   check(
-    `filter panel excludes ${label}`,
-    (await page.getByRole("button", { name: label, exact: true }).count()) === 0,
+    `source filter excludes ${label}`,
+    !sourceOptions.some((option) => option.trim() === label),
     "",
   );
 }
-await page.getByRole("button", { name: "Onboarding", exact: true }).last().click();
+await sourceFilter.selectOption("Website");
 await page.waitForTimeout(350);
 const filtered = await galleryState();
 const filteredRows = await navRows();
@@ -250,6 +251,7 @@ check(
   filteredRows.find((row) => row.label === "Mobile Apps")?.count === filtered.count,
   `${filtered.count}`,
 );
+await sourceFilter.selectOption("");
 
 check("no browser errors", errors.length === 0, errors.slice(0, 2).join(" | "));
 
