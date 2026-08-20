@@ -234,7 +234,9 @@ check("search empty state includes the query", Boolean(none.empty?.includes("zzz
 await search.fill("");
 
 const sourceFilter = page.getByLabel("Source");
-const sourceOptions = await sourceFilter.locator("option").allTextContents();
+await sourceFilter.click();
+const sourceMenu = page.getByRole("listbox", { name: "Source" });
+const sourceOptions = await sourceMenu.getByRole("option").allTextContents();
 for (const label of ["Favorites", "Typography", "Branding"]) {
   check(
     `source filter excludes ${label}`,
@@ -242,7 +244,7 @@ for (const label of ["Favorites", "Typography", "Branding"]) {
     "",
   );
 }
-await sourceFilter.selectOption("Website");
+await sourceMenu.getByRole("option", { name: "Website", exact: true }).click();
 await page.waitForTimeout(350);
 const filtered = await galleryState();
 const filteredRows = await navRows();
@@ -251,7 +253,8 @@ check(
   filteredRows.find((row) => row.label === "Mobile Apps")?.count === filtered.count,
   `${filtered.count}`,
 );
-await sourceFilter.selectOption("");
+await sourceFilter.click();
+await page.getByRole("option", { name: "All sources", exact: true }).click();
 
 check("no browser errors", errors.length === 0, errors.slice(0, 2).join(" | "));
 

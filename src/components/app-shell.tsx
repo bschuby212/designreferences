@@ -209,12 +209,15 @@ export function AppShell() {
                 <IconButton label="Search" onClick={() => setSearchOpen(true)}>
                   <Search size={16} strokeWidth={1.75} />
                 </IconButton>
-                <IconButton
-                  label="Add reference"
+                <button
+                  type="button"
+                  aria-label="Add reference"
                   onClick={() => setEditor({ mode: "link" })}
+                  className="inline-flex h-10 shrink-0 items-center gap-1 rounded-md px-2.5 text-[13px] font-medium text-[var(--text)] hover:bg-[var(--hover)]"
                 >
-                  <Plus size={18} strokeWidth={1.75} />
-                </IconButton>
+                  <Plus size={16} strokeWidth={1.75} />
+                  Add
+                </button>
               </>
             )}
           </header>
@@ -232,13 +235,15 @@ export function AppShell() {
                 className={cn(inputClass, "h-10 pl-8")}
               />
             </div>
-            <IconButton
-              label="Add reference"
-              className="h-10 w-10"
+            <button
+              type="button"
+              aria-label="Add reference"
               onClick={() => setEditor({ mode: "link" })}
+              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md px-3 text-[13px] font-medium text-[var(--text)] hover:bg-[var(--hover)]"
             >
-              <Plus size={18} strokeWidth={1.75} />
-            </IconButton>
+              <Plus size={16} strokeWidth={1.75} />
+              Add
+            </button>
           </header>
         )}
 
