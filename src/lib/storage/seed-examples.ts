@@ -20,7 +20,7 @@ export interface ExampleSeed {
   aspect: "portrait" | "landscape";
 }
 
-export const SEED_REVISION = "2026-08-canonical-categories-1";
+export const SEED_REVISION = "2026-08-web-landing-cleanup-1";
 
 export const EXAMPLE_SEEDS: ExampleSeed[] = [
   {
@@ -379,7 +379,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-ca69a753-ee20-4e4d-bbbe-7260a303cdac",
     title: "Shopify Web Shopify Homepage",
     url: "https://mobbin.com/explore/screens/ca69a753-ee20-4e4d-bbbe-7260a303cdac",
-    collections: ["Web & Landing Pages"],
+    collections: [],
     screens: [
       { src: "/screens/restored/original-ca69a753-ee20-4e4d-bbbe-7260a303cdac/01.webp", label: "Desktop viewport" },
     ],
@@ -1399,7 +1399,6 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     screens: [
       { src: "/screens/restored/original-be6d28f4-b46f-4c3b-abe7-008205758f55/01.webp", label: "Top viewport" },
       { src: "/screens/restored/original-be6d28f4-b46f-4c3b-abe7-008205758f55/02.webp", label: "Middle viewport" },
-      { src: "/screens/restored/original-be6d28f4-b46f-4c3b-abe7-008205758f55/03.webp", label: "Lower viewport" },
     ],
     tags: ["type", "web"],
     notes: "",
@@ -1414,7 +1413,6 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     screens: [
       { src: "/screens/restored/original-5aa60e87-1a43-492d-9616-107268d3f5ce/01.webp", label: "Top viewport" },
       { src: "/screens/restored/original-5aa60e87-1a43-492d-9616-107268d3f5ce/02.webp", label: "Middle viewport" },
-      { src: "/screens/restored/original-5aa60e87-1a43-492d-9616-107268d3f5ce/03.webp", label: "Lower viewport" },
     ],
     tags: ["type", "web"],
     notes: "",
@@ -1429,7 +1427,6 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     screens: [
       { src: "/screens/restored/original-36860ef7-69eb-4cac-9ad4-cf2c5c097dba/01.webp", label: "Top viewport" },
       { src: "/screens/restored/original-36860ef7-69eb-4cac-9ad4-cf2c5c097dba/02.webp", label: "Middle viewport" },
-      { src: "/screens/restored/original-36860ef7-69eb-4cac-9ad4-cf2c5c097dba/03.webp", label: "Lower viewport" },
     ],
     tags: ["type", "web"],
     notes: "",
@@ -1444,7 +1441,6 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     screens: [
       { src: "/screens/restored/original-61db1036-5bb3-426e-88f0-eb6ba3a91bff/01.webp", label: "Top viewport" },
       { src: "/screens/restored/original-61db1036-5bb3-426e-88f0-eb6ba3a91bff/02.webp", label: "Middle viewport" },
-      { src: "/screens/restored/original-61db1036-5bb3-426e-88f0-eb6ba3a91bff/03.webp", label: "Lower viewport" },
     ],
     tags: ["type", "web"],
     notes: "",
@@ -1457,12 +1453,9 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     url: "https://mobbin.com/explore/sections/570d1933-5cc4-430a-9d4a-8cf67b35403f",
     collections: ["Web & Landing Pages", "Typography"],
     screens: [
-      { src: "/screens/restored/original-570d1933-5cc4-430a-9d4a-8cf67b35403f/01.webp", label: "Screen 1" },
-      { src: "/screens/restored/original-570d1933-5cc4-430a-9d4a-8cf67b35403f/02.webp", label: "Screen 2" },
-      { src: "/screens/restored/original-570d1933-5cc4-430a-9d4a-8cf67b35403f/03.webp", label: "Screen 3" },
-      { src: "/screens/restored/original-86454284-9d6c-4bc2-84e8-c02c51c2abe5/01.webp", label: "Screen 4" },
-      { src: "/screens/restored/original-86454284-9d6c-4bc2-84e8-c02c51c2abe5/02.webp", label: "Screen 5" },
-      { src: "/screens/restored/original-86454284-9d6c-4bc2-84e8-c02c51c2abe5/03.webp", label: "Screen 6" },
+      { src: "/screens/restored/original-570d1933-5cc4-430a-9d4a-8cf67b35403f/01.webp", label: "Hero" },
+      { src: "/screens/restored/original-570d1933-5cc4-430a-9d4a-8cf67b35403f/02.webp", label: "Features" },
+      { src: "/screens/restored/original-86454284-9d6c-4bc2-84e8-c02c51c2abe5/02.webp", label: "Stories and pricing" },
     ],
     tags: ["type", "web"],
     notes: "Merged 2 same-company captures.",
@@ -1477,7 +1470,6 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     screens: [
       { src: "/screens/restored/original-cf6bd0a1-8de8-438f-8b96-c96b17a5b47f/01.webp", label: "Top viewport" },
       { src: "/screens/restored/original-cf6bd0a1-8de8-438f-8b96-c96b17a5b47f/02.webp", label: "Middle viewport" },
-      { src: "/screens/restored/original-cf6bd0a1-8de8-438f-8b96-c96b17a5b47f/03.webp", label: "Lower viewport" },
     ],
     tags: ["type", "web"],
     notes: "",
@@ -1492,7 +1484,6 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     screens: [
       { src: "/screens/restored/original-1f16d8d7-71d9-483a-8110-80b9df0a0aa0/01.webp", label: "Top viewport" },
       { src: "/screens/restored/original-1f16d8d7-71d9-483a-8110-80b9df0a0aa0/02.webp", label: "Middle viewport" },
-      { src: "/screens/restored/original-1f16d8d7-71d9-483a-8110-80b9df0a0aa0/03.webp", label: "Lower viewport" },
     ],
     tags: ["type", "web"],
     notes: "",
@@ -1507,7 +1498,6 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     screens: [
       { src: "/screens/restored/original-103527de-a347-4c2b-a223-c0c2b40674b9/01.webp", label: "Top viewport" },
       { src: "/screens/restored/original-103527de-a347-4c2b-a223-c0c2b40674b9/02.webp", label: "Middle viewport" },
-      { src: "/screens/restored/original-103527de-a347-4c2b-a223-c0c2b40674b9/03.webp", label: "Lower viewport" },
     ],
     tags: ["type", "web"],
     notes: "",
@@ -1522,7 +1512,6 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     screens: [
       { src: "/screens/restored/original-40eaa33f-a818-4076-aaa0-d6e5b87dd195/01.webp", label: "Top viewport" },
       { src: "/screens/restored/original-40eaa33f-a818-4076-aaa0-d6e5b87dd195/02.webp", label: "Middle viewport" },
-      { src: "/screens/restored/original-40eaa33f-a818-4076-aaa0-d6e5b87dd195/03.webp", label: "Lower viewport" },
     ],
     tags: ["type", "web"],
     notes: "",
@@ -1535,12 +1524,9 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     url: "https://mobbin.com/explore/sections/120806fe-e3c4-4992-aee7-1f99024cc6ce",
     collections: ["Web & Landing Pages", "Typography"],
     screens: [
-      { src: "/screens/restored/original-120806fe-e3c4-4992-aee7-1f99024cc6ce/01.webp", label: "Screen 1" },
-      { src: "/screens/restored/original-120806fe-e3c4-4992-aee7-1f99024cc6ce/02.webp", label: "Screen 2" },
-      { src: "/screens/restored/original-120806fe-e3c4-4992-aee7-1f99024cc6ce/03.webp", label: "Screen 3" },
-      { src: "/screens/restored/original-bc483029-6ba0-43c1-b8b8-902ad8297853/01.webp", label: "Screen 4" },
-      { src: "/screens/restored/original-bc483029-6ba0-43c1-b8b8-902ad8297853/02.webp", label: "Screen 5" },
-      { src: "/screens/restored/original-bc483029-6ba0-43c1-b8b8-902ad8297853/03.webp", label: "Screen 6" },
+      { src: "/screens/restored/original-bc483029-6ba0-43c1-b8b8-902ad8297853/01.webp", label: "Hero" },
+      { src: "/screens/restored/original-bc483029-6ba0-43c1-b8b8-902ad8297853/02.webp", label: "Features" },
+      { src: "/screens/restored/original-120806fe-e3c4-4992-aee7-1f99024cc6ce/02.webp", label: "Partner programs" },
     ],
     tags: ["type", "web"],
     notes: "Merged 2 same-company captures.",
@@ -1555,7 +1541,6 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     screens: [
       { src: "/screens/restored/original-3f9e2262-ab09-4dbf-9d45-48b346d2e0f1/01.webp", label: "Top viewport" },
       { src: "/screens/restored/original-3f9e2262-ab09-4dbf-9d45-48b346d2e0f1/02.webp", label: "Middle viewport" },
-      { src: "/screens/restored/original-3f9e2262-ab09-4dbf-9d45-48b346d2e0f1/03.webp", label: "Lower viewport" },
     ],
     tags: ["type", "web"],
     notes: "",
@@ -1570,7 +1555,6 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     screens: [
       { src: "/screens/restored/original-aa849334-7736-4f45-b3dd-dde64b86731e/01.webp", label: "Top viewport" },
       { src: "/screens/restored/original-aa849334-7736-4f45-b3dd-dde64b86731e/02.webp", label: "Middle viewport" },
-      { src: "/screens/restored/original-aa849334-7736-4f45-b3dd-dde64b86731e/03.webp", label: "Lower viewport" },
     ],
     tags: ["type", "web"],
     notes: "",
@@ -1585,7 +1569,6 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     screens: [
       { src: "/screens/restored/original-f90385f7-2714-4775-a5ec-d2128e94d2cf/01.webp", label: "Top viewport" },
       { src: "/screens/restored/original-f90385f7-2714-4775-a5ec-d2128e94d2cf/02.webp", label: "Middle viewport" },
-      { src: "/screens/restored/original-f90385f7-2714-4775-a5ec-d2128e94d2cf/03.webp", label: "Lower viewport" },
     ],
     tags: ["type", "web"],
     notes: "",
@@ -1600,7 +1583,6 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     screens: [
       { src: "/screens/restored/original-763c860b-0eb9-48ef-950c-4d63bc3935bd/01.webp", label: "Top viewport" },
       { src: "/screens/restored/original-763c860b-0eb9-48ef-950c-4d63bc3935bd/02.webp", label: "Middle viewport" },
-      { src: "/screens/restored/original-763c860b-0eb9-48ef-950c-4d63bc3935bd/03.webp", label: "Lower viewport" },
     ],
     tags: ["type", "web"],
     notes: "",
@@ -1899,7 +1881,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-f7ee898b-bcd0-414b-97a2-1a6beb7defa9",
     title: "Nextdoor Web Nextdoor Homepage",
     url: "https://mobbin.com/explore/screens/f7ee898b-bcd0-414b-97a2-1a6beb7defa9",
-    collections: ["Web & Landing Pages", "Branding"],
+    collections: ["Branding"],
     screens: [
       { src: "/screens/restored/original-f7ee898b-bcd0-414b-97a2-1a6beb7defa9/01.webp", label: "Desktop viewport" },
     ],
@@ -2068,7 +2050,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-d66a0b5c-d682-4ca7-b6ce-4b7cb91f4944",
     title: "HBO Max Web Content Homepage",
     url: "https://mobbin.com/explore/screens/d66a0b5c-d682-4ca7-b6ce-4b7cb91f4944",
-    collections: ["Web & Landing Pages", "Branding"],
+    collections: ["Branding"],
     screens: [
       { src: "/screens/restored/original-d66a0b5c-d682-4ca7-b6ce-4b7cb91f4944/01.webp", label: "Desktop viewport" },
     ],
