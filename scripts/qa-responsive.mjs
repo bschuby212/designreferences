@@ -489,7 +489,9 @@ for (const viewport of WIDTHS) {
     }
 
     if (viewport.touch) {
-      const detailFrame = inDetail.locator("div[style*='aspect-ratio']").first();
+      const detailFrame = inDetail
+        .locator('[aria-roledescription="carousel"] > div')
+        .first();
       const beforeSwipe = await inDetail.evaluate((node) => {
         const badge = [...node.querySelectorAll("div")].find((n) =>
           /^\d+\/\d+$/.test(n.textContent?.trim() ?? ""),
