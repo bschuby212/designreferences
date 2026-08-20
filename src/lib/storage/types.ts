@@ -137,6 +137,3 @@ export const DEFAULT_COLLECTIONS = [
   "Motion",
   "Branding",
 ];
-
-/** Screens shown per reference before the carousel is considered complete. */
-export const MIN_SCREENS = 3;
