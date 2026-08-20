@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, Folder, Heart, LayoutGrid, Plus } from "lucide-react";
+import { Folder, LayoutGrid, Plus } from "lucide-react";
 import type { NavView } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
@@ -9,8 +9,6 @@ import { inputClass } from "./ui";
 
 export interface NavCounts {
   all: number;
-  favorites: number;
-  recent: number;
   collections: Record<string, number>;
 }
 
@@ -97,29 +95,7 @@ export function LibraryNav({
         >
           All
         </Chip>
-        <Chip
-          active={view.type === "favorites"}
-          icon={<Heart size={13} strokeWidth={1.75} />}
-          count={counts?.favorites}
-          onClick={() => onViewChange({ type: "favorites" })}
-        >
-          Favorites
-        </Chip>
-        <Chip
-          active={view.type === "recent"}
-          icon={<Clock size={13} strokeWidth={1.75} />}
-          count={counts?.recent}
-          onClick={() => onViewChange({ type: "recent" })}
-        >
-          Recent
-        </Chip>
-
-        <span
-          aria-hidden="true"
-          className="mx-0.5 h-5 w-px shrink-0 bg-[var(--border-strong)]"
-        />
-
-        {collections.map((collection) => (
+        {collections.filter((collection) => collection.name !== "Typography").map((collection) => (
           <Chip
             key={collection.id}
             active={view.type === "collection" && view.id === collection.id}
@@ -165,8 +141,6 @@ export function viewLabel(
   collections: { id: string; name: string }[],
 ) {
   if (view.type === "all") return "All references";
-  if (view.type === "favorites") return "Favorites";
-  if (view.type === "recent") return "Recently added";
   if (view.type === "source") return view.source;
   return collections.find((collection) => collection.id === view.id)?.name ?? "Collection";
 }

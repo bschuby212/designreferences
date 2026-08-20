@@ -68,6 +68,7 @@ export function ReferenceCarousel({
   );
 
   const ratio = RATIO[aspect ?? "landscape"];
+  const frameRatio = variant === "card" ? "4 / 3" : ratio;
 
   if (count === 0) {
     return (
@@ -76,7 +77,7 @@ export function ReferenceCarousel({
           "flex items-center justify-center rounded-[var(--radius)] bg-[var(--hover)] text-[11px] text-[var(--muted-2)]",
           className,
         )}
-        style={{ aspectRatio: ratio }}
+        style={{ aspectRatio: frameRatio }}
       >
         No screens
       </div>
@@ -143,7 +144,7 @@ export function ReferenceCarousel({
     >
       <div
         className="relative overflow-hidden rounded-[var(--radius)] bg-[var(--hover)]"
-        style={{ aspectRatio: ratio }}
+        style={{ aspectRatio: frameRatio }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -158,7 +159,10 @@ export function ReferenceCarousel({
               key={screen.src}
               src={screen.src}
               alt={`${title} — ${screen.label}`}
-              className="h-full w-full shrink-0 select-none object-contain"
+              className={cn(
+                "h-full w-full shrink-0 select-none object-contain",
+                variant === "card" && "object-top",
+              )}
               draggable={false}
               loading={position === 0 ? "eager" : "lazy"}
               decoding="async"
@@ -221,9 +225,9 @@ export function ReferenceCarousel({
         )}
       </div>
 
-      {count > 1 && (
-        <div className="mt-1 flex items-center justify-center gap-0.5">
-          {screens.map((screen, position) => (
+      {(variant === "card" || count > 1) && (
+        <div className="mt-1 flex h-7 items-center justify-center gap-0.5">
+          {count > 1 && screens.map((screen, position) => (
             <button
               key={screen.src}
               type="button"

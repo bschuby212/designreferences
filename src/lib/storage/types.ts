@@ -27,8 +27,6 @@ export type Aspect = "portrait" | "landscape";
 
 export type NavView =
   | { type: "all" }
-  | { type: "favorites" }
-  | { type: "recent" }
   | { type: "collection"; id: string }
   | { type: "source"; source: SourceType };
 
@@ -116,14 +114,12 @@ export interface ActiveFilters {
   sources: SourceType[];
   collectionIds: string[];
   tags: string[];
-  favorites: boolean;
 }
 
 export const EMPTY_FILTERS: ActiveFilters = {
   sources: [],
   collectionIds: [],
   tags: [],
-  favorites: false,
 };
 
 export const DEFAULT_COLLECTIONS = [

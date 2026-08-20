@@ -15,36 +15,49 @@ import { useClickOutside } from "./ui";
 
 interface ReferenceCardProps {
   reference: Reference;
-  compactMeta?: boolean;
+  collectionNames: string[];
+  selected?: boolean;
   onOpen: () => void;
   onFavorite: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onSelectCollection?: (id: string) => void;
 }
 
 export function ReferenceCard({
   reference,
-  compactMeta,
+  collectionNames,
+  selected,
   onOpen,
   onFavorite,
   onEdit,
   onDelete,
+  onSelectCollection,
 }: ReferenceCardProps) {
   const [menu, setMenu] = useState(false);
   const menuRef = useClickOutside(menu, () => setMenu(false));
 
   return (
-    <article className="group relative mb-0 break-inside-avoid">
-      <ReferenceCarousel
-        screens={reference.screens}
-        aspect={reference.aspect}
-        title={reference.title || "Reference"}
-        variant="card"
-        onActivate={onOpen}
-      />
+    <article
+      className={cn(
+        "group relative mb-0 flex h-full min-w-0 break-inside-avoid flex-col rounded-xl border bg-[var(--card)] p-2 transition-[border-color,box-shadow,transform]",
+        selected
+          ? "border-[var(--text)] shadow-[0_0_0_2px_var(--surface),0_0_0_4px_var(--text)]"
+          : "border-[var(--card-border)] hover:border-[var(--border-strong)] hover:shadow-[0_8px_24px_rgba(27,26,23,0.08)]",
+      )}
+    >
+      <div className="relative">
+        <ReferenceCarousel
+          screens={reference.screens}
+          aspect={reference.aspect}
+          title={reference.title || "Reference"}
+          variant="card"
+          onActivate={onOpen}
+        />
+      </div>
 
       {/* Pointer devices get the inline row on hover. */}
-      <div className="pointer-events-none absolute top-1.5 right-1.5 z-30 hidden gap-0.5 rounded-md bg-[var(--surface)]/92 p-0.5 opacity-0 shadow-sm ring-1 ring-[var(--border)] transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 [@media(hover:hover)]:flex">
+      <div className="pointer-events-none absolute top-3 right-3 z-30 hidden gap-0.5 rounded-md bg-[var(--surface)]/92 p-0.5 opacity-0 shadow-sm ring-1 ring-[var(--border)] transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 [@media(hover:hover)]:flex">
         <Action
           label={reference.favorite ? "Unfavorite" : "Favorite"}
           onClick={onFavorite}
@@ -79,7 +92,7 @@ export function ReferenceCard({
       {/* Touch devices cannot hover, so the same actions live behind a tap. */}
       <div
         ref={menuRef}
-        className="absolute top-1.5 right-1.5 z-30 [@media(hover:hover)]:hidden"
+        className="absolute top-3 right-3 z-30 [@media(hover:hover)]:hidden"
       >
         <button
           type="button"
@@ -142,27 +155,40 @@ export function ReferenceCard({
         )}
       </div>
 
-      {compactMeta && (
-        <div className="mt-1 flex items-start justify-between gap-2 px-0.5">
-          <div className="min-w-0">
-            {reference.title ? (
-              <div className="truncate text-[12px] leading-tight">
-                {reference.title}
-              </div>
-            ) : null}
-            <div className="truncate text-[10px] text-[var(--muted-2)]">
-              {reference.source} · {reference.screens.length} screens
-            </div>
-          </div>
+      <div className="flex min-h-[76px] min-w-0 flex-1 flex-col px-1 pt-2 pb-0.5">
+        <button
+          type="button"
+          onClick={onOpen}
+          className="line-clamp-2 min-h-[34px] text-left text-[13px] leading-[17px] font-medium text-[var(--text)]"
+        >
+          {reference.title || "Untitled"}
+        </button>
+        <div className="mt-auto flex min-w-0 items-center gap-1.5 pt-2">
+          {collectionNames[0] && reference.collectionIds[0] ? (
+            <button
+              type="button"
+              className="inline-flex h-6 min-w-0 max-w-[58%] items-center rounded-full bg-[var(--surface)] px-2 text-[10px] text-[var(--muted)] ring-1 ring-[var(--border)] hover:text-[var(--text)]"
+              onClick={(event) => {
+                event.stopPropagation();
+                onSelectCollection?.(reference.collectionIds[0]);
+              }}
+            >
+              <span className="truncate">{collectionNames[0]}</span>
+            </button>
+          ) : null}
+          <span className="min-w-0 truncate text-[10px] text-[var(--muted-2)]">
+            {reference.source} · {reference.screens.length}{" "}
+            {reference.screens.length === 1 ? "image" : "images"}
+          </span>
           {reference.favorite && (
             <Heart
               size={12}
-              className="mt-0.5 shrink-0 text-[var(--text)]"
+              className="ml-auto shrink-0 text-[var(--text)]"
               fill="currentColor"
             />
           )}
         </div>
-      )}
+      </div>
     </article>
   );
 }

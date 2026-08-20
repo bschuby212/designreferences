@@ -3,6 +3,8 @@
 :root {
   --bg: #f3f2ef;
   --surface: #ffffff;
+  --card: #f8f7f4;
+  --card-border: #dedbd4;
   --hover: #eceae6;
   --border: #e2e0da;
   --border-strong: #d0cdc5;

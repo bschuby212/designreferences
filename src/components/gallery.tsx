@@ -7,26 +7,30 @@ import { ReferenceCard } from "./reference-card";
 interface GalleryProps {
   references: Reference[];
   density: Density;
-  compactMeta: boolean;
+  selectedId: string | null;
+  collectionNames: Record<string, string>;
   emptyTitle: string;
   emptyHint: string;
   onOpen: (id: string) => void;
   onFavorite: (id: string) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  onSelectCollection: (id: string) => void;
   onFiles: (files: File[]) => void;
 }
 
 export function Gallery({
   references,
   density,
-  compactMeta,
+  selectedId,
+  collectionNames,
   emptyTitle,
   emptyHint,
   onOpen,
   onFavorite,
   onEdit,
   onDelete,
+  onSelectCollection,
   onFiles,
 }: GalleryProps) {
   return (
@@ -59,11 +63,15 @@ export function Gallery({
             <ReferenceCard
               key={reference.id}
               reference={reference}
-              compactMeta={compactMeta}
+              collectionNames={reference.collectionIds
+                .map((id) => collectionNames[id])
+                .filter((name): name is string => Boolean(name))}
+              selected={reference.id === selectedId}
               onOpen={() => onOpen(reference.id)}
               onFavorite={() => onFavorite(reference.id)}
               onEdit={() => onEdit(reference.id)}
               onDelete={() => onDelete(reference.id)}
+              onSelectCollection={onSelectCollection}
             />
           ))}
         </div>

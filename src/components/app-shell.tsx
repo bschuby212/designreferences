@@ -29,7 +29,6 @@ import { useLibrary } from "./library-provider";
 import { Modal, Sheet } from "./sheet";
 import { IconButton, inputClass, useClickOutside } from "./ui";
 
-const RECENT_MS = 14 * 24 * 60 * 60 * 1000;
 const DENSITY_KEY = "library-density";
 
 function readDensity(): Density {
@@ -54,15 +53,10 @@ function matches(
   filters: ActiveFilters,
   collectionNames: string[],
 ) {
-  if (view.type === "favorites" && !reference.favorite) return false;
-  if (view.type === "recent" && Date.now() - reference.createdAt > RECENT_MS) {
-    return false;
-  }
   if (view.type === "collection" && !reference.collectionIds.includes(view.id)) {
     return false;
   }
   if (view.type === "source" && reference.source !== view.source) return false;
-  if (filters.favorites && !reference.favorite) return false;
   if (filters.sources.length && !filters.sources.includes(reference.source)) {
     return false;
   }
@@ -140,21 +134,18 @@ export function AppShell() {
   const counts = useMemo(() => {
     const collectionCounts: Record<string, number> = {};
     let all = 0;
-    let favorites = 0;
-    let recent = 0;
     for (const reference of references) {
       const names = collectionNamesOf(collections, reference.collectionIds);
       if (!matches(reference, { type: "all" }, search, filters, names)) continue;
       all += 1;
-      if (reference.favorite) favorites += 1;
-      if (matches(reference, { type: "recent" }, search, filters, names)) {
-        recent += 1;
-      }
       for (const id of reference.collectionIds) {
+        if (collections.find((collection) => collection.id === id)?.name === "Typography") {
+          continue;
+        }
         collectionCounts[id] = (collectionCounts[id] ?? 0) + 1;
       }
     }
-    return { all, favorites, recent, collections: collectionCounts };
+    return { all, collections: collectionCounts };
   }, [references, collections, search, filters]);
 
   const selected = references.find((r) => r.id === selectedId) ?? null;
@@ -219,9 +210,7 @@ export function AppShell() {
   }
 
   const filterActive =
-    filters.favorites ||
-    filters.sources.length + filters.collectionIds.length + filters.tags.length >
-      0;
+    filters.sources.length + filters.collectionIds.length + filters.tags.length > 0;
 
   // The empty state has to say which of search, filters or an empty tab is
   // responsible, otherwise a correctly empty collection looks like a bug.
@@ -239,18 +228,6 @@ export function AppShell() {
       return {
         title: "No references match these filters",
         hint: "Clear a filter to widen the results.",
-      };
-    }
-    if (view.type === "favorites") {
-      return {
-        title: "No favorites yet",
-        hint: "Tap the heart on a reference to keep it here.",
-      };
-    }
-    if (view.type === "recent") {
-      return {
-        title: "Nothing added recently",
-        hint: "References added in the last two weeks show up here.",
       };
     }
     if (view.type === "collection") {
@@ -388,13 +365,15 @@ export function AppShell() {
             <Gallery
               references={visible}
               density={density}
-              compactMeta={mobile}
+              selectedId={selectedId}
+              collectionNames={collectionNames}
               emptyTitle={empty.title}
               emptyHint={empty.hint}
               onOpen={openDetail}
               onFavorite={(id) => void toggleFavorite(id)}
               onEdit={(id) => setEditor({ mode: "edit", id })}
               onDelete={(id) => void deleteReference(id)}
+              onSelectCollection={(id) => setView({ type: "collection", id })}
               onFiles={(files) =>
                 setEditor({ mode: "upload", file: files[0] })
               }

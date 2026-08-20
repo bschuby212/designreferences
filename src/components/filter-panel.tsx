@@ -29,11 +29,6 @@ export function FilterPanel({
 
   const body = (
     <div className="space-y-4 p-4">
-      <Toggle
-        label="Favorites"
-        on={filters.favorites}
-        onClick={() => onChange({ ...filters, favorites: !filters.favorites })}
-      />
       <Group label="Source">
         {SOURCE_TYPES.map((source) => (
           <Chip
@@ -51,7 +46,7 @@ export function FilterPanel({
         ))}
       </Group>
       <Group label="Collection">
-        {collections.map((collection) => (
+        {collections.filter((collection) => collection.name !== "Typography").map((collection) => (
           <Chip
             key={collection.id}
             active={filters.collectionIds.includes(collection.id)}
@@ -92,7 +87,6 @@ export function FilterPanel({
               sources: [],
               collectionIds: [],
               tags: [],
-              favorites: false,
             })
           }
         >
@@ -160,39 +154,6 @@ function Chip({
   );
 }
 
-function Toggle({
-  label,
-  on,
-  onClick,
-}: {
-  label: string;
-  on: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex h-11 w-full items-center justify-between text-[13px]"
-    >
-      {label}
-      <span
-        className={cn(
-          "flex h-5 w-9 items-center rounded-full px-0.5 transition-colors",
-          on ? "bg-[var(--text)]" : "bg-[var(--border-strong)]",
-        )}
-      >
-        <span
-          className={cn(
-            "h-4 w-4 rounded-full bg-white transition-transform",
-            on && "translate-x-4",
-          )}
-        />
-      </span>
-    </button>
-  );
-}
-
 function toggle<T>(list: T[], value: T) {
   return list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
 }
@@ -207,13 +168,6 @@ export function FilterChips({
   collectionNames: Record<string, string>;
 }) {
   const chips: Array<{ key: string; label: string; clear: () => void }> = [];
-  if (filters.favorites) {
-    chips.push({
-      key: "fav",
-      label: "Favorites",
-      clear: () => onChange({ ...filters, favorites: false }),
-    });
-  }
   for (const source of filters.sources) {
     chips.push({
       key: `s-${source}`,
