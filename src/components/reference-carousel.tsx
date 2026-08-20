@@ -174,7 +174,7 @@ export function ReferenceCarousel({
                   "flex items-center justify-center px-5 py-6",
                 card &&
                   kind === "landscape" &&
-                  "flex items-center justify-center px-5 py-8",
+                  "flex items-center justify-center px-6 py-12",
               )}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
