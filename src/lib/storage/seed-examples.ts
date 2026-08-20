@@ -379,7 +379,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-ca69a753-ee20-4e4d-bbbe-7260a303cdac",
     title: "Shopify Web Shopify Homepage",
     url: "https://mobbin.com/explore/screens/ca69a753-ee20-4e4d-bbbe-7260a303cdac",
-    collections: [],
+    collections: ["Branding"],
     screens: [
       { src: "/screens/restored/original-ca69a753-ee20-4e4d-bbbe-7260a303cdac/01.webp", label: "Desktop viewport" },
     ],
