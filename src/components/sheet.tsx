@@ -156,7 +156,7 @@ export function Modal({
           size === "large"
             ? "h-[calc(100dvh-32px)] sm:h-[calc(100dvh-48px)] sm:max-w-[min(1480px,calc(100vw-48px))]"
             : size === "wide"
-              ? "sm:max-w-2xl"
+              ? "sm:max-w-[min(1120px,calc(100vw-48px))]"
               : "max-w-md",
           className,
         )}

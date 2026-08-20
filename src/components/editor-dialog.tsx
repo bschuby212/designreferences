@@ -19,7 +19,14 @@ import type {
   ReferenceScreen,
   ThumbnailType,
 } from "@/lib/storage/types";
-import { base64ToBlob, blobToDataUrl, cn, hostnameOf, normalizeUrl } from "@/lib/utils";
+import {
+  base64ToBlob,
+  blobToDataUrl,
+  cn,
+  hostnameOf,
+  isHiddenNavCollection,
+  normalizeUrl,
+} from "@/lib/utils";
 import { useLibrary } from "./library-provider";
 import { useBreakpoint, useObjectUrl } from "./hooks";
 import { Modal } from "./sheet";
@@ -97,17 +104,26 @@ function EditorForm({
   onClose: () => void;
   onSaved: (id: string) => void;
 }) {
-  const { references, createReference, updateReference } = useLibrary();
+  const { collections, references, createReference, updateReference } =
+    useLibrary();
   const existing =
     state.mode === "edit"
       ? references.find((r) => r.id === state.id)
       : undefined;
   const initialFile = state.mode === "upload" ? state.file : undefined;
+  const categoryOptions = collections.filter(
+    (collection) => !isHiddenNavCollection(collection.name),
+  );
 
   const [url, setUrl] = useState(existing?.url ?? "");
   const [title, setTitle] = useState(
     existing?.title ??
       (initialFile ? initialFile.name.replace(/\.[^.]+$/, "") : ""),
+  );
+  const initialCollectionIds =
+    existing?.collectionIds ?? defaultCollectionIds;
+  const [categoryId, setCategoryId] = useState(
+    initialCollectionIds[0] ?? "",
   );
   const [screens, setScreens] = useState<ReferenceScreen[]>(
     existing?.screens ?? [],
@@ -251,9 +267,11 @@ function EditorForm({
             ? "Upload"
             : "Website",
         collectionIds:
-          state.mode === "edit" && existing
+          existing && existing.collectionIds.includes(categoryId)
             ? existing.collectionIds
-            : defaultCollectionIds,
+            : categoryId
+              ? [categoryId]
+              : [],
         screens: resolved,
         aspect,
         seedKey: existing?.seedKey ?? null,
@@ -277,7 +295,7 @@ function EditorForm({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3">
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
         <Field label="URL">
           <input
             ref={urlRef}
@@ -294,6 +312,41 @@ function EditorForm({
             }}
           />
         </Field>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Field label="Title">
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className={inputClass}
+              placeholder="Optional"
+            />
+          </Field>
+          <Field label="Category">
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className={inputClass}
+            >
+              <option value="">Select a category</option>
+              {categoryOptions.map((collection) => (
+                <option key={collection.id} value={collection.id}>
+                  {collection.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Frame">
+            <select
+              value={aspect}
+              onChange={(e) => setAspect(e.target.value as Aspect)}
+              className={inputClass}
+            >
+              <option value="landscape">Landscape (web)</option>
+              <option value="portrait">Portrait (mobile)</option>
+            </select>
+          </Field>
+        </div>
 
         <div className="overflow-hidden rounded-[var(--radius)] bg-[var(--hover)]">
           {previewUrl ? (
@@ -315,14 +368,6 @@ function EditorForm({
 
         <UploadPicker onPick={onPick} compact />
 
-        <Field label="Title">
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className={inputClass}
-            placeholder="Optional"
-          />
-        </Field>
         <Field label={`Screens (${screens.length})`}>
           <div className="space-y-2">
             {screens.length > 0 && (
@@ -401,16 +446,6 @@ function EditorForm({
                 : "One complete image is valid; add more only for a flow or longer page."}
             </p>
           </div>
-        </Field>
-        <Field label="Frame">
-          <select
-            value={aspect}
-            onChange={(e) => setAspect(e.target.value as Aspect)}
-            className={inputClass}
-          >
-            <option value="landscape">Landscape (web)</option>
-            <option value="portrait">Portrait (mobile)</option>
-          </select>
         </Field>
         <Field label="Notes">
           <textarea
