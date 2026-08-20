@@ -64,7 +64,7 @@ export function PrimaryButton({
     <button
       type="button"
       className={cn(
-        "inline-flex h-11 items-center justify-center rounded-[var(--radius)] bg-[var(--text)] px-4 text-[13px] font-medium text-white disabled:opacity-40",
+        "inline-flex h-11 items-center justify-center rounded-[var(--radius)] bg-[var(--text)] px-4 text-[13px] font-medium text-white !text-white disabled:opacity-40",
         className,
       )}
       {...props}

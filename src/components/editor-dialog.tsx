@@ -425,7 +425,7 @@ function EditorForm({
       <div className="flex items-center justify-end gap-2 border-t border-[var(--border)] px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
         <GhostButton onClick={onClose}>Cancel</GhostButton>
         <PrimaryButton
-          className="min-w-24 disabled:opacity-100"
+          className="shrink-0 px-5 disabled:opacity-100"
           disabled={!canSave || saving}
           onClick={() => void save()}
         >
