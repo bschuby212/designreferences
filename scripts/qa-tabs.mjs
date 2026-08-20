@@ -145,7 +145,7 @@ const stored = await page.evaluate(async () => {
 });
 
 const seeded = stored.filter((reference) => reference.seedKey);
-check("restored seeded reference count", seeded.length === 153, `${seeded.length}`);
+check("restored seeded reference count", seeded.length === 293, `${seeded.length}`);
 check(
   "every restored reference has a unique URL",
   new Set(seeded.map((reference) => reference.url)).size === seeded.length,
@@ -163,12 +163,12 @@ check(
 );
 check(
   "valid single-image references remain",
-  seeded.filter((reference) => reference.images === 1).length === 109,
+  seeded.filter((reference) => reference.images === 1).length === 190,
   `${seeded.filter((reference) => reference.images === 1).length}`,
 );
 check(
   "meaningful multi-image references remain",
-  seeded.filter((reference) => reference.images > 1).length === 44,
+  seeded.filter((reference) => reference.images > 1).length === 103,
   `${seeded.filter((reference) => reference.images > 1).length}`,
 );
 check(
