@@ -30,7 +30,7 @@ CACHE = os.path.join(ROOT, "scripts", ".cache", "restored")
 PUBLIC = os.path.join(ROOT, "public", "screens", "restored")
 TARGET = os.path.join(ROOT, "src", "lib", "storage", "seed-examples.ts")
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/122 Safari/537.36"
-SEED_REVISION = "2026-08-full-library-2"
+SEED_REVISION = "2026-08-full-library-3"
 
 
 def slug(value: str) -> str:
@@ -67,15 +67,24 @@ def download(url: str) -> str:
 
 
 def viewport_capture(job: tuple[str, str, str]) -> str:
-    """Create a 1440 x 1080 crop at top, center, or bottom."""
+    """Create a top-fit viewport or a meaningful long-page crop."""
     url, output, position = job
     source = download(url)
     os.makedirs(os.path.dirname(output), exist_ok=True)
-    y = {
-        "top": "0",
-        "center": "(ih-oh)/2",
-        "bottom": "ih-oh",
-    }[position]
+    if position == "fit":
+        # Preserve the complete normal desktop viewport, including left
+        # navigation, and anchor it to the top of the 4:3 thumbnail canvas.
+        video_filter = (
+            "scale=1440:1080:force_original_aspect_ratio=decrease,"
+            "pad=1440:1080:(ow-iw)/2:0:color=white"
+        )
+    else:
+        y = {
+            "top": "0",
+            "center": "(ih-oh)/2",
+            "bottom": "ih-oh",
+        }[position]
+        video_filter = f"scale=1440:-2,crop=1440:1080:0:{y}"
     subprocess.run(
         [
             "ffmpeg",
@@ -85,10 +94,7 @@ def viewport_capture(job: tuple[str, str, str]) -> str:
             "-i",
             source,
             "-vf",
-            (
-                "scale=1440:1080:force_original_aspect_ratio=increase,"
-                f"crop=1440:1080:(iw-ow)/2:{y}"
-            ),
+            video_filter,
             "-frames:v",
             "1",
             "-c:v",
@@ -181,7 +187,7 @@ def build_references() -> tuple[list[dict], list[dict]]:
                 used.add(image_id)
                 if is_web:
                     output = os.path.join(PUBLIC, key, f"{len(screens) + 1:02d}.webp")
-                    viewport_jobs.append((remote, output, "center"))
+                    viewport_jobs.append((remote, output, "fit"))
                     src = "/" + os.path.relpath(output, os.path.join(ROOT, "public"))
                 else:
                     src = screen["src"]
@@ -191,7 +197,7 @@ def build_references() -> tuple[list[dict], list[dict]]:
             if original_id not in used:
                 if is_web:
                     output = os.path.join(PUBLIC, key, f"{len(screens) + 1:02d}.webp")
-                    viewport_jobs.append((original["imageUrl"], output, "center"))
+                    viewport_jobs.append((original["imageUrl"], output, "fit"))
                     src = "/" + os.path.relpath(output, os.path.join(ROOT, "public"))
                 else:
                     src = original["imageUrl"]
@@ -208,7 +214,7 @@ def build_references() -> tuple[list[dict], list[dict]]:
                 screens.append({"src": src, "label": label})
         elif is_web:
             output = os.path.join(PUBLIC, key, "01.webp")
-            viewport_jobs.append((original["imageUrl"], output, "center"))
+            viewport_jobs.append((original["imageUrl"], output, "fit"))
             src = "/" + os.path.relpath(output, os.path.join(ROOT, "public"))
             screens.append({"src": src, "label": "Desktop viewport"})
         else:

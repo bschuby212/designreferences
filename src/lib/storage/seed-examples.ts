@@ -20,7 +20,7 @@ export interface ExampleSeed {
   aspect: "portrait" | "landscape";
 }
 
-export const SEED_REVISION = "2026-08-full-library-2";
+export const SEED_REVISION = "2026-08-full-library-3";
 
 export const EXAMPLE_SEEDS: ExampleSeed[] = [
   {
