@@ -38,7 +38,7 @@ export function Gallery({
 
   return (
     <div
-      className="h-full overflow-y-auto overflow-x-hidden overscroll-contain px-4 pb-10 md:px-8"
+      className="h-full overflow-y-auto overflow-x-hidden overscroll-contain px-4 pb-10 md:px-12"
       onDragOver={(e) => {
         if ([...e.dataTransfer.types].includes("Files")) e.preventDefault();
       }}

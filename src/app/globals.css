@@ -71,35 +71,13 @@ button {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: 32px 28px;
+  gap: 40px 48px;
 }
 
 .gallery-flex > * {
-  flex: 1 1 calc((100% - 56px) / 3);
-  max-width: calc((100% - 56px) / 3);
+  flex: 1 1 calc((100% - 48px) / 2);
+  max-width: calc((100% - 48px) / 2);
   min-width: 0;
-}
-
-@media (min-width: 1600px) {
-  .gallery-flex {
-    gap: 36px 28px;
-  }
-
-  .gallery-flex > * {
-    flex-basis: calc((100% - 84px) / 4);
-    max-width: calc((100% - 84px) / 4);
-  }
-}
-
-@media (max-width: 1023px) {
-  .gallery-flex {
-    gap: 24px 18px;
-  }
-
-  .gallery-flex > * {
-    flex-basis: calc((100% - 18px) / 2);
-    max-width: calc((100% - 18px) / 2);
-  }
 }
 
 @media (max-width: 767px) {

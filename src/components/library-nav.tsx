@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Folder, Plus } from "lucide-react";
+import { Folder } from "lucide-react";
 import type { NavView } from "@/lib/storage/types";
 import { cn, isHiddenNavCollection } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
-import { inputClass } from "./ui";
 
 export interface NavCounts {
   collections: Record<string, number>;
@@ -64,21 +62,7 @@ export function LibraryNav({
   onViewChange,
   counts,
 }: LibraryNavProps) {
-  const { collections, createCollection } = useLibrary();
-  const [creating, setCreating] = useState(false);
-  const [newName, setNewName] = useState("");
-
-  async function submitNew() {
-    const name = newName.trim();
-    if (!name) {
-      setCreating(false);
-      return;
-    }
-    const created = await createCollection(name);
-    setNewName("");
-    setCreating(false);
-    onViewChange({ type: "collection", id: created.id });
-  }
+  const { collections } = useLibrary();
 
   return (
     <nav
@@ -97,31 +81,6 @@ export function LibraryNav({
             {collection.name}
           </Chip>
         ))}
-
-        {creating ? (
-          <input
-            autoFocus
-            value={newName}
-            onChange={(event) => setNewName(event.target.value)}
-            onBlur={() => void submitNew()}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") void submitNew();
-              if (event.key === "Escape") setCreating(false);
-            }}
-            placeholder="Collection name"
-            className={cn(inputClass, "h-8 w-36 shrink-0 rounded-full bg-[var(--surface)]")}
-          />
-        ) : (
-          <button
-            type="button"
-            aria-label="New collection"
-            title="New collection"
-            onClick={() => setCreating(true)}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]"
-          >
-            <Plus size={14} strokeWidth={1.75} />
-          </button>
-        )}
       </div>
     </nav>
   );

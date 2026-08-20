@@ -130,42 +130,6 @@ export function ReferenceCarousel({
     variant === "detail" ? "h-9 w-9" : "h-7 w-7",
   );
 
-  const dots = count > 1 && (
-    <div
-      className={cn(
-        "flex items-center justify-center gap-0.5",
-        card && "pointer-events-none absolute inset-x-0 bottom-1.5 z-20",
-        !card && "mt-1",
-      )}
-    >
-      {screens.map((screen, position) => (
-        <button
-          key={screen.src}
-          type="button"
-          aria-label={`Show screen ${position + 1}`}
-          aria-current={position === index}
-          className={cn(
-            "grid place-items-center",
-            card ? "pointer-events-auto h-7 w-7" : "h-7 w-7",
-          )}
-          onClick={(event) => {
-            event.stopPropagation();
-            go(position);
-          }}
-        >
-          <span
-            className={cn(
-              "block h-1.5 rounded-full transition-all",
-              position === index
-                ? "w-4 bg-[var(--text)]"
-                : "w-1.5 bg-[var(--border-strong)]",
-            )}
-          />
-        </button>
-      ))}
-    </div>
-  );
-
   return (
     <div
       className={cn("group/carousel relative", className)}
@@ -285,11 +249,34 @@ export function ReferenceCarousel({
             </div>
           </>
         )}
-
-        {card ? dots : null}
       </div>
 
-      {card ? null : dots}
+      {!card && count > 1 && (
+        <div className="mt-1 flex items-center justify-center gap-0.5">
+          {screens.map((screen, position) => (
+            <button
+              key={screen.src}
+              type="button"
+              aria-label={`Show screen ${position + 1}`}
+              aria-current={position === index}
+              className="grid h-7 w-7 place-items-center"
+              onClick={(event) => {
+                event.stopPropagation();
+                go(position);
+              }}
+            >
+              <span
+                className={cn(
+                  "block h-1.5 rounded-full transition-all",
+                  position === index
+                    ? "w-4 bg-[var(--text)]"
+                    : "w-1.5 bg-[var(--border-strong)]",
+                )}
+              />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

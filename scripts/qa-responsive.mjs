@@ -320,38 +320,12 @@ for (const viewport of WIDTHS) {
     );
   }
 
-  // Dots work on both input types.
-  const dotBefore = await counterIn(firstCard);
-  const dots = firstCard.getByRole("button", { name: /Show screen \d+/ });
-  const dotCount = await dots.count();
-  if (dotCount >= 3) {
-    await dots.nth(2).click();
-    const dotAfter = await counterIn(firstCard);
-    check(
-      `${label}: pagination dot jumps to screen`,
-      dotAfter === `3/${dotAfter?.split("/")[1]}` && dotAfter !== dotBefore,
-      `${dotBefore} -> ${dotAfter}`,
-    );
-    // Every dot, including the first, must page without opening the detail
-    // view: they sit next to the open target, so a stray bubble would be easy
-    // to miss by eye.
-    let opened = 0;
-    for (let position = 0; position < dotCount; position += 1) {
-      await dots.nth(position).click();
-      await page.waitForTimeout(120);
-      const detailOpen =
-        (await page.locator("[role='dialog']").count()) +
-        (await page.locator("aside").filter({ hasText: "Screens" }).count());
-      if (detailOpen > 0) opened += 1;
-      const seen = await counterIn(firstCard);
-      if (seen !== `${position + 1}/${dotCount}`) {
-        check(`${label}: dot ${position + 1} selects its screen`, false, String(seen));
-      }
-    }
-    check(`${label}: no dot opens the detail view`, opened === 0, `${opened} of ${dotCount} did`);
-  } else {
-    check(`${label}: pagination dots present`, false, `found ${dotCount}`);
-  }
+  // Card carousels use arrows and n/total only.
+  check(
+    `${label}: gallery cards have no pagination dots`,
+    (await firstCard.getByRole("button", { name: /Show screen \d+/ }).count()) === 0,
+    "",
+  );
 
   const afterBox = await firstCard.boundingBox();
   check(
@@ -410,8 +384,7 @@ for (const viewport of WIDTHS) {
   check(`${label}: horizontal chip navigation is visible`, chrome.chipNav, "");
   check(`${label}: no navigation drawer trigger`, chrome.hamburger === 0, "");
   check(`${label}: header width toggle is absent`, chrome.density === 0, "");
-  const expectedColumns =
-    viewport.width < 768 ? 1 : viewport.width < 1024 ? 2 : viewport.width >= 1600 ? 4 : 3;
+  const expectedColumns = viewport.width < 768 ? 1 : 2;
   check(
     `${label}: at most ${expectedColumns} cards per row`,
     chrome.columns > 0 && chrome.columns <= expectedColumns,
