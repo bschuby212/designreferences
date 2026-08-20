@@ -111,7 +111,7 @@ function Chip({
       data-nav-label={typeof children === "string" ? children : undefined}
       onClick={onClick}
       className={cn(
-        "relative z-10 inline-flex h-10 shrink-0 items-center gap-1.5 border-b-2 px-2.5 text-[13px] whitespace-nowrap transition-colors",
+        "relative z-10 inline-flex h-10 shrink-0 items-center gap-1.5 border-b px-2.5 text-[13px] whitespace-nowrap transition-colors",
         active
           ? "border-[var(--text)] font-medium !text-[var(--text)]"
           : "border-transparent !text-[var(--muted)] hover:!text-[var(--text)]",
