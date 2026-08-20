@@ -88,7 +88,7 @@ export function DetailView({
           aria-label="Reference media"
           className={
             modal
-              ? "flex min-h-0 items-center justify-center overflow-hidden bg-[var(--bg)]"
+              ? "flex min-h-0 items-center justify-center overflow-hidden bg-[var(--hover)]"
               : "p-4 pb-0"
           }
         >
