@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Plus, Search, X } from "lucide-react";
+import { ArrowLeft, Heart, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import {
   EMPTY_FILTERS,
   LAPTOP_NAV_COLLECTIONS,
@@ -298,6 +298,35 @@ export function AppShell() {
           onClose={closeDetail}
           title={selected.title || "Reference"}
           size="large"
+          actions={
+            <>
+              <IconButton
+                label={selected.favorite ? "Unfavorite" : "Favorite"}
+                onClick={() => void toggleFavorite(selected.id)}
+              >
+                <Heart
+                  size={16}
+                  strokeWidth={1.75}
+                  fill={selected.favorite ? "currentColor" : "none"}
+                />
+              </IconButton>
+              <IconButton
+                label="Edit"
+                onClick={() => setEditor({ mode: "edit", id: selected.id })}
+              >
+                <Pencil size={16} strokeWidth={1.75} />
+              </IconButton>
+              <IconButton
+                label="Delete"
+                onClick={() => {
+                  void deleteReference(selected.id);
+                  setSelectedId(null);
+                }}
+              >
+                <Trash2 size={16} strokeWidth={1.75} />
+              </IconButton>
+            </>
+          }
         >
           <DetailView
             reference={selected}

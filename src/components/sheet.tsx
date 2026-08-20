@@ -110,6 +110,7 @@ export function Modal({
   open,
   onClose,
   title,
+  actions,
   children,
   className,
   size = "default",
@@ -117,6 +118,7 @@ export function Modal({
   open: boolean;
   onClose: () => void;
   title?: string;
+  actions?: ReactNode;
   children: ReactNode;
   className?: string;
   size?: "default" | "large" | "wide";
@@ -163,10 +165,13 @@ export function Modal({
       >
         {title && (
           <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] px-3">
-            <h2 className="truncate text-[13px] font-medium">{title}</h2>
-            <IconButton label="Close" onClick={onClose}>
-              <X size={16} strokeWidth={1.75} />
-            </IconButton>
+            <h2 className="min-w-0 truncate text-[13px] font-medium">{title}</h2>
+            <div className="flex shrink-0 items-center">
+              {actions}
+              <IconButton label="Close" onClick={onClose}>
+                <X size={16} strokeWidth={1.75} />
+              </IconButton>
+            </div>
           </div>
         )}
         {children}

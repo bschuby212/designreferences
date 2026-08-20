@@ -135,7 +135,7 @@ export function ReferenceCarousel({
 
   return (
     <div
-      className={cn("group/carousel relative", className)}
+      className={cn("group/carousel relative", !card && "h-full w-full", className)}
       role="group"
       aria-roledescription="carousel"
       aria-label={`${title}: ${count} screens`}
@@ -156,9 +156,9 @@ export function ReferenceCarousel({
           "relative overflow-hidden",
           card
             ? "rounded-[24px] bg-[var(--preview)]"
-            : "rounded-[var(--radius)] bg-[var(--hover)]",
+            : "h-full w-full",
         )}
-        style={{ aspectRatio: ratio }}
+        style={card ? { aspectRatio: ratio } : undefined}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -172,6 +172,7 @@ export function ReferenceCarousel({
               key={screen.src}
               className={cn(
                 "h-full w-full shrink-0",
+                !card && "flex items-center justify-center",
                 card &&
                   kind === "portrait" &&
                   "flex items-center justify-center px-5 py-6",
@@ -192,7 +193,7 @@ export function ReferenceCarousel({
                     ? "max-h-full max-w-full rounded-[22px]"
                     : card
                       ? "max-h-full max-w-full rounded-[14px]"
-                      : "h-full w-full",
+                      : "max-h-full max-w-full",
                 )}
                 draggable={false}
                 loading={position === 0 ? "eager" : "lazy"}
@@ -255,33 +256,6 @@ export function ReferenceCarousel({
           </>
         )}
       </div>
-
-      {!card && count > 1 && (
-        <div className="mt-1 flex items-center justify-center gap-0.5">
-          {screens.map((screen, position) => (
-            <button
-              key={screen.src}
-              type="button"
-              aria-label={`Show screen ${position + 1}`}
-              aria-current={position === index}
-              className="grid h-7 w-7 place-items-center"
-              onClick={(event) => {
-                event.stopPropagation();
-                go(position);
-              }}
-            >
-              <span
-                className={cn(
-                  "block h-1.5 rounded-full transition-all",
-                  position === index
-                    ? "w-4 bg-[var(--text)]"
-                    : "w-1.5 bg-[var(--border-strong)]",
-                )}
-              />
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

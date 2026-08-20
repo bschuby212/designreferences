@@ -1,9 +1,9 @@
 "use client";
 
-import type { CSSProperties, ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ExternalLink, Heart, Pencil, Trash2, X } from "lucide-react";
 import type { Collection, Reference } from "@/lib/storage/types";
-import { formatSavedDate } from "@/lib/utils";
+import { formatSavedDate, productName } from "@/lib/utils";
 import { ReferenceCarousel } from "./reference-carousel";
 import { areaClass, GhostButton, IconButton } from "./ui";
 
@@ -29,40 +29,53 @@ export function DetailView({
   variant,
 }: DetailViewProps) {
   const modal = variant === "modal";
-  const mediaStyle: CSSProperties = {
-    width:
-      reference.aspect === "portrait"
-        ? "min(100%, calc((100dvh - 170px) * 9 / 19.5))"
-        : "min(100%, calc((100dvh - 170px) * 4 / 3))",
-  };
+  const company = productName(reference.title || "Untitled");
+  const [companyExtract, setCompanyExtract] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    setCompanyExtract("");
+    const params = new URLSearchParams({ name: company });
+    void fetch(`/api/company?${params}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { extract?: string } | null) => {
+        if (!cancelled) setCompanyExtract(data?.extract?.trim() ?? "");
+      })
+      .catch(() => {
+        if (!cancelled) setCompanyExtract("");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [company]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[var(--surface)]">
-      <div className="flex h-11 shrink-0 items-center justify-between border-b border-[var(--border)] px-2">
-        <div className="flex items-center gap-0.5">
-          <IconButton
-            label={reference.favorite ? "Unfavorite" : "Favorite"}
-            onClick={onFavorite}
-          >
-            <Heart
-              size={16}
-              strokeWidth={1.75}
-              fill={reference.favorite ? "currentColor" : "none"}
-            />
-          </IconButton>
-          <IconButton label="Edit" onClick={onEdit}>
-            <Pencil size={16} strokeWidth={1.75} />
-          </IconButton>
-          <IconButton label="Delete" onClick={onDelete}>
-            <Trash2 size={16} strokeWidth={1.75} />
-          </IconButton>
-        </div>
-        {!modal && (
+    <div className="flex h-full min-h-0 flex-1 flex-col bg-[var(--surface)]">
+      {!modal && (
+        <div className="flex h-11 shrink-0 items-center justify-between border-b border-[var(--border)] px-2">
+          <div className="flex items-center gap-0.5">
+            <IconButton
+              label={reference.favorite ? "Unfavorite" : "Favorite"}
+              onClick={onFavorite}
+            >
+              <Heart
+                size={16}
+                strokeWidth={1.75}
+                fill={reference.favorite ? "currentColor" : "none"}
+              />
+            </IconButton>
+            <IconButton label="Edit" onClick={onEdit}>
+              <Pencil size={16} strokeWidth={1.75} />
+            </IconButton>
+            <IconButton label="Delete" onClick={onDelete}>
+              <Trash2 size={16} strokeWidth={1.75} />
+            </IconButton>
+          </div>
           <IconButton label="Close" onClick={onClose}>
             <X size={16} strokeWidth={1.75} />
           </IconButton>
-        )}
-      </div>
+        </div>
+      )}
 
       <div
         className={
@@ -75,13 +88,14 @@ export function DetailView({
           aria-label="Reference media"
           className={
             modal
-              ? "flex min-h-0 items-center justify-center overflow-hidden bg-[var(--bg)] p-4"
+              ? "flex min-h-0 items-center justify-center overflow-hidden bg-[var(--bg)]"
               : "p-4 pb-0"
           }
         >
           <div
-            className={modal ? "mx-auto" : "mx-auto w-full max-w-[420px]"}
-            style={modal ? mediaStyle : undefined}
+            className={
+              modal ? "h-full w-full" : "mx-auto w-full max-w-[420px]"
+            }
           >
             <ReferenceCarousel
               screens={reference.screens}
@@ -117,11 +131,15 @@ export function DetailView({
               </Row>
             )}
             <Row label="Images">{reference.screens.length}</Row>
-            {reference.tags.length > 0 && (
-              <Row label="Tags">{reference.tags.join(", ")}</Row>
-            )}
+            <Row label="Company">{company}</Row>
             <Row label="Saved">{formatSavedDate(reference.createdAt)}</Row>
           </dl>
+
+          {companyExtract && (
+            <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">
+              {companyExtract}
+            </p>
+          )}
 
           {reference.url && (
             <a

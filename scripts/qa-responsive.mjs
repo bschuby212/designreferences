@@ -454,20 +454,11 @@ for (const viewport of WIDTHS) {
       (await detail.count()) > 0,
       "",
     );
-    const detailDots = inDetail.getByRole("button", { name: /Show screen \d+/ });
-    const detailDotCount = await detailDots.count();
-    if (detailDotCount > 1) {
-      await detailDots.first().click();
-      await page.waitForTimeout(250);
-      const afterDot = await inDetail.evaluate((node) => {
-        const badge = [...node.querySelectorAll("div")].find((item) =>
-          /^\d+\/\d+$/.test(item.textContent?.trim() ?? ""),
-        );
-        return badge?.textContent?.trim() ?? null;
-      });
-      check(`${label}: detail pagination dot works`, afterDot === `1/${detailDotCount}`, String(afterDot));
-      check(`${label}: detail dot does not dismiss modal`, (await detail.count()) > 0, "");
-    }
+    check(
+      `${label}: detail has no pagination dots`,
+      (await inDetail.getByRole("button", { name: /Show screen \d+/ }).count()) === 0,
+      "",
+    );
 
     const fits = await inDetail.evaluate((node) => {
       const rect = node.getBoundingClientRect();
