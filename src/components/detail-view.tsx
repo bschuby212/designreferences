@@ -102,6 +102,7 @@ export function DetailView({
               aspect={reference.aspect}
               title={reference.title || "Reference"}
               variant="detail"
+              bleed={modal}
               fit={
                 collectionNames?.includes("Dashboards") ? "dashboard" : "default"
               }

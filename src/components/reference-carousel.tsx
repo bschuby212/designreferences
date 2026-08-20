@@ -33,6 +33,8 @@ interface ReferenceCarouselProps {
   variant: "card" | "detail";
   /** Dashboards drop the tall laptop plate so screenshots fill the frame. */
   fit?: "default" | "dashboard";
+  /** Desktop modal: fill the grey pane instead of a framed aspect-ratio plate. */
+  bleed?: boolean;
   onActivate?: () => void;
   className?: string;
 }
@@ -43,6 +45,7 @@ export function ReferenceCarousel({
   title,
   variant,
   fit = "default",
+  bleed = false,
   onActivate,
   className,
 }: ReferenceCarouselProps) {
@@ -78,6 +81,7 @@ export function ReferenceCarousel({
 
   const ratio = variant === "card" ? CARD_RATIO[kind] : DETAIL_RATIO[kind];
   const card = variant === "card";
+  const fill = !card && bleed;
 
   if (count === 0) {
     return (
@@ -86,10 +90,12 @@ export function ReferenceCarousel({
           "flex items-center justify-center text-[11px] text-[var(--muted-2)]",
           card
             ? "rounded-[24px] bg-[var(--preview)]"
-            : "rounded-[var(--radius)] bg-[var(--hover)]",
+            : fill
+              ? "h-full w-full"
+              : "rounded-[var(--radius)] bg-[var(--hover)]",
           className,
         )}
-        style={{ aspectRatio: ratio }}
+        style={fill ? undefined : { aspectRatio: ratio }}
       >
         No screens
       </div>
@@ -135,7 +141,7 @@ export function ReferenceCarousel({
 
   return (
     <div
-      className={cn("group/carousel relative", !card && "h-full w-full", className)}
+      className={cn("group/carousel relative", fill && "h-full w-full", className)}
       role="group"
       aria-roledescription="carousel"
       aria-label={`${title}: ${count} screens`}
@@ -156,9 +162,11 @@ export function ReferenceCarousel({
           "relative overflow-hidden",
           card
             ? "rounded-[24px] bg-[var(--preview)]"
-            : "h-full w-full",
+            : fill
+              ? "h-full w-full"
+              : "rounded-[var(--radius)] bg-[var(--hover)]",
         )}
-        style={card ? { aspectRatio: ratio } : undefined}
+        style={fill ? undefined : { aspectRatio: ratio }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -172,7 +180,7 @@ export function ReferenceCarousel({
               key={screen.src}
               className={cn(
                 "h-full w-full shrink-0",
-                !card && "flex items-center justify-center",
+                fill && "flex items-center justify-center",
                 card &&
                   kind === "portrait" &&
                   "flex items-center justify-center px-5 py-6",
@@ -193,7 +201,9 @@ export function ReferenceCarousel({
                     ? "max-h-full max-w-full rounded-[22px]"
                     : card
                       ? "max-h-full max-w-full rounded-[14px]"
-                      : "max-h-full max-w-full",
+                      : fill
+                        ? "max-h-full max-w-full"
+                        : "h-full w-full",
                 )}
                 draggable={false}
                 loading={position === 0 ? "eager" : "lazy"}
