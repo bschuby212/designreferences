@@ -7,7 +7,6 @@ import {
   Columns3,
   Columns4,
   Filter,
-  Menu,
   Plus,
   Search,
   X,
@@ -27,7 +26,7 @@ import { Gallery } from "./gallery";
 import { useBreakpoint } from "./hooks";
 import { LibraryNav } from "./library-nav";
 import { useLibrary } from "./library-provider";
-import { Sheet } from "./sheet";
+import { Modal, Sheet } from "./sheet";
 import { IconButton, inputClass, useClickOutside } from "./ui";
 
 const RECENT_MS = 14 * 24 * 60 * 60 * 1000;
@@ -105,7 +104,6 @@ export function AppShell() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [filters, setFilters] = useState<ActiveFilters>(EMPTY_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -137,8 +135,8 @@ export function AppShell() {
     );
   }, [references, view, search, filters, collections]);
 
-  // Counts ignore the active view but respect search and filters, so the
-  // sidebar always agrees with what a tab will actually show.
+  // Counts ignore the active view but respect search and filters, so each
+  // navigation chip agrees with the references it will render.
   const counts = useMemo(() => {
     const collectionCounts: Record<string, number> = {};
     let all = 0;
@@ -271,12 +269,7 @@ export function AppShell() {
   }, [search, filterActive, view, collections]);
 
   return (
-    <div className="flex h-dvh min-h-0 overflow-hidden bg-[var(--bg)]">
-      <aside className="hidden h-full w-[var(--sidebar-w)] shrink-0 border-r border-[var(--border)] bg-[var(--bg)] md:flex md:flex-col">
-        <LibraryNav view={view} onViewChange={setView} counts={counts} />
-      </aside>
-
-      <div className="flex min-w-0 flex-1 flex-col">
+    <div className="flex h-dvh min-h-0 min-w-0 flex-col overflow-hidden bg-[var(--bg)]">
         {mobile ? (
           <header className="flex h-[var(--header-h)] items-center gap-0.5 border-b border-[var(--border)] bg-[var(--bg)] px-1 pt-[env(safe-area-inset-top)]">
             {searchOpen ? (
@@ -317,9 +310,6 @@ export function AppShell() {
                   onClick={() => setAddOpen(true)}
                 >
                   <Plus size={18} strokeWidth={1.75} />
-                </IconButton>
-                <IconButton label="Menu" onClick={() => setMenuOpen(true)}>
-                  <Menu size={16} strokeWidth={1.75} />
                 </IconButton>
               </>
             )}
@@ -385,6 +375,8 @@ export function AppShell() {
           </header>
         )}
 
+        <LibraryNav view={view} onViewChange={setView} counts={counts} />
+
         <FilterChips
           filters={filters}
           onChange={setFilters}
@@ -409,45 +401,7 @@ export function AppShell() {
             />
           </div>
 
-          {selected && !mobile && (
-            <aside className="h-full w-[var(--panel-w)] shrink-0 border-l border-[var(--border)] bg-[var(--surface)]">
-              <DetailView
-                reference={selected}
-                collectionNames={collectionNamesOf(
-                  collections,
-                  selected.collectionIds,
-                )}
-                variant="panel"
-                onClose={closeDetail}
-                onFavorite={() => void toggleFavorite(selected.id)}
-                onEdit={() => setEditor({ mode: "edit", id: selected.id })}
-                onDelete={() => {
-                  void deleteReference(selected.id);
-                  setSelectedId(null);
-                }}
-                onNotes={(notes) =>
-                  void updateReference(selected.id, { notes })
-                }
-              />
-            </aside>
-          )}
         </div>
-      </div>
-
-      <Sheet
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        side="left"
-        title="Library"
-      >
-        <LibraryNav
-          view={view}
-          onViewChange={setView}
-          onNavigate={() => setMenuOpen(false)}
-          showTitle={false}
-          counts={counts}
-        />
-      </Sheet>
 
       {mobile && (
         <FilterPanel
@@ -478,6 +432,29 @@ export function AppShell() {
             void pasteImage();
           }}
         />
+      )}
+
+      {!mobile && selected && (
+        <Modal
+          open
+          onClose={closeDetail}
+          title={selected.title || "Reference"}
+          size="large"
+        >
+          <DetailView
+            reference={selected}
+            collectionNames={collectionNamesOf(collections, selected.collectionIds)}
+            variant="modal"
+            onClose={closeDetail}
+            onFavorite={() => void toggleFavorite(selected.id)}
+            onEdit={() => setEditor({ mode: "edit", id: selected.id })}
+            onDelete={() => {
+              void deleteReference(selected.id);
+              setSelectedId(null);
+            }}
+            onNotes={(notes) => void updateReference(selected.id, { notes })}
+          />
+        </Modal>
       )}
 
       {mobile && selected && (

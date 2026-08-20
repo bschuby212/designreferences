@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import type { LinkPreview } from "@/lib/preview/types";
 import {
-  MIN_SCREENS,
   SOURCE_TYPES,
   type Aspect,
   type CreateReferenceInput,
@@ -408,17 +407,10 @@ function EditorForm({
                 Add
               </GhostButton>
             </div>
-            <p
-              className={cn(
-                "text-[11px]",
-                screens.length >= MIN_SCREENS
-                  ? "text-[var(--muted-2)]"
-                  : "text-[var(--danger)]",
-              )}
-            >
-              {screens.length >= MIN_SCREENS
-                ? "Carousel ready."
-                : `Add at least ${MIN_SCREENS} screens for a complete carousel.`}
+            <p className="text-[11px] text-[var(--muted-2)]">
+              {screens.length > 1
+                ? `${screens.length} meaningful images will appear in the carousel.`
+                : "One complete image is valid; add more only for a flow or longer page."}
             </p>
           </div>
         </Field>

@@ -12,19 +12,12 @@
   --overlay: rgb(27 26 23 / 0.4);
   --danger: #b42318;
   --danger-bg: #f8e8e6;
+  --chip-track: #e9e7e2;
+  --chip-active: #ffffff;
   --radius: 6px;
   --header-h: 52px;
-  --sidebar-w: 220px;
-  --panel-w: 360px;
   --gap: 8px;
   --min-col: 220px;
-}
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  :root {
-    --sidebar-w: 180px;
-    --panel-w: min(420px, 48vw);
-  }
 }
 
 @theme inline {

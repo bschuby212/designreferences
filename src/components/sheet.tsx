@@ -112,14 +112,31 @@ export function Modal({
   title,
   children,
   className,
+  size = "default",
 }: {
   open: boolean;
   onClose: () => void;
   title?: string;
   children: ReactNode;
   className?: string;
+  size?: "default" | "large";
 }) {
   const isClient = useIsClient();
+
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onClose]);
+
   if (!isClient || !open) return null;
 
   return createPortal(
@@ -135,7 +152,10 @@ export function Modal({
         aria-modal="true"
         aria-label={title}
         className={cn(
-          "relative flex max-h-[94dvh] w-full max-w-md flex-col rounded-t-xl bg-[var(--surface)] sm:rounded-xl",
+          "relative flex max-h-[94dvh] w-full flex-col rounded-t-xl bg-[var(--surface)] sm:rounded-xl",
+          size === "large"
+            ? "h-[calc(100dvh-32px)] sm:h-[calc(100dvh-48px)] sm:max-w-[min(1480px,calc(100vw-48px))]"
+            : "max-w-md",
           className,
         )}
       >

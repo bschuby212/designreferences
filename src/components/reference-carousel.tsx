@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 /** Frame ratios keep the card height identical on every slide. */
 const RATIO: Record<Aspect, string> = {
   portrait: "9 / 19.5",
-  landscape: "16 / 10",
+  landscape: "4 / 3",
 };
 
 const SWIPE_PX = 32;

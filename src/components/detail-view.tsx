@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { ExternalLink, Heart, Pencil, Trash2, X } from "lucide-react";
 import type { Collection, Reference } from "@/lib/storage/types";
 import { formatSavedDate } from "@/lib/utils";
@@ -15,7 +15,7 @@ interface DetailViewProps {
   onEdit: () => void;
   onDelete: () => void;
   onNotes: (notes: string) => void;
-  variant: "panel" | "sheet";
+  variant: "modal" | "sheet";
 }
 
 export function DetailView({
@@ -28,9 +28,17 @@ export function DetailView({
   onNotes,
   variant,
 }: DetailViewProps) {
+  const modal = variant === "modal";
+  const mediaStyle: CSSProperties = {
+    width:
+      reference.aspect === "portrait"
+        ? "min(100%, calc((100dvh - 170px) * 9 / 19.5))"
+        : "min(100%, calc((100dvh - 170px) * 4 / 3))",
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col bg-[var(--surface)]">
-      <div className="flex items-center justify-between px-2">
+      <div className="flex h-11 shrink-0 items-center justify-between border-b border-[var(--border)] px-2">
         <div className="flex items-center gap-0.5">
           <IconButton
             label={reference.favorite ? "Unfavorite" : "Favorite"}
@@ -49,88 +57,109 @@ export function DetailView({
             <Trash2 size={16} strokeWidth={1.75} />
           </IconButton>
         </div>
-        <IconButton label="Close" onClick={onClose}>
-          <X size={16} strokeWidth={1.75} />
-        </IconButton>
+        {!modal && (
+          <IconButton label="Close" onClick={onClose}>
+            <X size={16} strokeWidth={1.75} />
+          </IconButton>
+        )}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
-        <div className="mx-auto w-full max-w-[420px]">
-          <ReferenceCarousel
-            screens={reference.screens}
-            aspect={reference.aspect}
-            title={reference.title || "Reference"}
-            variant="detail"
-          />
-        </div>
-
-        <h1 className="mt-4 text-[16px] leading-snug font-medium tracking-tight">
-          {reference.title || "Untitled"}
-        </h1>
-
-        <dl className="mt-3 space-y-2 text-[13px]">
-          <Row label="Source">{reference.source}</Row>
-          {reference.url && (
-            <Row label="URL">
-              <a
-                href={reference.url}
-                target="_blank"
-                rel="noreferrer"
-                className="break-all text-[var(--text)] underline-offset-2 hover:underline"
-              >
-                {reference.url}
-              </a>
-            </Row>
-          )}
-          {collectionNames && collectionNames.length > 0 && (
-            <Row label={collectionNames.length > 1 ? "Collections" : "Collection"}>
-              {collectionNames.join(", ")}
-            </Row>
-          )}
-          <Row label="Screens">{reference.screens.length}</Row>
-          {reference.tags.length > 0 && (
-            <Row label="Tags">{reference.tags.join(", ")}</Row>
-          )}
-          <Row label="Saved">{formatSavedDate(reference.createdAt)}</Row>
-        </dl>
-
-        {reference.url && (
-          <a
-            href={reference.url}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-[var(--text)] text-[13px] font-medium text-white"
+      <div
+        className={
+          modal
+            ? "grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_360px]"
+            : "min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        }
+      >
+        <section
+          aria-label="Reference media"
+          className={
+            modal
+              ? "flex min-h-0 items-center justify-center overflow-hidden bg-[var(--bg)] p-4"
+              : "p-4 pb-0"
+          }
+        >
+          <div
+            className={modal ? "mx-auto" : "mx-auto w-full max-w-[420px]"}
+            style={modal ? mediaStyle : undefined}
           >
-            <ExternalLink size={14} strokeWidth={1.75} />
-            Open original
-          </a>
-        )}
-
-        <label className="mt-5 flex flex-col gap-1.5">
-          <span className="text-[11px] font-medium tracking-wide text-[var(--muted)]">
-            Notes
-          </span>
-          <textarea
-            defaultValue={reference.notes}
-            key={reference.id + reference.updatedAt}
-            className={areaClass}
-            placeholder="Add notes…"
-            onBlur={(e) => {
-              if (e.target.value !== reference.notes) onNotes(e.target.value);
-            }}
-          />
-        </label>
-
-        {variant === "sheet" && (
-          <div className="mt-4 flex gap-2">
-            <GhostButton className="flex-1" onClick={onEdit}>
-              Edit
-            </GhostButton>
-            <GhostButton className="flex-1 text-[var(--danger)]" onClick={onDelete}>
-              Delete
-            </GhostButton>
+            <ReferenceCarousel
+              screens={reference.screens}
+              aspect={reference.aspect}
+              title={reference.title || "Reference"}
+              variant="detail"
+            />
           </div>
-        )}
+        </section>
+
+        <section
+          aria-label="Reference details"
+          className={
+            modal
+              ? "min-h-0 overflow-y-auto border-l border-[var(--border)] p-5"
+              : "p-4 pb-8"
+          }
+        >
+          {!modal && (
+            <h1 className="text-[18px] leading-snug font-medium tracking-tight">
+              {reference.title || "Untitled"}
+            </h1>
+          )}
+
+          <dl className={modal ? "space-y-2 text-[13px]" : "mt-4 space-y-2 text-[13px]"}>
+            <Row label="Source">{reference.source}</Row>
+            {collectionNames && collectionNames.length > 0 && (
+              <Row label={collectionNames.length > 1 ? "Categories" : "Category"}>
+                {collectionNames.join(", ")}
+              </Row>
+            )}
+            <Row label="Images">{reference.screens.length}</Row>
+            {reference.tags.length > 0 && (
+              <Row label="Tags">{reference.tags.join(", ")}</Row>
+            )}
+            <Row label="Saved">{formatSavedDate(reference.createdAt)}</Row>
+          </dl>
+
+          {reference.url && (
+            <a
+              href={reference.url}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-[var(--radius)] bg-[var(--text)] text-[13px] font-medium text-white"
+            >
+              <ExternalLink size={14} strokeWidth={1.75} />
+              Open source
+            </a>
+          )}
+
+          <label className="mt-5 flex flex-col gap-1.5">
+            <span className="text-[11px] font-medium tracking-wide text-[var(--muted)]">
+              Notes
+            </span>
+            <textarea
+              defaultValue={reference.notes}
+              key={reference.id + reference.updatedAt}
+              className={areaClass}
+              placeholder="Add notes or a description…"
+              onBlur={(event) => {
+                if (event.target.value !== reference.notes) {
+                  onNotes(event.target.value);
+                }
+              }}
+            />
+          </label>
+
+          {!modal && (
+            <div className="mt-4 flex gap-2">
+              <GhostButton className="flex-1" onClick={onEdit}>
+                Edit
+              </GhostButton>
+              <GhostButton className="flex-1 text-[var(--danger)]" onClick={onDelete}>
+                Delete
+              </GhostButton>
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );
@@ -138,9 +167,9 @@ export function DetailView({
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="grid grid-cols-[88px_1fr] gap-2">
+    <div className="grid grid-cols-[76px_1fr] gap-2">
       <dt className="text-[var(--muted-2)]">{label}</dt>
-      <dd className="min-w-0">{children}</dd>
+      <dd className="min-w-0 break-words">{children}</dd>
     </div>
   );
 }
@@ -150,7 +179,7 @@ export function collectionNamesOf(
   ids: string[] | undefined,
 ) {
   if (!ids?.length) return [];
-  const byId = new Map(collections.map((c) => [c.id, c.name]));
+  const byId = new Map(collections.map((collection) => [collection.id, collection.name]));
   return ids
     .map((id) => byId.get(id))
     .filter((name): name is string => Boolean(name));
