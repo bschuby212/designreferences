@@ -1,0 +1,377 @@
+[
+ {
+  "title": "Superpower section",
+  "pageUrl": "https://superpower.com/",
+  "patterns": [
+   "Navigation Section"
+  ],
+  "seconds": 2.28,
+  "candidates": 11,
+  "distinct": 11,
+  "kept": [
+   "cand02.png",
+   "cand03.png",
+   "cand04.png",
+   "cand05.png",
+   "cand06.png",
+   "cand07.png",
+   "cand08.png",
+   "cand09.png",
+   "cand10.png",
+   "cand11.png",
+   "cand12.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/superpower-section"
+ },
+ {
+  "title": "Paraform section",
+  "pageUrl": "https://www.paraform.com/",
+  "patterns": [
+   "CTA Section"
+  ],
+  "seconds": 3.05,
+  "candidates": 11,
+  "distinct": 11,
+  "kept": [
+   "cand02.png",
+   "cand03.png",
+   "cand04.png",
+   "cand05.png",
+   "cand06.png",
+   "cand07.png",
+   "cand08.png",
+   "cand09.png",
+   "cand10.png",
+   "cand11.png",
+   "cand12.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/paraform-section"
+ },
+ {
+  "title": "Paraform section",
+  "pageUrl": "https://www.paraform.com/",
+  "patterns": [
+   "Features"
+  ],
+  "seconds": 3.05,
+  "candidates": 11,
+  "distinct": 11,
+  "kept": [
+   "cand02.png",
+   "cand03.png",
+   "cand04.png",
+   "cand05.png",
+   "cand06.png",
+   "cand07.png",
+   "cand08.png",
+   "cand09.png",
+   "cand10.png",
+   "cand11.png",
+   "cand12.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/paraform-section"
+ },
+ {
+  "title": "Superpower section",
+  "pageUrl": "https://superpower.com/welcome",
+  "patterns": [],
+  "seconds": 2.28,
+  "candidates": 11,
+  "distinct": 11,
+  "kept": [
+   "cand02.png",
+   "cand03.png",
+   "cand04.png",
+   "cand05.png",
+   "cand06.png",
+   "cand07.png",
+   "cand08.png",
+   "cand09.png",
+   "cand10.png",
+   "cand11.png",
+   "cand12.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/superpower-section"
+ },
+ {
+  "title": "Midday section",
+  "pageUrl": "https://midday.ai/",
+  "patterns": [],
+  "seconds": 10.23,
+  "candidates": 11,
+  "distinct": 10,
+  "kept": [
+   "cand02.png",
+   "cand03.png",
+   "cand04.png",
+   "cand05.png",
+   "cand06.png",
+   "cand08.png",
+   "cand09.png",
+   "cand10.png",
+   "cand11.png",
+   "cand12.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/midday-section"
+ },
+ {
+  "title": "Antimetal section",
+  "pageUrl": "https://antimetal.com/",
+  "patterns": [
+   "Features"
+  ],
+  "seconds": 4.92,
+  "candidates": 11,
+  "distinct": 7,
+  "kept": [
+   "cand02.png",
+   "cand03.png",
+   "cand04.png",
+   "cand05.png",
+   "cand06.png",
+   "cand08.png",
+   "cand10.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/antimetal-section"
+ },
+ {
+  "title": "Aave section",
+  "pageUrl": "https://aave.com/blog",
+  "patterns": [
+   "Blog"
+  ],
+  "seconds": 4.23,
+  "candidates": 11,
+  "distinct": 7,
+  "kept": [
+   "cand02.png",
+   "cand06.png",
+   "cand07.png",
+   "cand08.png",
+   "cand09.png",
+   "cand10.png",
+   "cand11.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/aave-section"
+ },
+ {
+  "title": "Current section",
+  "pageUrl": "https://current.com/spend/",
+  "patterns": [
+   "Hero Section"
+  ],
+  "seconds": 4.0,
+  "candidates": 11,
+  "distinct": 7,
+  "kept": [
+   "cand02.png",
+   "cand03.png",
+   "cand04.png",
+   "cand05.png",
+   "cand06.png",
+   "cand07.png",
+   "cand08.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/current-section"
+ },
+ {
+  "title": "ISO Meet section",
+  "pageUrl": "https://www.isomeet.com/",
+  "patterns": [
+   "Blog"
+  ],
+  "seconds": 3.8,
+  "candidates": 11,
+  "distinct": 6,
+  "kept": [
+   "cand02.png",
+   "cand03.png",
+   "cand07.png",
+   "cand08.png",
+   "cand09.png",
+   "cand10.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/iso-meet-section"
+ },
+ {
+  "title": "ISO Meet section",
+  "pageUrl": "https://www.isomeet.com/",
+  "patterns": [
+   "CTA Section"
+  ],
+  "seconds": 3.8,
+  "candidates": 11,
+  "distinct": 6,
+  "kept": [
+   "cand02.png",
+   "cand03.png",
+   "cand07.png",
+   "cand08.png",
+   "cand09.png",
+   "cand10.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/iso-meet-section"
+ },
+ {
+  "title": "Ease section",
+  "pageUrl": "https://easehealth.com",
+  "patterns": [
+   "Hero Section"
+  ],
+  "seconds": 3.77,
+  "candidates": 11,
+  "distinct": 4,
+  "kept": [
+   "cand02.png",
+   "cand03.png",
+   "cand04.png",
+   "cand05.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/ease-section"
+ },
+ {
+  "title": "Ease section",
+  "pageUrl": "https://easehealth.com",
+  "patterns": [
+   "Comparison"
+  ],
+  "seconds": 3.77,
+  "candidates": 11,
+  "distinct": 4,
+  "kept": [
+   "cand02.png",
+   "cand03.png",
+   "cand04.png",
+   "cand05.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/ease-section"
+ },
+ {
+  "title": "Ramp section",
+  "pageUrl": "https://ramp.com/partnerships",
+  "patterns": [
+   "Hero Section"
+  ],
+  "seconds": 2.17,
+  "candidates": 11,
+  "distinct": 4,
+  "kept": [
+   "cand02.png",
+   "cand04.png",
+   "cand08.png",
+   "cand09.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/ramp-section"
+ },
+ {
+  "title": "Ramp section",
+  "pageUrl": "https://ramp.com/",
+  "patterns": [
+   "Features"
+  ],
+  "seconds": 2.17,
+  "candidates": 11,
+  "distinct": 4,
+  "kept": [
+   "cand02.png",
+   "cand04.png",
+   "cand08.png",
+   "cand09.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/ramp-section"
+ },
+ {
+  "title": "Oevra section",
+  "pageUrl": "https://oevra.com/",
+  "patterns": [
+   "About"
+  ],
+  "seconds": 5.02,
+  "candidates": 11,
+  "distinct": 4,
+  "kept": [
+   "cand02.png",
+   "cand04.png",
+   "cand06.png",
+   "cand07.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/oevra-section"
+ },
+ {
+  "title": "Mercury section",
+  "pageUrl": "https://mercury.com/",
+  "patterns": [
+   "CTA Section"
+  ],
+  "seconds": 6.27,
+  "candidates": 11,
+  "distinct": 3,
+  "kept": [
+   "cand02.png",
+   "cand05.png",
+   "cand06.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/mercury-section"
+ },
+ {
+  "title": "ClickUp section",
+  "pageUrl": "https://clickup.com/",
+  "patterns": [
+   "Hero Section"
+  ],
+  "seconds": 2.6,
+  "candidates": 11,
+  "distinct": 3,
+  "kept": [
+   "cand02.png",
+   "cand03.png",
+   "cand04.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/clickup-section"
+ },
+ {
+  "title": "Runway section",
+  "pageUrl": "https://runway.com/",
+  "patterns": [
+   "Social Proof"
+  ],
+  "seconds": 3.13,
+  "candidates": 11,
+  "distinct": 2,
+  "kept": [
+   "cand02.png",
+   "cand07.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/runway-section"
+ },
+ {
+  "title": "Ada section",
+  "pageUrl": "https://www.ada.cx/",
+  "patterns": [
+   "Stats Section"
+  ],
+  "seconds": 4.37,
+  "candidates": 11,
+  "distinct": 2,
+  "kept": [
+   "cand02.png",
+   "cand05.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/ada-section"
+ },
+ {
+  "title": "T1 Energy section",
+  "pageUrl": "https://t1energy.com/",
+  "patterns": [
+   "CTA Section"
+  ],
+  "seconds": 2.4,
+  "candidates": 11,
+  "distinct": 2,
+  "kept": [
+   "cand02.png",
+   "cand03.png"
+  ],
+  "folder": "/workspace/scripts/.cache/sections/t1-energy-section"
+ }
+]
