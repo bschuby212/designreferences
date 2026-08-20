@@ -211,6 +211,12 @@ for (const viewport of WIDTHS) {
         ),
       ),
       metadata: cards.some((card) => /Mobbin|\d+ images?/i.test(card.textContent ?? "")),
+      categoryLine: cards.some(
+        (card) =>
+          [...card.querySelectorAll("button")].filter(
+            (button) => !button.getAttribute("aria-label"),
+          ).length > 1,
+      ),
       bordered: cards.some((card) => {
         const style = getComputedStyle(card);
         return style.borderStyle !== "none" && parseFloat(style.borderWidth) > 0;
@@ -236,6 +242,7 @@ for (const viewport of WIDTHS) {
   });
   check(`${label}: every card shows its product name`, cardPresentation.titled, "");
   check(`${label}: cards hide source and image-count labels`, !cardPresentation.metadata, "");
+  check(`${label}: cards have no category line under the title`, !cardPresentation.categoryLine, "");
   check(`${label}: cards have no visible stroke`, !cardPresentation.bordered, "");
   check(`${label}: page background is white`, cardPresentation.whitePage, "");
   check(
@@ -384,10 +391,10 @@ for (const viewport of WIDTHS) {
   check(`${label}: horizontal chip navigation is visible`, chrome.chipNav, "");
   check(`${label}: no navigation drawer trigger`, chrome.hamburger === 0, "");
   check(`${label}: header width toggle is absent`, chrome.density === 0, "");
-  const expectedColumns = viewport.width < 768 ? 1 : 2;
+  const expectedColumns = viewport.width < 768 ? 1 : 3;
   check(
-    `${label}: at most ${expectedColumns} cards per row`,
-    chrome.columns > 0 && chrome.columns <= expectedColumns,
+    `${label}: ${expectedColumns} cards per row on Mobile Apps`,
+    chrome.columns === expectedColumns,
     `${chrome.columns} in first row`,
   );
   if (viewport.width < 768) {
@@ -558,31 +565,74 @@ for (const viewport of WIDTHS) {
       null,
       { timeout: 45000 },
     );
+    const webColumns = await page.evaluate(() => {
+      const cards = [...document.querySelectorAll("article")];
+      if (cards.length === 0) return 0;
+      const firstTop = Math.round(cards[0].getBoundingClientRect().top);
+      return cards.filter((card) => Math.round(card.getBoundingClientRect().top) === firstTop).length;
+    });
+    check(
+      `${label}: Web canvas is two cards per row`,
+      webColumns === 2,
+      `${webColumns} in first row`,
+    );
+    const webTitles = await page.evaluate(() =>
+      [...document.querySelectorAll("article img")].map((image) => image.currentSrc),
+    );
+    const onboardingFlowDirs = [
+      "original-ab8dcea1-9830-43e8-9487-fe6ce5910c84",
+      "original-e064f4d1-4ee1-4748-ba66-f2172caa277d",
+      "original-242ff3d6-866e-4a34-87eb-715354f9d45f",
+      "original-0c3206ce-2ec1-4408-8a00-24190ec7651d",
+      "original-ec2d5551-50bd-45c9-be09-b5a84a3f6605",
+      "original-7f996659-bee1-4760-b1e2-7918e3816f20",
+      "original-950c4839-2b7d-4a9e-9e15-52b1c5e77769",
+      "original-808643f4-122e-40a8-9b14-bc25c7379c34",
+    ];
+    check(
+      `${label}: Web canvas has no onboarding-flow cards`,
+      webTitles.every((src) => !onboardingFlowDirs.some((dir) => src.includes(dir))),
+      webTitles.filter((src) => onboardingFlowDirs.some((dir) => src.includes(dir))).slice(0, 3).join(", "),
+    );
     const desktopThumbs = await page.evaluate(() =>
       [...document.querySelectorAll("article img")]
         .filter((image) => image.complete && image.naturalWidth > 0)
         .slice(0, 8)
         .map((image) => {
         const style = getComputedStyle(image);
+        const frame = image.closest("div[style*='aspect-ratio']");
+        const frameBox = frame?.getBoundingClientRect();
+        const imageBox = image.getBoundingClientRect();
         return {
           naturalWidth: image.naturalWidth,
           naturalHeight: image.naturalHeight,
           objectFit: style.objectFit,
-          objectPosition: style.objectPosition,
+          inset:
+            Boolean(frameBox) &&
+            imageBox.width < frameBox.width - 20 &&
+            imageBox.height < frameBox.height - 20,
         };
       }),
     );
     check(
-      `${label}: web thumbnails use 1440×1080 source frames`,
+      `${label}: web thumbnails keep their natural viewport size`,
       desktopThumbs.length > 0 &&
         desktopThumbs.every(
-          (image) => image.naturalWidth === 1440 && image.naturalHeight === 1080,
+          (image) =>
+            image.naturalWidth <= 1440 &&
+            image.naturalHeight <= 1080 &&
+            image.naturalWidth > 0,
         ),
       JSON.stringify(desktopThumbs.slice(0, 2)),
     );
     check(
       `${label}: web thumbnails preserve proportions`,
       desktopThumbs.every((image) => image.objectFit === "contain"),
+      JSON.stringify(desktopThumbs.slice(0, 2)),
+    );
+    check(
+      `${label}: laptop mockups sit inset in the gray preview`,
+      desktopThumbs.length > 0 && desktopThumbs.every((image) => image.inset),
       JSON.stringify(desktopThumbs.slice(0, 2)),
     );
     const webFrame = page.locator("article div[style*='16 / 10']").first();

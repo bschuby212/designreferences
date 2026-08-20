@@ -148,6 +148,28 @@ check(
   "",
 );
 check(
+  "web onboarding flows are not tagged Web or Landing Pages",
+  seeded
+    .filter((reference) => /Web Onboarding Flow$/.test(reference.title))
+    .every(
+      (reference) =>
+        reference.categories.length === 1 && reference.categories[0] === "Onboarding",
+    ),
+  seeded
+    .filter((reference) => /Web Onboarding Flow$/.test(reference.title))
+    .map((reference) => `${reference.title}:${reference.categories.join("+")}`)
+    .join(", "),
+);
+check(
+  "Navattic onboarding is absent from Web",
+  !seeded.some(
+    (reference) =>
+      reference.seedKey === "original-242ff3d6-866e-4a34-87eb-715354f9d45f" &&
+      reference.categories.includes("Web"),
+  ),
+  "",
+);
+check(
   "only the three exact duplicate source IDs are retired",
   EXPECTED_RETIRED_DUPLICATES.every(
     (url) => !seeded.some((reference) => reference.url === url),
