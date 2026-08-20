@@ -72,12 +72,9 @@ def viewport_capture(job: tuple[str, str, str]) -> str:
     source = download(url)
     os.makedirs(os.path.dirname(output), exist_ok=True)
     if position == "fit":
-        # Preserve the complete normal desktop viewport, including left
-        # navigation, and anchor it to the top of the 4:3 thumbnail canvas.
-        video_filter = (
-            "scale=1440:1080:force_original_aspect_ratio=decrease,"
-            "pad=1440:1080:(ow-iw)/2:0:color=white"
-        )
+        # Keep the desktop viewport's natural aspect. White padding here
+        # showed up as a leftover plate under laptop thumbnails.
+        video_filter = "scale=1440:1080:force_original_aspect_ratio=decrease"
     else:
         y = {
             "top": "0",

@@ -174,7 +174,7 @@ export function ReferenceCarousel({
                   "flex items-center justify-center px-5 py-6",
                 card &&
                   kind === "landscape" &&
-                  "flex items-center justify-center p-2.5",
+                  "flex items-center justify-center px-5 py-8",
               )}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -186,7 +186,7 @@ export function ReferenceCarousel({
                   card && kind === "portrait"
                     ? "max-h-full max-w-full rounded-[22px]"
                     : card
-                      ? "h-full w-full rounded-[14px]"
+                      ? "max-h-full max-w-full rounded-[14px]"
                       : "h-full w-full",
                 )}
                 draggable={false}
