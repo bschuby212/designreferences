@@ -68,8 +68,14 @@ function SourceGlyph({
 }) {
   if (type === "X") {
     return (
-      <span className={cn("grid h-3.5 w-3.5 place-items-center text-[10px] font-semibold", className)}>
-        X
+      <span
+        aria-hidden
+        className={cn(
+          "grid h-3.5 w-3.5 place-items-center text-[11px] font-semibold",
+          className,
+        )}
+      >
+        𝕏
       </span>
     );
   }
@@ -107,21 +113,21 @@ function Chip({
       className={cn(
         "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md px-2.5 text-[13px] whitespace-nowrap transition-colors",
         active
-          ? "bg-[var(--hover)] font-medium text-[var(--text)]"
-          : "text-[var(--muted-2)] hover:bg-[var(--hover)] hover:text-[var(--muted)]",
+          ? "bg-[var(--hover)] font-medium !text-[var(--text)]"
+          : "!text-[var(--muted-2)] hover:bg-[var(--hover)] hover:!text-[var(--muted)]",
       )}
     >
       <Icon
         size={14}
         strokeWidth={1.75}
-        className={active ? "text-[var(--text)]" : "text-[var(--muted-2)]"}
+        className={active ? "!text-[var(--text)]" : "!text-[var(--muted-2)]"}
       />
       <span>{children}</span>
       {count !== undefined && (
         <span
           className={cn(
             "text-[10px] tabular-nums",
-            active ? "text-[var(--muted)]" : "text-[var(--muted-2)]",
+            active ? "!text-[var(--muted)]" : "!text-[var(--muted-2)]",
           )}
         >
           {count}
@@ -153,8 +159,8 @@ function SourceMenu({
         className={cn(
           "inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[13px] whitespace-nowrap transition-colors",
           source
-            ? "bg-[var(--hover)] font-medium text-[var(--text)]"
-            : "text-[var(--muted-2)] hover:bg-[var(--hover)] hover:text-[var(--muted)]",
+            ? "bg-[var(--hover)] font-medium !text-[var(--text)]"
+            : "!text-[var(--muted-2)] hover:bg-[var(--hover)] hover:!text-[var(--muted)]",
         )}
       >
         <SourceGlyph type={source} />
