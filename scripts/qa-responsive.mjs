@@ -373,8 +373,10 @@ for (const viewport of WIDTHS) {
       sidebar: visible(document.querySelector("aside nav")),
       chipNav: visible(document.querySelector("nav[aria-label='Library categories']")),
       chipScrollable: (() => {
-        const nav = document.querySelector("nav[aria-label='Library categories'] > div");
-        return nav ? nav.scrollWidth > nav.clientWidth : false;
+        const scroller = document.querySelector(
+          "nav[aria-label='Library categories'] .overflow-x-auto",
+        );
+        return scroller ? scroller.scrollWidth > scroller.clientWidth + 1 : false;
       })(),
       hamburger: byLabel("Menu").length,
       density: byLabel("compact").length + byLabel("medium").length + byLabel("large").length,

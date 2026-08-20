@@ -214,8 +214,8 @@ export function LibraryNav({
       aria-label="Library categories"
       className="border-b border-[var(--border)] px-2 py-2 md:px-4"
     >
-      <div className="flex w-max max-w-full items-center gap-1">
-        <div className="no-scrollbar min-w-0 overflow-x-auto">
+      <div className="flex min-w-0 max-w-full items-center gap-1">
+        <div className="no-scrollbar min-w-0 flex-1 overflow-x-auto">
           <div className="flex w-max items-center gap-0.5">
             {collections
               .filter((collection) => !isHiddenNavCollection(collection.name))
