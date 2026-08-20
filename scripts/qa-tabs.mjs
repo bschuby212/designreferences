@@ -20,7 +20,7 @@ const EXPECTED_RETIRED_DUPLICATES = [
   "https://mobbin.com/explore/sections/2f4ca455-4c8d-429e-a43a-593170bcd5d0",
   "https://mobbin.com/explore/sections/25505391-659c-4d67-978e-83b976c6e211",
 ];
-const REMOVED_NAV_ITEMS = ["Favorites", "Recent", "Typography"];
+const REMOVED_NAV_ITEMS = ["All", "Favorites", "Recent", "Typography", "Branding"];
 
 let failures = 0;
 const checks = [];
@@ -180,25 +180,30 @@ for (const row of rows) {
   report.chips[row.label] = { count: row.count, rendered: state.count };
 }
 
-const categoryLabels = rows
-  .map((row) => row.label)
-  .filter((label) => label !== "All");
+const categoryLabels = rows.map((row) => row.label);
 for (const category of categoryLabels) {
   const expected = seeded.filter((reference) => reference.categories.includes(category)).length;
   const actual = report.chips[category]?.rendered;
   check(`${category}: stored membership matches gallery`, expected === actual, `${expected} vs ${actual}`);
 }
 
-await page.locator('[data-nav-label="All"]').click();
+check(
+  "default canvas is Mobile Apps",
+  rows[0]?.label === "Mobile Apps" &&
+    (await page.locator('[data-nav-label="Mobile Apps"]').getAttribute("aria-pressed")) === "true",
+  rows[0]?.label ?? "",
+);
+
+await page.locator('[data-nav-label="Mobile Apps"]').click();
 const search = page.getByPlaceholder("Search references…");
-await search.fill("dashboard");
+await search.fill("headspace");
 await page.waitForTimeout(350);
 const searched = await galleryState();
 const searchedRows = await navRows();
-check("search returns dashboard references", searched.count > 0, `${searched.count}`);
+check("search returns Headspace references", searched.count > 0, `${searched.count}`);
 check(
-  "search updates the All chip count",
-  searchedRows.find((row) => row.label === "All")?.count === searched.count,
+  "search updates the Mobile Apps chip count",
+  searchedRows.find((row) => row.label === "Mobile Apps")?.count === searched.count,
   `${searched.count}`,
 );
 await search.fill("zzzznotfound");
@@ -208,20 +213,20 @@ check("search empty state includes the query", Boolean(none.empty?.includes("zzz
 await search.fill("");
 
 await page.getByRole("button", { name: "Filter" }).first().click();
-for (const label of ["Favorites", "Typography"]) {
+for (const label of ["Favorites", "Typography", "Branding"]) {
   check(
     `filter panel excludes ${label}`,
     (await page.getByRole("button", { name: label, exact: true }).count()) === 0,
     "",
   );
 }
-await page.getByRole("button", { name: "Dashboards", exact: true }).last().click();
+await page.getByRole("button", { name: "Onboarding", exact: true }).last().click();
 await page.waitForTimeout(350);
 const filtered = await galleryState();
 const filteredRows = await navRows();
 check(
   "filters update chip counts and rendered cards together",
-  filteredRows.find((row) => row.label === "All")?.count === filtered.count,
+  filteredRows.find((row) => row.label === "Mobile Apps")?.count === filtered.count,
   `${filtered.count}`,
 );
 

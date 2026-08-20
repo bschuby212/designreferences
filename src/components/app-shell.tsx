@@ -14,7 +14,7 @@ import {
   type NavView,
   type Reference,
 } from "@/lib/storage/types";
-import { cn } from "@/lib/utils";
+import { cn, isHiddenNavCollection } from "@/lib/utils";
 import { AddMenu, EditorDialog, type EditorState } from "./editor-dialog";
 import { DetailView, collectionNamesOf } from "./detail-view";
 import { FilterChips, FilterPanel } from "./filter-panel";
@@ -72,7 +72,14 @@ export function AppShell() {
   const breakpoint = useBreakpoint();
   const mobile = breakpoint === "mobile";
 
-  const [view, setView] = useState<NavView>({ type: "all" });
+  const mobileAppsId =
+    collections.find((collection) => collection.name === "Mobile Apps")?.id ??
+    null;
+  const [view, setView] = useState<NavView | null>(null);
+  const activeView: NavView = view ??
+    (mobileAppsId
+      ? { type: "collection", id: mobileAppsId }
+      : { type: "all" });
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [filters, setFilters] = useState<ActiveFilters>(EMPTY_FILTERS);
@@ -90,31 +97,28 @@ export function AppShell() {
     return references.filter((reference) =>
       matches(
         reference,
-        view,
+        activeView,
         search,
         filters,
         collectionNamesOf(collections, reference.collectionIds),
       ),
     );
-  }, [references, view, search, filters, collections]);
+  }, [references, activeView, search, filters, collections]);
 
   // Counts ignore the active view but respect search and filters, so each
   // navigation chip agrees with the references it will render.
   const counts = useMemo(() => {
     const collectionCounts: Record<string, number> = {};
-    let all = 0;
     for (const reference of references) {
       const names = collectionNamesOf(collections, reference.collectionIds);
       if (!matches(reference, { type: "all" }, search, filters, names)) continue;
-      all += 1;
       for (const id of reference.collectionIds) {
-        if (collections.find((collection) => collection.id === id)?.name === "Typography") {
-          continue;
-        }
+        const name = collections.find((collection) => collection.id === id)?.name;
+        if (!name || isHiddenNavCollection(name)) continue;
         collectionCounts[id] = (collectionCounts[id] ?? 0) + 1;
       }
     }
-    return { all, collections: collectionCounts };
+    return { collections: collectionCounts };
   }, [references, collections, search, filters]);
 
   const selected = references.find((r) => r.id === selectedId) ?? null;
@@ -199,9 +203,9 @@ export function AppShell() {
         hint: "Clear a filter to widen the results.",
       };
     }
-    if (view.type === "collection") {
+    if (activeView.type === "collection") {
       const name =
-        collections.find((collection) => collection.id === view.id)?.name ??
+        collections.find((collection) => collection.id === activeView.id)?.name ??
         "this collection";
       return {
         title: `Nothing in ${name} yet`,
@@ -212,7 +216,7 @@ export function AppShell() {
       title: "Your library is empty",
       hint: "Paste a link or upload a screenshot to start collecting references.",
     };
-  }, [search, filterActive, view, collections]);
+  }, [search, filterActive, activeView, collections]);
 
   return (
     <div className="flex h-dvh min-h-0 min-w-0 flex-col overflow-hidden bg-[var(--bg)]">
@@ -320,7 +324,7 @@ export function AppShell() {
           </header>
         )}
 
-        <LibraryNav view={view} onViewChange={setView} counts={counts} />
+        <LibraryNav view={activeView} onViewChange={setView} counts={counts} />
 
         <FilterChips
           filters={filters}

@@ -216,12 +216,40 @@ for (const viewport of WIDTHS) {
         return style.borderStyle !== "none" && parseFloat(style.borderWidth) > 0;
       }),
       whitePage: bodyBg === "rgb(255, 255, 255)",
+      preview: (() => {
+        const frame = document.querySelector("article div[style*='aspect-ratio']");
+        if (!frame) return null;
+        const style = getComputedStyle(frame);
+        const image = frame.querySelector("img");
+        const frameBox = frame.getBoundingClientRect();
+        const imageBox = image?.getBoundingClientRect();
+        return {
+          background: style.backgroundColor,
+          radius: parseFloat(style.borderRadius),
+          inset:
+            Boolean(imageBox) &&
+            imageBox.width < frameBox.width - 20 &&
+            imageBox.height < frameBox.height - 20,
+        };
+      })(),
     };
   });
   check(`${label}: every card shows its product name`, cardPresentation.titled, "");
   check(`${label}: cards hide source and image-count labels`, !cardPresentation.metadata, "");
   check(`${label}: cards have no visible stroke`, !cardPresentation.bordered, "");
   check(`${label}: page background is white`, cardPresentation.whitePage, "");
+  check(
+    `${label}: preview is a large rounded gray container`,
+    Boolean(cardPresentation.preview) &&
+      cardPresentation.preview.background !== "rgb(255, 255, 255)" &&
+      cardPresentation.preview.radius >= 20,
+    JSON.stringify(cardPresentation.preview),
+  );
+  check(
+    `${label}: phone screenshot sits inset in the preview`,
+    Boolean(cardPresentation.preview?.inset),
+    JSON.stringify(cardPresentation.preview),
+  );
 
   // Card height must not change while paging.
   const firstCard = page.locator("article").filter({
@@ -243,16 +271,16 @@ for (const viewport of WIDTHS) {
   const beforeBox = await firstCard.boundingBox();
   const frameBox = await firstCard.locator("div[style*='aspect-ratio']").first().boundingBox();
   check(
-    `${label}: portrait carousel uses a 9:16 frame`,
-    Boolean(frameBox) && Math.abs((frameBox.width / frameBox.height) - 9 / 16) < 0.05,
+    `${label}: portrait carousel uses a 3:4 preview`,
+    Boolean(frameBox) && Math.abs((frameBox.width / frameBox.height) - 3 / 4) < 0.05,
     frameBox ? `${Math.round(frameBox.width)}×${Math.round(frameBox.height)}` : "missing",
   );
-  const landscapeFrame = page.locator("article div[style*='4 / 3']").first();
+  const landscapeFrame = page.locator("article div[style*='16 / 10']").first();
   if ((await landscapeFrame.count()) > 0) {
     const landscapeBox = await landscapeFrame.boundingBox();
     check(
-      `${label}: landscape cards use a 4:3 frame`,
-      Boolean(landscapeBox) && Math.abs((landscapeBox.width / landscapeBox.height) - 4 / 3) < 0.05,
+      `${label}: landscape cards use a 16:10 preview`,
+      Boolean(landscapeBox) && Math.abs((landscapeBox.width / landscapeBox.height) - 16 / 10) < 0.05,
       landscapeBox
         ? `${Math.round(landscapeBox.width)}×${Math.round(landscapeBox.height)}`
         : "missing",
@@ -383,7 +411,7 @@ for (const viewport of WIDTHS) {
   check(`${label}: no navigation drawer trigger`, chrome.hamburger === 0, "");
   check(`${label}: header width toggle is absent`, chrome.density === 0, "");
   const expectedColumns =
-    viewport.width < 768 ? 1 : viewport.width < 1024 ? 2 : 3;
+    viewport.width < 768 ? 1 : viewport.width < 1024 ? 2 : viewport.width >= 1600 ? 4 : 3;
   check(
     `${label}: at most ${expectedColumns} cards per row`,
     chrome.columns > 0 && chrome.columns <= expectedColumns,
@@ -575,10 +603,17 @@ for (const viewport of WIDTHS) {
       desktopThumbs.every((image) => image.objectFit === "contain"),
       JSON.stringify(desktopThumbs.slice(0, 2)),
     );
+    const webFrame = page.locator("article div[style*='16 / 10']").first();
+    const webBox = (await webFrame.count()) > 0 ? await webFrame.boundingBox() : null;
+    check(
+      `${label}: web cards use a 16:10 preview`,
+      Boolean(webBox) && Math.abs((webBox.width / webBox.height) - 16 / 10) < 0.05,
+      webBox ? `${Math.round(webBox.width)}×${Math.round(webBox.height)}` : "missing",
+    );
     if (SHOTS) {
       await page.screenshot({ path: `${SHOTS}/web-gallery-${viewport.width}.png` });
     }
-    await page.locator('[data-nav-label="All"]').click();
+    await page.locator('[data-nav-label="Mobile Apps"]').click();
     await page.waitForTimeout(250);
   }
 

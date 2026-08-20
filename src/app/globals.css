@@ -14,6 +14,7 @@
   --danger-bg: #f8e8e6;
   --chip-track: #e9e7e2;
   --chip-active: #ffffff;
+  --preview: #f2f1ee;
   --radius: 6px;
   --header-h: 52px;
 }
@@ -70,18 +71,29 @@ button {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: 28px 24px;
+  gap: 32px 28px;
 }
 
 .gallery-flex > * {
-  flex: 1 1 calc((100% - 48px) / 3);
-  max-width: calc((100% - 48px) / 3);
+  flex: 1 1 calc((100% - 56px) / 3);
+  max-width: calc((100% - 56px) / 3);
   min-width: 0;
+}
+
+@media (min-width: 1600px) {
+  .gallery-flex {
+    gap: 36px 28px;
+  }
+
+  .gallery-flex > * {
+    flex-basis: calc((100% - 84px) / 4);
+    max-width: calc((100% - 84px) / 4);
+  }
 }
 
 @media (max-width: 1023px) {
   .gallery-flex {
-    gap: 22px 18px;
+    gap: 24px 18px;
   }
 
   .gallery-flex > * {
@@ -92,7 +104,7 @@ button {
 
 @media (max-width: 767px) {
   .gallery-flex {
-    gap: 20px;
+    gap: 22px;
   }
 
   .gallery-flex > * {

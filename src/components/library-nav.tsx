@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Folder, LayoutGrid, Plus } from "lucide-react";
+import { Folder, Plus } from "lucide-react";
 import type { NavView } from "@/lib/storage/types";
-import { cn } from "@/lib/utils";
+import { cn, isHiddenNavCollection } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
 import { inputClass } from "./ui";
 
 export interface NavCounts {
-  all: number;
   collections: Record<string, number>;
 }
 
@@ -87,15 +86,7 @@ export function LibraryNav({
       className="border-b border-[var(--border)] px-2 py-2 md:px-4"
     >
       <div className="no-scrollbar flex min-w-0 max-w-full items-center gap-1 overflow-x-auto rounded-full bg-[var(--chip-track)] p-1">
-        <Chip
-          active={view.type === "all"}
-          icon={<LayoutGrid size={13} strokeWidth={1.75} />}
-          count={counts?.all}
-          onClick={() => onViewChange({ type: "all" })}
-        >
-          All
-        </Chip>
-        {collections.filter((collection) => collection.name !== "Typography").map((collection) => (
+        {collections.filter((collection) => !isHiddenNavCollection(collection.name)).map((collection) => (
           <Chip
             key={collection.id}
             active={view.type === "collection" && view.id === collection.id}

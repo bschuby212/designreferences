@@ -3,7 +3,7 @@
 import { type ReactNode } from "react";
 import { X } from "lucide-react";
 import { SOURCE_TYPES, type ActiveFilters } from "@/lib/storage/types";
-import { cn } from "@/lib/utils";
+import { cn, isHiddenNavCollection } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
 import { Sheet } from "./sheet";
 import { GhostButton, PrimaryButton } from "./ui";
@@ -46,7 +46,7 @@ export function FilterPanel({
         ))}
       </Group>
       <Group label="Collection">
-        {collections.filter((collection) => collection.name !== "Typography").map((collection) => (
+        {collections.filter((collection) => !isHiddenNavCollection(collection.name)).map((collection) => (
           <Chip
             key={collection.id}
             active={filters.collectionIds.includes(collection.id)}

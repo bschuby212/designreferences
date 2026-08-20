@@ -1,3 +1,5 @@
+import { HIDDEN_NAV_COLLECTIONS } from "@/lib/storage/types";
+
 export function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
@@ -29,6 +31,10 @@ export function hostnameOf(url: string) {
   } catch {
     return "";
   }
+}
+
+export function isHiddenNavCollection(name: string) {
+  return (HIDDEN_NAV_COLLECTIONS as readonly string[]).includes(name);
 }
 
 /** Display-only product name. Stored titles stay unchanged for search. */

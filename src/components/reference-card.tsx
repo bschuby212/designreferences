@@ -9,7 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import type { Reference } from "@/lib/storage/types";
-import { cn, productName } from "@/lib/utils";
+import { cn, isHiddenNavCollection, productName } from "@/lib/utils";
 import { ReferenceCarousel } from "./reference-carousel";
 import { useClickOutside } from "./ui";
 
@@ -37,7 +37,12 @@ export function ReferenceCard({
   const [menu, setMenu] = useState(false);
   const menuRef = useClickOutside(menu, () => setMenu(false));
   const name = productName(reference.title || "Untitled");
-  const category = collectionNames[0];
+  const categoryIndex = collectionNames.findIndex(
+    (label) => !isHiddenNavCollection(label),
+  );
+  const category = categoryIndex >= 0 ? collectionNames[categoryIndex] : undefined;
+  const categoryId =
+    categoryIndex >= 0 ? reference.collectionIds[categoryIndex] : undefined;
 
   return (
     <article
@@ -153,21 +158,21 @@ export function ReferenceCard({
         )}
       </div>
 
-      <div className="flex min-w-0 items-center gap-2 pt-2">
+      <div className="min-w-0 pt-3">
         <button
           type="button"
           onClick={onOpen}
-          className="min-w-0 truncate text-left text-[13px] leading-tight font-medium text-[var(--text)]"
+          className="block min-w-0 truncate text-left text-[14px] leading-tight font-semibold tracking-tight text-[var(--text)]"
         >
           {name}
         </button>
-        {category && reference.collectionIds[0] ? (
+        {category && categoryId ? (
           <button
             type="button"
-            className="shrink-0 text-[11px] text-[var(--muted-2)] hover:text-[var(--muted)]"
+            className="mt-0.5 block text-[12px] text-[var(--muted-2)] hover:text-[var(--muted)]"
             onClick={(event) => {
               event.stopPropagation();
-              onSelectCollection?.(reference.collectionIds[0]);
+              onSelectCollection?.(categoryId);
             }}
           >
             {category}

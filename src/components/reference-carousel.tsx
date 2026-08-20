@@ -11,8 +11,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Aspect, ReferenceScreen } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
 
-/** Frame ratios keep the card height identical on every slide. */
-const RATIO: Record<Aspect, string> = {
+/** Outer gray preview size. Slide height stays fixed while paging. */
+const CARD_RATIO: Record<Aspect, string> = {
+  portrait: "3 / 4",
+  landscape: "16 / 10",
+};
+
+const DETAIL_RATIO: Record<Aspect, string> = {
   portrait: "9 / 16",
   landscape: "4 / 3",
 };
@@ -45,6 +50,7 @@ export function ReferenceCarousel({
   // Time of the last swipe rather than a boolean: a flag that outlives the
   // gesture ends up swallowing a later tap that was meant to open the card.
   const swipedAt = useRef(0);
+  const kind: Aspect = aspect ?? "landscape";
 
   // Compare the screens themselves rather than the array identity: the live
   // query hands back a fresh array on every write, and resetting to the first
@@ -67,13 +73,17 @@ export function ReferenceCarousel({
     [count],
   );
 
-  const ratio = RATIO[aspect ?? "landscape"];
+  const ratio = variant === "card" ? CARD_RATIO[kind] : DETAIL_RATIO[kind];
+  const card = variant === "card";
 
   if (count === 0) {
     return (
       <div
         className={cn(
-          "flex items-center justify-center rounded-[var(--radius)] bg-white text-[11px] text-[var(--muted-2)]",
+          "flex items-center justify-center text-[11px] text-[var(--muted-2)]",
+          card
+            ? "rounded-[24px] bg-[var(--preview)]"
+            : "rounded-[var(--radius)] bg-[var(--hover)]",
           className,
         )}
         style={{ aspectRatio: ratio }}
@@ -123,6 +133,42 @@ export function ReferenceCarousel({
     "[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100",
   );
 
+  const dots = count > 1 && (
+    <div
+      className={cn(
+        "flex items-center justify-center gap-0.5",
+        card && "pointer-events-none absolute inset-x-0 bottom-1.5 z-20",
+        !card && "mt-1",
+      )}
+    >
+      {screens.map((screen, position) => (
+        <button
+          key={screen.src}
+          type="button"
+          aria-label={`Show screen ${position + 1}`}
+          aria-current={position === index}
+          className={cn(
+            "grid place-items-center",
+            card ? "pointer-events-auto h-7 w-7" : "h-7 w-7",
+          )}
+          onClick={(event) => {
+            event.stopPropagation();
+            go(position);
+          }}
+        >
+          <span
+            className={cn(
+              "block h-1.5 rounded-full transition-all",
+              position === index
+                ? "w-4 bg-[var(--text)]"
+                : "w-1.5 bg-[var(--border-strong)]",
+            )}
+          />
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <div
       className={cn("group/carousel relative", className)}
@@ -142,7 +188,12 @@ export function ReferenceCarousel({
       }}
     >
       <div
-        className="relative overflow-hidden rounded-[var(--radius)] bg-[var(--bg)]"
+        className={cn(
+          "relative overflow-hidden",
+          card
+            ? "rounded-[24px] bg-[var(--preview)]"
+            : "rounded-[var(--radius)] bg-[var(--hover)]",
+        )}
         style={{ aspectRatio: ratio }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -153,23 +204,42 @@ export function ReferenceCarousel({
           style={{ transform: `translate3d(-${index * 100}%, 0, 0)` }}
         >
           {screens.map((screen, position) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <div
               key={screen.src}
-              src={screen.src}
-              alt={`${title} — ${screen.label}`}
-              className="h-full w-full shrink-0 select-none object-contain"
-              draggable={false}
-              loading={position === 0 ? "eager" : "lazy"}
-              decoding="async"
-              referrerPolicy="no-referrer"
-            />
+              className={cn(
+                "h-full w-full shrink-0",
+                card &&
+                  kind === "portrait" &&
+                  "flex items-center justify-center px-5 py-6",
+                card &&
+                  kind === "landscape" &&
+                  "flex items-center justify-center p-2.5",
+              )}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={screen.src}
+                alt={`${title} — ${screen.label}`}
+                className={cn(
+                  "select-none object-contain",
+                  card && kind === "portrait"
+                    ? "max-h-full max-w-full rounded-[22px]"
+                    : card
+                      ? "h-full w-full rounded-[14px]"
+                      : "h-full w-full",
+                )}
+                draggable={false}
+                loading={position === 0 ? "eager" : "lazy"}
+                decoding="async"
+                referrerPolicy="no-referrer"
+              />
+            </div>
           ))}
         </div>
 
         {/* Open target sits under the controls: siblings declared after it
             receive the pointer events instead. */}
-        {variant === "card" && onActivate && (
+        {card && onActivate && (
           <button
             type="button"
             aria-label={`Open ${title}`}
@@ -188,7 +258,7 @@ export function ReferenceCarousel({
             <button
               type="button"
               aria-label="Previous screen"
-              className={cn(arrowClass, variant === "detail" ? "left-2" : "left-1")}
+              className={cn(arrowClass, variant === "detail" ? "left-2" : "left-1.5")}
               onClick={(event) => {
                 event.stopPropagation();
                 go(index - 1);
@@ -199,7 +269,7 @@ export function ReferenceCarousel({
             <button
               type="button"
               aria-label="Next screen"
-              className={cn(arrowClass, variant === "detail" ? "right-2" : "right-1")}
+              className={cn(arrowClass, variant === "detail" ? "right-2" : "right-1.5")}
               onClick={(event) => {
                 event.stopPropagation();
                 go(index + 1);
@@ -208,47 +278,21 @@ export function ReferenceCarousel({
               <ChevronRight size={arrowSize} strokeWidth={2} />
             </button>
 
-            {/* On cards the top-right corner belongs to the row of actions. */}
             <div
               className={cn(
                 "pointer-events-none absolute top-1.5 z-20 rounded-full bg-[var(--text)]/75 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-white",
-                variant === "detail" ? "right-2 top-2" : "left-1.5",
+                variant === "detail" ? "right-2 top-2" : "left-2",
               )}
             >
               {index + 1}/{count}
             </div>
           </>
         )}
+
+        {card ? dots : null}
       </div>
 
-      {count > 1 && (
-        <div className="mt-1 flex items-center justify-center gap-0.5">
-          {screens.map((screen, position) => (
-            <button
-              key={screen.src}
-              type="button"
-              aria-label={`Show screen ${position + 1}`}
-              aria-current={position === index}
-              // Generous target: the dots sit right below the area that opens
-              // the reference, so a near miss should still page.
-              className="grid h-7 w-7 place-items-center"
-              onClick={(event) => {
-                event.stopPropagation();
-                go(position);
-              }}
-            >
-              <span
-                className={cn(
-                  "block h-2 rounded-full transition-all",
-                  position === index
-                    ? "w-4 bg-[var(--text)]"
-                    : "w-2 bg-[var(--border-strong)]",
-                )}
-              />
-            </button>
-          ))}
-        </div>
-      )}
+      {card ? null : dots}
     </div>
   );
 }

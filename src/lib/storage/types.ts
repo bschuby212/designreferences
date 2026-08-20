@@ -133,3 +133,6 @@ export const DEFAULT_COLLECTIONS = [
   "Motion",
   "Branding",
 ];
+
+/** Kept in IndexedDB, but not shown as gallery canvases. */
+export const HIDDEN_NAV_COLLECTIONS = ["Typography", "Branding"] as const;
