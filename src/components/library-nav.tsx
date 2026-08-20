@@ -111,7 +111,7 @@ function Chip({
       data-nav-label={typeof children === "string" ? children : undefined}
       onClick={onClick}
       className={cn(
-        "inline-flex h-8 shrink-0 items-center gap-1.5 border-b-2 px-2.5 text-[13px] whitespace-nowrap transition-colors",
+        "relative z-10 inline-flex h-10 shrink-0 items-center gap-1.5 border-b-2 px-2.5 text-[13px] whitespace-nowrap transition-colors",
         active
           ? "border-[var(--text)] font-medium !text-[var(--text)]"
           : "border-transparent !text-[var(--muted)] hover:!text-[var(--text)]",
@@ -124,7 +124,14 @@ function Chip({
       />
       <span>{children}</span>
       {count !== undefined && (
-        <span className="text-[10px] tabular-nums !text-[var(--muted)]">
+        <span
+          className={cn(
+            "ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1.5 text-[10px] font-medium tabular-nums",
+            active
+              ? "bg-[var(--hover)] !text-[var(--text)]"
+              : "bg-[var(--hover)] !text-[var(--muted)]",
+          )}
+        >
           {count}
         </span>
       )}
@@ -152,7 +159,7 @@ function SourceMenu({
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          "inline-flex h-8 items-center gap-1.5 px-2.5 text-[13px] whitespace-nowrap transition-colors",
+          "inline-flex h-10 items-center gap-1.5 px-2.5 text-[13px] whitespace-nowrap transition-colors",
           source
             ? "font-medium !text-[var(--text)]"
             : "!text-[var(--muted)] hover:!text-[var(--text)]",
@@ -212,7 +219,7 @@ export function LibraryNav({
   return (
     <nav
       aria-label="Library categories"
-      className="border-b border-[var(--border)] px-2 py-2 md:px-4"
+      className="relative px-2 md:px-4"
     >
       <div className="flex min-w-0 max-w-full items-center gap-1">
         <div className="no-scrollbar min-w-0 flex-1 overflow-x-auto">
@@ -241,6 +248,10 @@ export function LibraryNav({
           </>
         )}
       </div>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[var(--border)]"
+      />
     </nav>
   );
 }
