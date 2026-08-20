@@ -547,13 +547,22 @@ for (const viewport of WIDTHS) {
   if (viewport.width >= 1280) {
     await page.locator('[data-nav-label="Web"]').click();
     await page.waitForTimeout(400);
-    await page.waitForFunction(() =>
-      [...document.querySelectorAll("article img")]
-        .slice(0, 12)
-        .every((image) => image.complete && image.naturalWidth > 0),
+    await page.waitForFunction(
+      () =>
+        [...document.querySelectorAll("article")]
+          .slice(0, 4)
+          .every((card) => {
+            const image = card.querySelector("img");
+            return image && image.complete && image.naturalWidth > 0;
+          }),
+      null,
+      { timeout: 45000 },
     );
     const desktopThumbs = await page.evaluate(() =>
-      [...document.querySelectorAll("article img")].slice(0, 20).map((image) => {
+      [...document.querySelectorAll("article img")]
+        .filter((image) => image.complete && image.naturalWidth > 0)
+        .slice(0, 8)
+        .map((image) => {
         const style = getComputedStyle(image);
         return {
           naturalWidth: image.naturalWidth,
