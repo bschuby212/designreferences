@@ -224,9 +224,47 @@ check(
     .join(", "),
 );
 check(
-  "Mobile Apps membership stays at 72",
-  seeded.filter((reference) => reference.categories.includes("Mobile Apps")).length === 72,
+  "Mobile Apps membership excludes onboarding",
+  seeded.filter((reference) => reference.categories.includes("Mobile Apps")).length === 60,
   `${seeded.filter((reference) => reference.categories.includes("Mobile Apps")).length}`,
+);
+check(
+  "Mobile Onboarding membership stays at 50",
+  seeded.filter((reference) => reference.categories.includes("Mobile Onboarding")).length === 50,
+  `${seeded.filter((reference) => reference.categories.includes("Mobile Onboarding")).length}`,
+);
+check(
+  "Mobile Apps and Mobile Onboarding are mutually exclusive",
+  seeded.every(
+    (reference) =>
+      !(
+        reference.categories.includes("Mobile Apps") &&
+        reference.categories.includes("Mobile Onboarding")
+      ),
+  ),
+  seeded
+    .filter(
+      (reference) =>
+        reference.categories.includes("Mobile Apps") &&
+        reference.categories.includes("Mobile Onboarding"),
+    )
+    .map((reference) => `${reference.seedKey}:${reference.title}`)
+    .join(", "),
+);
+check(
+  "every seed ID belongs to at most one of Mobile Apps or Mobile Onboarding",
+  new Set(
+    seeded
+      .filter(
+        (reference) =>
+          reference.categories.includes("Mobile Apps") ||
+          reference.categories.includes("Mobile Onboarding"),
+      )
+      .map((reference) => reference.seedKey),
+  ).size ===
+    seeded.filter((reference) => reference.categories.includes("Mobile Apps")).length +
+      seeded.filter((reference) => reference.categories.includes("Mobile Onboarding")).length,
+  "",
 );
 check(
   "only the three exact duplicate source IDs are retired",
@@ -269,7 +307,22 @@ for (const row of rows) {
   if (state.count === 0) {
     check(`${row.label}: empty state explains the result`, Boolean(state.empty), state.empty ?? "");
   }
-  report.chips[row.label] = { count: row.count, rendered: state.count };
+  report.chips[row.label] = { count: row.count, rendered: state.count, titles: state.titles };
+  if (row.label === "Mobile Apps") {
+    const leaked = state.titles.filter((title) => /onboarding/i.test(title));
+    check(
+      "Mobile Apps gallery has no onboarding cards",
+      leaked.length === 0,
+      leaked.join(", "),
+    );
+  }
+  if (row.label === "Mobile Onboarding") {
+    check(
+      "Mobile Onboarding gallery still has Headspace",
+      state.titles.some((title) => /headspace/i.test(title)),
+      state.titles.slice(0, 8).join(", "),
+    );
+  }
 }
 
 const categoryLabels = rows.map((row) => row.label);
@@ -281,16 +334,33 @@ for (const category of categoryLabels) {
 
 await page.locator('[data-nav-label="Mobile Apps"]').click();
 const search = page.getByPlaceholder("Search references…");
-await search.fill("headspace");
+await search.fill("klarna");
 await page.waitForTimeout(350);
 const searched = await galleryState();
 const searchedRows = await navRows();
-check("search returns Headspace references", searched.count > 0, `${searched.count}`);
+check("search returns Klarna in Mobile Apps", searched.count > 0, `${searched.count}`);
 check(
   "search updates the Mobile Apps chip count",
   searchedRows.find((row) => row.label === "Mobile Apps")?.count === searched.count,
   `${searched.count}`,
 );
+await search.fill("headspace");
+await page.waitForTimeout(350);
+const onboardingLeak = await galleryState();
+check(
+  "Headspace onboarding does not appear in Mobile Apps search",
+  onboardingLeak.count === 0,
+  onboardingLeak.titles.join(", "),
+);
+await page.locator('[data-nav-label="Mobile Onboarding"]').click();
+await page.waitForTimeout(300);
+const onboardingSearch = await galleryState();
+check(
+  "Headspace remains in Mobile Onboarding search",
+  onboardingSearch.count > 0 && onboardingSearch.titles.some((title) => /headspace/i.test(title)),
+  onboardingSearch.titles.join(", "),
+);
+await page.locator('[data-nav-label="Mobile Apps"]').click();
 await search.fill("zzzznotfound");
 await page.waitForTimeout(300);
 const none = await galleryState();

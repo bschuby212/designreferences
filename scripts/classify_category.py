@@ -39,7 +39,7 @@ LANDING = re.compile(
 )
 ONBOARDING = re.compile(
     r"\b(onboarding|welcome|permission|personalization|goal selection|"
-    r"profile setup)\b",
+    r"profile setup|first[ -]?use|get started|set up|setup)\b",
     re.I,
 )
 NAV = re.compile(r"\b(tab bar|bottom nav|drawer|navigation|menu)\b", re.I)
@@ -121,6 +121,14 @@ def uniq(names: list[str]) -> list[str]:
     return out
 
 
+def exclusive(names: list[str]) -> list[str]:
+    """Mobile Onboarding never also belongs to Mobile Apps."""
+    unique = uniq(names)
+    if "Mobile Onboarding" in unique:
+        return [name for name in unique if name != "Mobile Apps"]
+    return unique
+
+
 def product_name(title: str) -> str:
     return re.sub(r"\s+(iOS|Web|section)\b.*$", "", title, flags=re.I).strip() or title
 
@@ -150,86 +158,93 @@ def categories_for(original: dict, metadata: dict, flow_audit: dict | None = Non
     hidden = [original_category] if original_category in HIDDEN else []
 
     if original_category == "Motion":
-        return uniq(["Mobile Apps", "Motion"])
+        return exclusive(["Mobile Apps", "Motion"])
     if original_category in {"Navigation", "Mobile Navigation"}:
-        return uniq(["Mobile Apps", "Mobile Navigation", *hidden])
-    if original_category in {"Onboarding", "Mobile Onboarding"}:
-        if platform == "web":
-            return uniq(["Web Sign-Up", *hidden])
-        return uniq(["Mobile Apps", "Mobile Onboarding", *hidden])
+        return exclusive(["Mobile Apps", "Mobile Navigation", *hidden])
+    if original_category == "Mobile Onboarding" or (
+        original_category == "Onboarding" and platform != "web"
+    ) or (platform != "web" and ONBOARDING.search(text)):
+        return exclusive(["Mobile Onboarding", *hidden])
+    if original_category == "Onboarding" and platform == "web":
+        return exclusive(["Web Sign-Up", *hidden])
     if original_category == "Dashboards":
-        return uniq(["Dashboards", *hidden])
+        return exclusive(["Dashboards", *hidden])
     if original_category in {"Landing Pages", "Typography", "Web & Landing Pages"}:
         extra = ["Typography"] if original_category == "Typography" else []
-        return uniq(["Web & Landing Pages", *extra, *hidden])
+        return exclusive(["Web & Landing Pages", *extra, *hidden])
     if original_category == "Mobile Apps":
-        return uniq(["Mobile Apps", *hidden])
+        if ONBOARDING.search(text) and platform != "web":
+            return exclusive(["Mobile Onboarding", *hidden])
+        return exclusive(["Mobile Apps", *hidden])
 
     if platform == "ios":
         if ONBOARDING.search(text):
-            return uniq(["Mobile Apps", "Mobile Onboarding", *hidden])
+            return exclusive(["Mobile Onboarding", *hidden])
         if NAV.search(text):
-            return uniq(["Mobile Apps", "Mobile Navigation", *hidden])
-        return uniq(["Mobile Apps", *hidden])
+            return exclusive(["Mobile Apps", "Mobile Navigation", *hidden])
+        return exclusive(["Mobile Apps", *hidden])
 
     if title in SIGNUP_TITLE_OVERRIDES or SIGNUP.search(text):
-        return uniq(["Web Sign-Up", *hidden])
+        return exclusive(["Web Sign-Up", *hidden])
     if title in DASHBOARD_TITLE_OVERRIDES or DASHBOARD.search(text):
-        return uniq(["Dashboards", *hidden])
+        return exclusive(["Dashboards", *hidden])
     if title in LANDING_TITLE_OVERRIDES or LANDING.search(text):
         if re.search(r"\baccount setup\b", text, re.I):
-            return uniq(["Web Sign-Up", *hidden])
-        return uniq(["Web & Landing Pages", *hidden])
+            return exclusive(["Web Sign-Up", *hidden])
+        return exclusive(["Web & Landing Pages", *hidden])
 
     if original_category in {"Web", "Branding"} or platform == "web":
         if SIGNUP.search(title):
-            return uniq(["Web Sign-Up", *hidden])
+            return exclusive(["Web Sign-Up", *hidden])
         if LANDING.search(title):
-            return uniq(["Web & Landing Pages", *hidden])
-        return uniq(["Dashboards", *hidden])
+            return exclusive(["Web & Landing Pages", *hidden])
+        return exclusive(["Dashboards", *hidden])
 
-    return uniq(["Web & Landing Pages", *hidden])
+    return exclusive(["Web & Landing Pages", *hidden])
 
 
 def classify_seed(ref: dict[str, Any]) -> list[str]:
     previous = list(ref.get("collections") or [])
     title = ref.get("title") or ""
     notes = ref.get("notes") or ""
+    tags = " ".join(ref.get("tags") or [])
     aspect = ref.get("aspect")
     platform = platform_of(title, aspect, None)
     hidden = [name for name in previous if name in HIDDEN]
+    text = f"{title} {notes} {tags}"
 
     if "Motion" in previous:
-        return uniq(["Mobile Apps", "Motion"])
+        return exclusive(["Mobile Apps", "Motion"])
     if "Navigation" in previous or "Mobile Navigation" in previous:
-        return uniq(["Mobile Apps", "Mobile Navigation"])
-    if "Onboarding" in previous or "Mobile Onboarding" in previous:
-        if "Mobile Apps" in previous or platform == "ios":
-            return uniq(["Mobile Apps", "Mobile Onboarding"])
-        return uniq(["Web Sign-Up"])
+        return exclusive(["Mobile Apps", "Mobile Navigation"])
+    if "Mobile Onboarding" in previous or (
+        "Onboarding" in previous and platform != "web"
+    ) or (platform != "web" and ONBOARDING.search(text)):
+        return exclusive(["Mobile Onboarding", *hidden])
+    if "Onboarding" in previous and platform == "web":
+        return exclusive(["Web Sign-Up"])
     if "Landing Pages" in previous or "Typography" in previous or "Web & Landing Pages" in previous:
-        return uniq(["Web & Landing Pages", *hidden])
+        return exclusive(["Web & Landing Pages", *hidden])
     if title in SIGNUP_TITLE_OVERRIDES:
-        return uniq(["Web Sign-Up", *hidden])
+        return exclusive(["Web Sign-Up", *hidden])
     if title in DASHBOARD_TITLE_OVERRIDES:
-        return uniq(["Dashboards", *hidden])
+        return exclusive(["Dashboards", *hidden])
     if title in LANDING_TITLE_OVERRIDES:
-        return uniq(["Web & Landing Pages", *hidden])
+        return exclusive(["Web & Landing Pages", *hidden])
     if "Dashboards" in previous:
-        return uniq(["Dashboards", *hidden])
+        return exclusive(["Dashboards", *hidden])
     if "Mobile Apps" in previous:
-        return uniq(["Mobile Apps", *hidden])
+        return exclusive(["Mobile Apps", *hidden])
 
-    text = f"{title} {notes}"
     if SIGNUP.search(text):
-        return uniq(["Web Sign-Up", *hidden])
+        return exclusive(["Web Sign-Up", *hidden])
     if DASHBOARD.search(text):
-        return uniq(["Dashboards", *hidden])
+        return exclusive(["Dashboards", *hidden])
     if LANDING.search(text):
-        return uniq(["Web & Landing Pages", *hidden])
+        return exclusive(["Web & Landing Pages", *hidden])
     if platform == "web":
-        return uniq(["Dashboards", *hidden])
-    return uniq(["Web & Landing Pages", *hidden])
+        return exclusive(["Dashboards", *hidden])
+    return exclusive(["Web & Landing Pages", *hidden])
 
 
 def _drop_original_reference(screens: list[dict]) -> list[dict]:
@@ -350,7 +365,7 @@ def recategorize_library(references: list[dict[str, Any]]) -> tuple[list[dict[st
             classified = ["Web Sign-Up"]
             updated["screens"] = _drop_original_reference(updated["screens"])
             updated["title"] = f"{product_name(ref['title'])} Web Sign-Up"
-        updated["collections"] = classified
+        updated["collections"] = exclusive(classified)
         next_refs.append(updated)
         reason = "canonical remap"
         if classified != previous:
@@ -451,6 +466,10 @@ def recategorize_library(references: list[dict[str, Any]]) -> tuple[list[dict[st
 
     visible_names = set(CANONICAL)
     for ref in result:
+        cols = exclusive(ref["collections"])
+        if "Mobile Apps" in cols and "Mobile Onboarding" in cols:
+            raise RuntimeError(f"{ref['key']} cannot belong to Mobile Apps and Mobile Onboarding")
+        ref["collections"] = cols
         for name in ref["collections"]:
             if name in OBSOLETE:
                 raise RuntimeError(f"{ref['key']} still has obsolete category {name}")

@@ -11,7 +11,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { classifyReference } from "@/lib/classify/category";
+import { classifyReference, exclusiveCollectionNames } from "@/lib/classify/category";
 import type { LinkPreview } from "@/lib/preview/types";
 import { detectSource } from "@/lib/preview/detectSource";
 import type {
@@ -268,17 +268,14 @@ function EditorForm({
           aspect,
           screenLabels: resolved.map((screen) => screen.label),
           originalCategory: currentName,
+          tags: existing?.tags,
         });
-        const ids = [
-          ...new Set(
-            names
-              .map(
-                (name) =>
-                  collections.find((collection) => collection.name === name)?.id,
-              )
-              .filter((id): id is string => Boolean(id)),
-          ),
-        ];
+        const ids = exclusiveCollectionNames(names)
+          .map(
+            (name) =>
+              collections.find((collection) => collection.name === name)?.id,
+          )
+          .filter((id): id is string => Boolean(id));
         return ids.length ? ids : categoryId ? [categoryId] : [];
       };
       const payload: CreateReferenceInput = {

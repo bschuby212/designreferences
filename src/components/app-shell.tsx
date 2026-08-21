@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Heart, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { exclusiveCollectionNames } from "@/lib/classify/category";
 import {
   EMPTY_FILTERS,
   LAPTOP_NAV_COLLECTIONS,
@@ -26,9 +27,15 @@ function matches(
   search: string,
   filters: ActiveFilters,
   collectionNames: string[],
+  viewCollectionName?: string,
 ) {
-  if (view.type === "collection" && !reference.collectionIds.includes(view.id)) {
-    return false;
+  if (view.type === "collection") {
+    const visibleNames = exclusiveCollectionNames(collectionNames);
+    if (viewCollectionName) {
+      if (!visibleNames.includes(viewCollectionName)) return false;
+    } else if (!reference.collectionIds.includes(view.id)) {
+      return false;
+    }
   }
   if (view.type === "source" && reference.source !== view.source) return false;
   if (filters.sources.length && !filters.sources.includes(reference.source)) {
@@ -86,6 +93,10 @@ export function AppShell() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const visible = useMemo(() => {
+    const viewCollectionName =
+      activeView.type === "collection"
+        ? collections.find((collection) => collection.id === activeView.id)?.name
+        : undefined;
     return references.filter((reference) =>
       matches(
         reference,
@@ -93,6 +104,7 @@ export function AppShell() {
         search,
         filters,
         collectionNamesOf(collections, reference.collectionIds),
+        viewCollectionName,
       ),
     );
   }, [references, activeView, search, filters, collections]);
@@ -102,11 +114,14 @@ export function AppShell() {
   const counts = useMemo(() => {
     const collectionCounts: Record<string, number> = {};
     for (const reference of references) {
-      const names = collectionNamesOf(collections, reference.collectionIds);
+      const names = exclusiveCollectionNames(
+        collectionNamesOf(collections, reference.collectionIds),
+      );
       if (!matches(reference, { type: "all" }, search, filters, names)) continue;
-      for (const id of reference.collectionIds) {
-        const name = collections.find((collection) => collection.id === id)?.name;
-        if (!name || isHiddenNavCollection(name)) continue;
+      for (const name of names) {
+        if (isHiddenNavCollection(name)) continue;
+        const id = collections.find((collection) => collection.name === name)?.id;
+        if (!id) continue;
         collectionCounts[id] = (collectionCounts[id] ?? 0) + 1;
       }
     }
