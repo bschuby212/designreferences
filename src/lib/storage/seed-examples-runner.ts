@@ -1,5 +1,6 @@
 "use client";
 
+import { exclusiveCollectionNames } from "@/lib/classify/category";
 import { repository } from "@/lib/storage";
 import { EXAMPLE_SEEDS, SEED_REVISION } from "@/lib/storage/seed-examples";
 import { DEFAULT_COLLECTIONS, type CreateReferenceInput } from "@/lib/storage/types";
@@ -57,7 +58,7 @@ async function run() {
     thumbnailUrl: seed.screens[0]?.src ?? null,
     thumbnailType: "og",
     source: seed.source,
-    collectionIds: seed.collections
+    collectionIds: exclusiveCollectionNames(seed.collections)
       .map((name) => idByName.get(name.trim().toLowerCase()))
       .filter((id): id is string => Boolean(id)),
     screens: seed.screens.map((screen) => ({ ...screen })),

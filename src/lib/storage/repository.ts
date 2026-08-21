@@ -1,5 +1,6 @@
 import {
   classifyReference,
+  exclusiveCollectionNames,
   isNavigationContent,
   isOnboardingContent,
   isSignupContent,
@@ -36,6 +37,22 @@ function toReference(
     seedKey: record.seedKey ?? null,
     thumbnail: blob,
   };
+}
+
+async function exclusiveCollectionIds(ids: string[] | undefined) {
+  const unique = [...new Set(ids ?? [])];
+  if (unique.length === 0) return unique;
+  const collections = await getDb().collections.toArray();
+  const nameById = new Map(collections.map((row) => [row.id, row.name]));
+  const allowed = new Set(
+    exclusiveCollectionNames(
+      unique.map((id) => nameById.get(id)).filter((name): name is string => Boolean(name)),
+    ),
+  );
+  return unique.filter((id) => {
+    const name = nameById.get(id);
+    return !name || allowed.has(name);
+  });
 }
 
 export interface LibraryRepository {
@@ -82,6 +99,7 @@ export const indexedDbRepository: LibraryRepository = {
 
   async createReference(input) {
     const timestamp = now();
+    const collectionIds = await exclusiveCollectionIds(input.collectionIds);
     const record: ReferenceRecord = {
       id: uid(),
       title: input.title,
@@ -89,7 +107,7 @@ export const indexedDbRepository: LibraryRepository = {
       thumbnailUrl: input.thumbnailUrl ?? null,
       thumbnailType: input.thumbnailType,
       source: input.source,
-      collectionIds: input.collectionIds ?? [],
+      collectionIds,
       screens: input.screens ?? [],
       aspect: input.aspect ?? null,
       seedKey: input.seedKey ?? null,
@@ -118,6 +136,7 @@ export const indexedDbRepository: LibraryRepository = {
       id: existing.id,
       createdAt: existing.createdAt,
       updatedAt: now(),
+      collectionIds: await exclusiveCollectionIds(rest.collectionIds ?? existing.collectionIds),
     };
     await getDb().transaction("rw", getDb().references, getDb().thumbnails, async () => {
       await getDb().references.put(next);
@@ -392,6 +411,19 @@ export const indexedDbRepository: LibraryRepository = {
         await db.references.update(survivor.id, { screens, collectionIds });
       }
 
+      const exclusiveMap = await byName();
+      const appsId = exclusiveMap.get("mobile apps")?.id;
+      const onboardingId = exclusiveMap.get("mobile onboarding")?.id;
+      if (appsId && onboardingId) {
+        for (const record of await db.references.toArray()) {
+          const ids = record.collectionIds ?? [];
+          if (!ids.includes(onboardingId) || !ids.includes(appsId)) continue;
+          await db.references.update(record.id, {
+            collectionIds: ids.filter((id) => id !== appsId),
+          });
+        }
+      }
+
       const used = new Set(
         (await db.references.toArray()).flatMap((row) => row.collectionIds ?? []),
       );
@@ -464,6 +496,13 @@ export const indexedDbRepository: LibraryRepository = {
    */
   async replaceSeededReferences(inputs) {
     const timestamp = now();
+    const sanitized: CreateReferenceInput[] = [];
+    for (const input of inputs) {
+      sanitized.push({
+        ...input,
+        collectionIds: await exclusiveCollectionIds(input.collectionIds),
+      });
+    }
     return getDb().transaction(
       "rw",
       getDb().references,
@@ -476,7 +515,7 @@ export const indexedDbRepository: LibraryRepository = {
           await getDb().references.delete(record.id);
           await getDb().thumbnails.delete(record.id);
         }
-        const records: ReferenceRecord[] = inputs.map((input, index) => ({
+        const records: ReferenceRecord[] = sanitized.map((input, index) => ({
           id: uid(),
           title: input.title,
           url: input.url,

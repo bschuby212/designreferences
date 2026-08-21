@@ -20,7 +20,7 @@ export interface ExampleSeed {
   aspect: "portrait" | "landscape";
 }
 
-export const SEED_REVISION = "2026-08-landing-1440-1";
+export const SEED_REVISION = "2026-08-onboarding-exclusive-2";
 
 export const EXAMPLE_SEEDS: ExampleSeed[] = [
   {
@@ -678,7 +678,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-7cdc08c0-3bcb-4882-90dd-5cf92019616f",
     title: "Headspace iOS Onboarding Flow",
     url: "https://mobbin.com/explore/flows/7cdc08c0-3bcb-4882-90dd-5cf92019616f",
-    collections: ["Mobile Apps", "Mobile Onboarding"],
+    collections: ["Mobile Onboarding"],
     screens: [
       { src: "/screens/headspace-ios-flow/01.webp", label: "Flow screen 1" },
       { src: "/screens/headspace-ios-flow/02.webp", label: "Flow screen 2" },
@@ -696,7 +696,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-d162ef83-02c1-45d9-be0f-6d03633ac095",
     title: "Spotify iOS Onboarding Flow",
     url: "https://mobbin.com/explore/flows/d162ef83-02c1-45d9-be0f-6d03633ac095",
-    collections: ["Mobile Apps", "Mobile Onboarding"],
+    collections: ["Mobile Onboarding"],
     screens: [
       { src: "/screens/spotify-ios-flow/01.webp", label: "Flow screen 1" },
       { src: "/screens/spotify-ios-flow/02.webp", label: "Flow screen 2" },
@@ -714,7 +714,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-7291bae9-7b5a-4b40-a911-316447f4437c",
     title: "Revolut iOS Onboarding Flow",
     url: "https://mobbin.com/explore/flows/7291bae9-7b5a-4b40-a911-316447f4437c",
-    collections: ["Mobile Apps", "Mobile Onboarding"],
+    collections: ["Mobile Onboarding"],
     screens: [
       { src: "/screens/revolut-ios-flow/01.webp", label: "Flow screen 1" },
       { src: "/screens/revolut-ios-flow/02.webp", label: "Flow screen 2" },
@@ -732,7 +732,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-cc454aaf-c5b6-40c3-8bef-3b815a88d168",
     title: "Airbnb iOS Onboarding Flow",
     url: "https://mobbin.com/explore/flows/cc454aaf-c5b6-40c3-8bef-3b815a88d168",
-    collections: ["Mobile Apps", "Mobile Onboarding"],
+    collections: ["Mobile Onboarding"],
     screens: [
       { src: "/screens/airbnb-ios-flow/01.webp", label: "Flow screen 1" },
       { src: "/screens/airbnb-ios-flow/02.webp", label: "Flow screen 2" },
@@ -750,7 +750,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-1daa0279-a2ce-44dc-a2f0-667380b64294",
     title: "Wise iOS Onboarding Flow",
     url: "https://mobbin.com/explore/flows/1daa0279-a2ce-44dc-a2f0-667380b64294",
-    collections: ["Mobile Apps", "Mobile Onboarding"],
+    collections: ["Mobile Onboarding"],
     screens: [
       { src: "/screens/wise-ios-flow/01.webp", label: "Flow screen 1" },
       { src: "/screens/wise-ios-flow/02.webp", label: "Flow screen 2" },
@@ -768,7 +768,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-835f959d-7928-45a7-a4f7-fdec964e7270",
     title: "Revolut iOS Onboarding Flow",
     url: "https://mobbin.com/explore/flows/835f959d-7928-45a7-a4f7-fdec964e7270",
-    collections: ["Mobile Apps", "Mobile Onboarding"],
+    collections: ["Mobile Onboarding"],
     screens: [
       { src: "/screens/revolut-ios-flow-5/01.webp", label: "Flow screen 1" },
       { src: "/screens/revolut-ios-flow-5/02.webp", label: "Flow screen 2" },
@@ -786,7 +786,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-093bddb2-c6df-434e-86bc-dd52e3feb909",
     title: "Uber Eats iOS Onboarding Flow",
     url: "https://mobbin.com/explore/flows/093bddb2-c6df-434e-86bc-dd52e3feb909",
-    collections: ["Mobile Apps", "Mobile Onboarding"],
+    collections: ["Mobile Onboarding"],
     screens: [
       { src: "/screens/uber-eats-ios-flow/01.webp", label: "Flow screen 1" },
       { src: "/screens/uber-eats-ios-flow/02.webp", label: "Flow screen 2" },
@@ -804,7 +804,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-37252943-7152-4236-8d9c-3cc80e872c6c",
     title: "Mozi iOS Onboarding Flow",
     url: "https://mobbin.com/explore/flows/37252943-7152-4236-8d9c-3cc80e872c6c",
-    collections: ["Mobile Apps", "Mobile Onboarding"],
+    collections: ["Mobile Onboarding"],
     screens: [
       { src: "/screens/mozi-ios-flow/01.webp", label: "Flow screen 1" },
       { src: "/screens/mozi-ios-flow/02.webp", label: "Flow screen 2" },
@@ -822,7 +822,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-fc508ec1-6af0-46bd-9b01-578751475faa",
     title: "Instagram iOS Onboarding Flow",
     url: "https://mobbin.com/explore/flows/fc508ec1-6af0-46bd-9b01-578751475faa",
-    collections: ["Mobile Apps", "Mobile Onboarding"],
+    collections: ["Mobile Onboarding"],
     screens: [
       { src: "/screens/instagram-ios-flow/01.webp", label: "Flow screen 1" },
       { src: "/screens/instagram-ios-flow/02.webp", label: "Flow screen 2" },
@@ -840,7 +840,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-24035767-44e2-4688-8869-e891996fabc2",
     title: "Luma iOS Onboarding Flow",
     url: "https://mobbin.com/explore/flows/24035767-44e2-4688-8869-e891996fabc2",
-    collections: ["Mobile Apps", "Mobile Onboarding"],
+    collections: ["Mobile Onboarding"],
     screens: [
       { src: "/screens/luma-ios-flow/01.webp", label: "Flow screen 1" },
       { src: "/screens/luma-ios-flow/02.webp", label: "Flow screen 2" },
@@ -858,7 +858,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-57e41d19-30db-4443-ab36-b19c8c20dfe4",
     title: "Ahead iOS Onboarding Flow",
     url: "https://mobbin.com/explore/flows/57e41d19-30db-4443-ab36-b19c8c20dfe4",
-    collections: ["Mobile Apps", "Mobile Onboarding"],
+    collections: ["Mobile Onboarding"],
     screens: [
       { src: "/screens/ahead-ios-flow/01.webp", label: "Flow screen 1" },
       { src: "/screens/ahead-ios-flow/02.webp", label: "Flow screen 2" },
@@ -1010,7 +1010,7 @@ export const EXAMPLE_SEEDS: ExampleSeed[] = [
     key: "original-4ad908cc-ad45-4e29-b906-841b405495cf",
     title: "Uber iOS Onboarding Flow",
     url: "https://mobbin.com/explore/flows/4ad908cc-ad45-4e29-b906-841b405495cf",
-    collections: ["Mobile Apps", "Mobile Onboarding"],
+    collections: ["Mobile Onboarding"],
     screens: [
       { src: "/screens/uber-ios-flow/01.webp", label: "Flow screen 1" },
       { src: "/screens/uber-ios-flow/02.webp", label: "Flow screen 2" },

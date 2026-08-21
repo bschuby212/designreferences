@@ -13,6 +13,7 @@ export type ClassifyInput = {
   aspect?: Aspect | null;
   platform?: "ios" | "android" | "web" | string;
   screenLabels?: string[];
+  tags?: string[];
   originalCategory?: string;
 };
 
@@ -23,7 +24,7 @@ const DASHBOARD =
 const LANDING =
   /\b(landing page|homepage|home page|marketing|hero|pricing|testimonial|feature section|plan comparison)\b/i;
 const ONBOARDING =
-  /\b(onboarding|welcome|permission|personalization|goal selection|profile setup)\b/i;
+  /\b(onboarding|welcome|permission|personalization|goal selection|profile setup|first[ -]?use|get started|set up|setup)\b/i;
 const NAV = /\b(tab bar|bottom nav|drawer|navigation|menu)\b/i;
 
 const DESIGN_SYSTEM_HOSTS = [
@@ -82,8 +83,21 @@ function uniq(names: string[]) {
   return [...new Set(names.filter(Boolean))];
 }
 
+/**
+ * Mobile Onboarding and Mobile Apps are mutually exclusive. Onboarding,
+ * welcome, setup, permission, personalization, and first-use flows stay on
+ * Mobile Onboarding and must not also appear in Mobile Apps.
+ */
+export function exclusiveCollectionNames(names: string[]): string[] {
+  const unique = uniq(names);
+  if (unique.includes("Mobile Onboarding")) {
+    return unique.filter((name) => name !== "Mobile Apps");
+  }
+  return unique;
+}
+
 function haystack(input: ClassifyInput) {
-  return [input.title, input.notes, ...(input.screenLabels ?? [])]
+  return [input.title, input.notes, ...(input.screenLabels ?? []), ...(input.tags ?? [])]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -125,7 +139,7 @@ function hiddenFrom(original: string) {
 
 function allowed(names: string[]) {
   const allow = new Set<string>(DEFAULT_COLLECTIONS);
-  return uniq(names.filter((name) => allow.has(name)));
+  return exclusiveCollectionNames(uniq(names.filter((name) => allow.has(name))));
 }
 
 /** Map a raw API/folder label onto an allowed collection, or null if unknown. */
@@ -141,6 +155,9 @@ export function resolveAllowedCollectionName(raw: string): string | null {
 /**
  * Maps a reference to canonical gallery canvases from screen purpose first,
  * then flow type, platform, and only then title keywords.
+ *
+ * "mobile" or "iOS" alone never places a flow in Mobile Apps when the purpose
+ * is onboarding.
  */
 export function classifyReference(input: ClassifyInput): string[] {
   const text = haystack(input);
@@ -171,7 +188,9 @@ export function classifyReference(input: ClassifyInput): string[] {
   }
 
   if (original === "Mobile Onboarding" || originalRaw === "Onboarding") {
-    if (platform === "web") return allowed(["Web Sign-Up", ...hidden]);
+    if (platform === "web" && originalRaw === "Onboarding") {
+      return allowed(["Web Sign-Up", ...hidden]);
+    }
     return allowed(["Mobile Onboarding", ...hidden]);
   }
 
