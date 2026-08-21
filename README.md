@@ -2,6 +2,8 @@
 
 Personal visual archive. Paste links or upload screenshots, then browse them in a gallery.
 
+![Library](docs/library-main.png)
+
 ```bash
 npm install
 npm run dev
