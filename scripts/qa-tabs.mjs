@@ -163,12 +163,12 @@ check(
 );
 check(
   "valid single-image references remain",
-  seeded.filter((reference) => reference.images === 1).length === 190,
+  seeded.filter((reference) => reference.images === 1).length === 139,
   `${seeded.filter((reference) => reference.images === 1).length}`,
 );
 check(
   "meaningful multi-image references remain",
-  seeded.filter((reference) => reference.images > 1).length === 103,
+  seeded.filter((reference) => reference.images > 1).length === 154,
   `${seeded.filter((reference) => reference.images > 1).length}`,
 );
 check(

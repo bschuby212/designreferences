@@ -174,7 +174,17 @@ export function ReferenceCarousel({
               ? "h-full w-full"
               : "rounded-[var(--radius)] bg-[var(--hover)]",
         )}
-        style={fill ? undefined : { aspectRatio: ratio }}
+        style={
+          fill
+            ? undefined
+            : phone && card
+              ? {
+                  aspectRatio: ratio,
+                  width: "min(100%, calc((100dvh - 12rem) * 9 / 19.5))",
+                  marginInline: "auto",
+                }
+              : { aspectRatio: ratio }
+        }
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
