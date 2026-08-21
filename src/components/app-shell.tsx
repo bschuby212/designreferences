@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Heart, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import {
   EMPTY_FILTERS,
   LAPTOP_NAV_COLLECTIONS,
@@ -10,7 +10,7 @@ import {
   type Reference,
   type SourceType,
 } from "@/lib/storage/types";
-import { cn, isHiddenNavCollection } from "@/lib/utils";
+import { cn, isCanonicalNavCollection } from "@/lib/utils";
 import { EditorDialog, type EditorState } from "./editor-dialog";
 import { DetailView, collectionNamesOf } from "./detail-view";
 import { Gallery } from "./gallery";
@@ -106,7 +106,7 @@ export function AppShell() {
       if (!matches(reference, { type: "all" }, search, filters, names)) continue;
       for (const id of reference.collectionIds) {
         const name = collections.find((collection) => collection.id === id)?.name;
-        if (!name || isHiddenNavCollection(name)) continue;
+        if (!name || !isCanonicalNavCollection(name)) continue;
         collectionCounts[id] = (collectionCounts[id] ?? 0) + 1;
       }
     }
@@ -137,12 +137,6 @@ export function AppShell() {
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
-
-  async function toggleFavorite(id: string) {
-    const reference = references.find((item) => item.id === id);
-    if (!reference) return;
-    await updateReference(id, { favorite: !reference.favorite });
-  }
 
   const filterActive =
     filters.sources.length + filters.collectionIds.length + filters.tags.length > 0;
@@ -263,7 +257,7 @@ export function AppShell() {
         />
 
         <div className="flex min-h-0 flex-1">
-          <div className="min-w-0 flex-1 pt-3">
+          <div className="min-w-0 flex-1">
             <Gallery
               references={visible}
               selectedId={selectedId}
@@ -278,10 +272,14 @@ export function AppShell() {
                 collections.find((collection) => collection.name === "Dashboards")
                   ?.id ?? null
               }
+              landingCollectionId={
+                collections.find(
+                  (collection) => collection.name === "Web & Landing Pages",
+                )?.id ?? null
+              }
               emptyTitle={empty.title}
               emptyHint={empty.hint}
               onOpen={openDetail}
-              onFavorite={(id) => void toggleFavorite(id)}
               onEdit={(id) => setEditor({ mode: "edit", id })}
               onDelete={(id) => void deleteReference(id)}
               onFiles={(files) =>
@@ -300,16 +298,6 @@ export function AppShell() {
           size="large"
           actions={
             <>
-              <IconButton
-                label={selected.favorite ? "Unfavorite" : "Favorite"}
-                onClick={() => void toggleFavorite(selected.id)}
-              >
-                <Heart
-                  size={16}
-                  strokeWidth={1.75}
-                  fill={selected.favorite ? "currentColor" : "none"}
-                />
-              </IconButton>
               <IconButton
                 label="Edit"
                 onClick={() => setEditor({ mode: "edit", id: selected.id })}
@@ -333,7 +321,6 @@ export function AppShell() {
             collectionNames={collectionNamesOf(collections, selected.collectionIds)}
             variant="modal"
             onClose={closeDetail}
-            onFavorite={() => void toggleFavorite(selected.id)}
             onEdit={() => setEditor({ mode: "edit", id: selected.id })}
             onDelete={() => {
               void deleteReference(selected.id);
@@ -357,7 +344,6 @@ export function AppShell() {
             collectionNames={collectionNamesOf(collections, selected.collectionIds)}
             variant="sheet"
             onClose={closeDetail}
-            onFavorite={() => void toggleFavorite(selected.id)}
             onEdit={() => setEditor({ mode: "edit", id: selected.id })}
             onDelete={() => {
               void deleteReference(selected.id);

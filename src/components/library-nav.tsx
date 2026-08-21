@@ -3,6 +3,7 @@
 import { useState, type ComponentType } from "react";
 import {
   Award,
+  Briefcase,
   Check,
   ChevronDown,
   Clapperboard,
@@ -23,11 +24,12 @@ import {
   type LucideProps,
 } from "lucide-react";
 import {
+  CANONICAL_NAV_COLLECTIONS,
   SOURCE_TYPES,
   type NavView,
   type SourceType,
 } from "@/lib/storage/types";
-import { cn, isHiddenNavCollection } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
 import { useClickOutside } from "./ui";
 
@@ -44,6 +46,7 @@ const CATEGORY_ICONS: Record<string, Icon> = {
   "Mobile Onboarding": Sparkles,
   "Web Sign-Up": LogIn,
   "Mobile Navigation": Compass,
+  Portfolios: Briefcase,
   Motion: Clapperboard,
 };
 
@@ -222,9 +225,10 @@ export function LibraryNav({
       <div className="flex min-w-0 max-w-full items-center gap-1">
         <div className="no-scrollbar min-w-0 flex-1 overflow-x-auto">
           <div className="flex w-max items-center gap-0.5">
-            {collections
-              .filter((collection) => !isHiddenNavCollection(collection.name))
-              .map((collection) => (
+            {CANONICAL_NAV_COLLECTIONS.map((name) => {
+              const collection = collections.find((row) => row.name === name);
+              if (!collection) return null;
+              return (
                 <Chip
                   key={collection.id}
                   active={view.type === "collection" && view.id === collection.id}
@@ -236,7 +240,8 @@ export function LibraryNav({
                 >
                   {collection.name}
                 </Chip>
-              ))}
+              );
+            })}
           </div>
         </div>
         {onSourceChange && (

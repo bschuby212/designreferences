@@ -1,6 +1,7 @@
 "use client";
 
 import type { Reference } from "@/lib/storage/types";
+import { cn } from "@/lib/utils";
 import { ReferenceCard } from "./reference-card";
 
 interface GalleryProps {
@@ -8,10 +9,10 @@ interface GalleryProps {
   selectedId: string | null;
   laptop?: boolean;
   dashboardCollectionId?: string | null;
+  landingCollectionId?: string | null;
   emptyTitle: string;
   emptyHint: string;
   onOpen: (id: string) => void;
-  onFavorite: (id: string) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onFiles: (files: File[]) => void;
@@ -22,10 +23,10 @@ export function Gallery({
   selectedId,
   laptop = false,
   dashboardCollectionId = null,
+  landingCollectionId = null,
   emptyTitle,
   emptyHint,
   onOpen,
-  onFavorite,
   onEdit,
   onDelete,
   onFiles,
@@ -38,7 +39,11 @@ export function Gallery({
 
   return (
     <div
-      className="h-full overflow-y-auto overflow-x-hidden overscroll-contain px-4 pb-10 md:px-12"
+      className={cn(
+        "h-full overflow-y-auto overflow-x-hidden overscroll-contain px-4 pb-10 md:px-12",
+        laptop ? "pt-10" : "pt-8",
+        "max-md:pt-[22px]",
+      )}
       onDragOver={(e) => {
         if ([...e.dataTransfer.types].includes("Files")) e.preventDefault();
       }}
@@ -65,13 +70,14 @@ export function Gallery({
               reference={reference}
               selected={reference.id === selectedId}
               fit={
-                dashboardCollectionId &&
-                reference.collectionIds.includes(dashboardCollectionId)
+                (dashboardCollectionId &&
+                  reference.collectionIds.includes(dashboardCollectionId)) ||
+                (landingCollectionId &&
+                  reference.collectionIds.includes(landingCollectionId))
                   ? "dashboard"
                   : "default"
               }
               onOpen={() => onOpen(reference.id)}
-              onFavorite={() => onFavorite(reference.id)}
               onEdit={() => onEdit(reference.id)}
               onDelete={() => onDelete(reference.id)}
             />

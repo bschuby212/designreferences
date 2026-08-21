@@ -1,13 +1,27 @@
+import {
+  classifyReference,
+  isNavigationContent,
+  isOnboardingContent,
+  isSignupContent,
+  resolveAllowedCollectionName,
+} from "../classify/category";
+import { now, normalizeUrl, uid } from "../utils";
 import { getDb } from "./indexeddb";
 import {
+  CANONICAL_NAV_COLLECTIONS,
   DEFAULT_COLLECTIONS,
   OBSOLETE_NAV_COLLECTIONS,
   type Collection,
   type CreateReferenceInput,
   type Reference,
   type ReferenceRecord,
+  type ReferenceScreen,
 } from "./types";
-import { now, uid } from "../utils";
+
+function mergeScreens(a: ReferenceScreen[], b: ReferenceScreen[]) {
+  const seen = new Set(a.map((screen) => screen.src));
+  return [...a, ...b.filter((screen) => !seen.has(screen.src))];
+}
 
 function toReference(
   record: ReferenceRecord,
@@ -128,10 +142,23 @@ export const indexedDbRepository: LibraryRepository = {
   },
 
   async createCollection(name) {
+    const resolved = resolveAllowedCollectionName(name);
+    if (!resolved) {
+      const existingUnknown = await getDb().collections.toArray();
+      const match = existingUnknown.find(
+        (row) => row.name.trim().toLowerCase() === name.trim().toLowerCase(),
+      );
+      if (match) return match;
+      throw new Error("Unknown category");
+    }
     const collections = await getDb().collections.toArray();
+    const existing = collections.find(
+      (row) => row.name.trim().toLowerCase() === resolved.toLowerCase(),
+    );
+    if (existing) return existing;
     const collection: Collection = {
       id: uid(),
-      name: name.trim(),
+      name: resolved,
       createdAt: now(),
       sortOrder: collections.length,
     };
@@ -186,6 +213,7 @@ export const indexedDbRepository: LibraryRepository = {
    * top of the user's own ordering.
    */
   async ensureCollections(names) {
+    const allowed = new Set(DEFAULT_COLLECTIONS.map((name) => name.toLowerCase()));
     const obsolete = new Set(
       OBSOLETE_NAV_COLLECTIONS.map((name) => name.toLowerCase()),
     );
@@ -193,16 +221,18 @@ export const indexedDbRepository: LibraryRepository = {
     const byName = new Map(existing.map((c) => [c.name.toLowerCase(), c]));
     let sortOrder = existing.length;
     for (const name of names) {
-      if (obsolete.has(name.toLowerCase())) continue;
-      if (byName.has(name.toLowerCase())) continue;
+      const resolved = resolveAllowedCollectionName(name) ?? name.trim();
+      if (obsolete.has(resolved.toLowerCase())) continue;
+      if (!allowed.has(resolved.toLowerCase())) continue;
+      if (byName.has(resolved.toLowerCase())) continue;
       const collection: Collection = {
         id: uid(),
-        name,
+        name: resolved,
         createdAt: now(),
         sortOrder: sortOrder++,
       };
       await getDb().collections.put(collection);
-      byName.set(name.toLowerCase(), collection);
+      byName.set(resolved.toLowerCase(), collection);
     }
     return getDb().collections.orderBy("sortOrder").toArray();
   },
@@ -214,90 +244,178 @@ export const indexedDbRepository: LibraryRepository = {
    */
   async syncCanonicalCollections() {
     const db = getDb();
-    await db.transaction("rw", db.collections, db.references, async () => {
-      const remapCollectionId = async (fromId: string, toId: string) => {
-        if (fromId === toId) return;
-        const references = await db.references.toArray();
-        for (const record of references) {
-          const ids = record.collectionIds ?? [];
-          if (!ids.includes(fromId)) continue;
-          const next = [...new Set(ids.map((id) => (id === fromId ? toId : id)))];
-          await db.references.update(record.id, { collectionIds: next });
-        }
-      };
-
+    await db.transaction("rw", db.collections, db.references, db.thumbnails, db.meta, async () => {
       const byName = async () => {
         const rows = await db.collections.toArray();
         return new Map(rows.map((row) => [row.name.trim().toLowerCase(), row]));
       };
 
-      const renameOrMerge = async (from: string, to: string) => {
+      const ensureNamed = async (name: string) => {
         const map = await byName();
-        const source = map.get(from.toLowerCase());
-        if (!source) return;
-        const dest = map.get(to.toLowerCase());
-        if (dest && dest.id !== source.id) {
-          await remapCollectionId(source.id, dest.id);
-          await db.collections.delete(source.id);
-          return;
-        }
-        if (source.name !== to) {
-          await db.collections.update(source.id, { name: to });
-        }
+        const existing = map.get(name.toLowerCase());
+        if (existing) return existing;
+        const rows = await db.collections.toArray();
+        const collection: Collection = {
+          id: uid(),
+          name,
+          createdAt: now(),
+          sortOrder: rows.length,
+        };
+        await db.collections.put(collection);
+        return collection;
       };
 
-      await renameOrMerge("Onboarding", "Mobile Onboarding");
-      await renameOrMerge("Navigation", "Mobile Navigation");
+      const labelsOf = (record: ReferenceRecord) =>
+        (record.screens ?? []).map((screen) => screen.label);
 
-      const map = await byName();
-      const combined = map.get("web & landing pages");
-      const web = map.get("web");
-      const landing = map.get("landing pages");
-      const survivor = combined ?? web ?? landing;
-      if (survivor) {
-        if (survivor.name !== "Web & Landing Pages") {
-          await db.collections.update(survivor.id, { name: "Web & Landing Pages" });
+      const destForObsolete = (
+        sourceName: string,
+        record: ReferenceRecord,
+      ): string | null => {
+        const lower = sourceName.trim().toLowerCase();
+        if (lower === "onboarding") return "Mobile Onboarding";
+        if (lower === "navigation") return "Mobile Navigation";
+        if (lower === "mobile" || lower === "mobile app") {
+          if (isOnboardingContent(record.title, record.notes, labelsOf(record))) {
+            return "Mobile Onboarding";
+          }
+          if (isNavigationContent(record.title, record.notes, labelsOf(record))) {
+            return "Mobile Navigation";
+          }
+          return "Mobile Apps";
         }
-        for (const extra of [combined, web, landing]) {
-          if (extra && extra.id !== survivor.id) {
-            await remapCollectionId(extra.id, survivor.id);
-            await db.collections.delete(extra.id);
+        if (
+          lower === "website" ||
+          lower === "websites" ||
+          lower === "web" ||
+          lower === "landing page" ||
+          lower === "landing pages" ||
+          lower === "marketing"
+        ) {
+          if (isSignupContent(record.title, record.notes, labelsOf(record))) {
+            return "Web Sign-Up";
+          }
+          return "Web & Landing Pages";
+        }
+        if (lower === "product design") return "Dashboards";
+        if (lower === "components") {
+          const names = classifyReference({
+            title: record.title,
+            url: record.url,
+            notes: record.notes,
+            screenLabels: labelsOf(record),
+            originalCategory: "Components",
+          });
+          return (
+            names.find((name) =>
+              (CANONICAL_NAV_COLLECTIONS as readonly string[]).includes(name),
+            ) ?? null
+          );
+        }
+        return resolveAllowedCollectionName(sourceName);
+      };
+
+      for (const name of DEFAULT_COLLECTIONS) await ensureNamed(name);
+
+      const obsoleteNames = new Set(
+        OBSOLETE_NAV_COLLECTIONS.map((name) => name.toLowerCase()),
+      );
+      const obsoleteRows = (await db.collections.toArray()).filter((row) =>
+        obsoleteNames.has(row.name.trim().toLowerCase()),
+      );
+      const stats = { mobileToApps: 0, websiteToLanding: 0, componentsMoved: 0, componentsHidden: 0 };
+
+      for (const source of obsoleteRows) {
+        const destCache = new Map<string | null, string | null>();
+        const references = await db.references.toArray();
+        for (const record of references) {
+          const ids = record.collectionIds ?? [];
+          if (!ids.includes(source.id)) continue;
+          const destName = destForObsolete(source.name, record);
+          if (!destCache.has(destName)) {
+            destCache.set(
+              destName,
+              destName ? (await ensureNamed(destName)).id : null,
+            );
+          }
+          const destId = destCache.get(destName) ?? null;
+          const next = ids.filter((id) => id !== source.id);
+          if (destId && !next.includes(destId)) next.push(destId);
+          await db.references.update(record.id, { collectionIds: next });
+
+          const lower = source.name.trim().toLowerCase();
+          if ((lower === "mobile" || lower === "mobile app") && destName === "Mobile Apps") {
+            stats.mobileToApps += 1;
+          }
+          if (
+            (lower === "website" || lower === "websites" || lower === "web") &&
+            destName === "Web & Landing Pages"
+          ) {
+            stats.websiteToLanding += 1;
+          }
+          if (lower === "components") {
+            if (destName) stats.componentsMoved += 1;
+            else stats.componentsHidden += 1;
           }
         }
+        await db.collections.delete(source.id);
       }
 
-      const after = await byName();
-      if (!after.get("web sign-up")) {
-        const existing = await db.collections.toArray();
-        await db.collections.put({
-          id: uid(),
-          name: "Web Sign-Up",
-          createdAt: now(),
-          sortOrder: existing.length,
+      const grouped = new Map<string, ReferenceRecord[]>();
+      for (const record of await db.references.toArray()) {
+        const key = normalizeUrl(record.url);
+        if (!key) continue;
+        const list = grouped.get(key) ?? [];
+        list.push(record);
+        grouped.set(key, list);
+      }
+      for (const group of grouped.values()) {
+        if (group.length < 2) continue;
+        group.sort((a, b) => {
+          const seeded = Number(Boolean(b.seedKey)) - Number(Boolean(a.seedKey));
+          if (seeded) return seeded;
+          return a.createdAt - b.createdAt;
         });
+        const survivor = group[0];
+        let screens = survivor.screens ?? [];
+        let collectionIds = [...(survivor.collectionIds ?? [])];
+        for (const extra of group.slice(1)) {
+          const overlap = (extra.collectionIds ?? []).some((id) =>
+            collectionIds.includes(id),
+          );
+          if (!overlap) continue;
+          screens = mergeScreens(screens, extra.screens ?? []);
+          collectionIds = [...new Set([...collectionIds, ...(extra.collectionIds ?? [])])];
+          await db.references.delete(extra.id);
+          await db.thumbnails.delete(extra.id);
+        }
+        await db.references.update(survivor.id, { screens, collectionIds });
       }
 
+      const used = new Set(
+        (await db.references.toArray()).flatMap((row) => row.collectionIds ?? []),
+      );
       const obsolete = new Set(
         OBSOLETE_NAV_COLLECTIONS.map((name) => name.toLowerCase()),
       );
-      const refs = await db.references.toArray();
-      const used = new Set(refs.flatMap((row) => row.collectionIds ?? []));
       for (const row of await db.collections.toArray()) {
-        if (!obsolete.has(row.name.trim().toLowerCase())) continue;
-        if (used.has(row.id)) continue;
-        await db.collections.delete(row.id);
+        if ((DEFAULT_COLLECTIONS as readonly string[]).includes(row.name)) continue;
+        const leftover = obsolete.has(row.name.trim().toLowerCase());
+        if (leftover || !used.has(row.id)) await db.collections.delete(row.id);
       }
 
       const current = await byName();
-      const extras = (await db.collections.toArray())
-        .filter((row) => !DEFAULT_COLLECTIONS.includes(row.name))
-        .sort((a, b) => a.sortOrder - b.sortOrder);
       let sortOrder = 0;
-      for (const name of [...DEFAULT_COLLECTIONS, ...extras.map((row) => row.name)]) {
+      for (const name of DEFAULT_COLLECTIONS) {
         const row = current.get(name.toLowerCase());
         if (!row) continue;
         await db.collections.update(row.id, { sortOrder: sortOrder++ });
       }
+
+      await db.meta.put({
+        key: "category-allowlist-stats",
+        value: JSON.stringify(stats),
+      });
     });
   },
 

@@ -129,6 +129,7 @@ export const CANONICAL_NAV_COLLECTIONS = [
   "Mobile Onboarding",
   "Web Sign-Up",
   "Mobile Navigation",
+  "Portfolios",
 ] as const;
 
 export type CanonicalNavCollection = (typeof CANONICAL_NAV_COLLECTIONS)[number];
@@ -152,12 +153,21 @@ export const LAPTOP_NAV_COLLECTIONS = [
   "Web & Landing Pages",
   "Dashboards",
   "Web Sign-Up",
+  "Portfolios",
 ] as const;
 
 /** Old chip names that must not be recreated after migration. */
 export const OBSOLETE_NAV_COLLECTIONS = [
   "Web",
+  "Website",
+  "Websites",
+  "Landing Page",
   "Landing Pages",
   "Onboarding",
   "Navigation",
+  "Mobile",
+  "Mobile App",
+  "Components",
+  "Product Design",
+  "Marketing",
 ] as const;

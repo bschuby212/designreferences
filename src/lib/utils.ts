@@ -1,4 +1,7 @@
-import { HIDDEN_NAV_COLLECTIONS } from "@/lib/storage/types";
+import {
+  CANONICAL_NAV_COLLECTIONS,
+  HIDDEN_NAV_COLLECTIONS,
+} from "@/lib/storage/types";
 
 export function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -45,6 +48,10 @@ export function hostnameOf(url: string) {
 
 export function isHiddenNavCollection(name: string) {
   return (HIDDEN_NAV_COLLECTIONS as readonly string[]).includes(name);
+}
+
+export function isCanonicalNavCollection(name: string) {
+  return (CANONICAL_NAV_COLLECTIONS as readonly string[]).includes(name);
 }
 
 /** Display-only product name. Stored titles stay unchanged for search. */

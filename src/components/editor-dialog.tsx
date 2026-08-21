@@ -25,7 +25,7 @@ import {
   blobToDataUrl,
   cn,
   hostnameOf,
-  isHiddenNavCollection,
+  isCanonicalNavCollection,
   normalizeUrl,
 } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
@@ -112,8 +112,8 @@ function EditorForm({
       ? references.find((r) => r.id === state.id)
       : undefined;
   const initialFile = state.mode === "upload" ? state.file : undefined;
-  const categoryOptions = collections.filter(
-    (collection) => !isHiddenNavCollection(collection.name),
+  const categoryOptions = collections.filter((collection) =>
+    isCanonicalNavCollection(collection.name),
   );
 
   const [url, setUrl] = useState(existing?.url ?? "");

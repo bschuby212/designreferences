@@ -2,7 +2,7 @@
 
 import { repository } from "@/lib/storage";
 import { EXAMPLE_SEEDS, SEED_REVISION } from "@/lib/storage/seed-examples";
-import type { CreateReferenceInput } from "@/lib/storage/types";
+import { DEFAULT_COLLECTIONS, type CreateReferenceInput } from "@/lib/storage/types";
 
 const REVISION_KEY = "seedRevision";
 
@@ -40,7 +40,10 @@ async function run() {
     return;
   }
 
-  const names = [...new Set(EXAMPLE_SEEDS.flatMap((seed) => seed.collections))];
+  const names = [
+    ...DEFAULT_COLLECTIONS,
+    ...new Set(EXAMPLE_SEEDS.flatMap((seed) => seed.collections)),
+  ];
   const collections = await repository.ensureCollections(names);
   const idByName = new Map(
     collections.map((collection) => [collection.name.trim().toLowerCase(), collection.id]),
