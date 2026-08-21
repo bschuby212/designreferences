@@ -283,6 +283,11 @@ export function AppShell() {
                     ?.name ?? "",
                 )
               }
+              phone={
+                activeView.type === "collection" &&
+                (collections.find((collection) => collection.id === activeView.id)
+                  ?.name ?? "") === "Mobile Apps"
+              }
               dashboardCollectionId={
                 collections.find((collection) => collection.name === "Dashboards")
                   ?.id ?? null

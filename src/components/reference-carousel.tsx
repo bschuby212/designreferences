@@ -22,6 +22,9 @@ const DETAIL_RATIO: Record<Aspect, string> = {
   landscape: "4 / 3",
 };
 
+/** Natural iPhone capture (1290×2796). Used only for Mobile Apps. */
+const PHONE_RATIO = "9 / 19.5";
+
 const SWIPE_PX = 32;
 const SWIPE_CLICK_MS = 350;
 
@@ -31,8 +34,8 @@ interface ReferenceCarouselProps {
   title: string;
   /** "card" adds a transparent open target underneath the controls. */
   variant: "card" | "detail";
-  /** Dashboards drop the tall laptop plate so screenshots fill the frame. */
-  fit?: "default" | "dashboard";
+  /** Dashboards drop the tall laptop plate; phone uses a portrait device well. */
+  fit?: "default" | "dashboard" | "phone";
   /** Desktop modal: fill the grey pane instead of a framed aspect-ratio plate. */
   bleed?: boolean;
   onActivate?: () => void;
@@ -57,6 +60,7 @@ export function ReferenceCarousel({
   // gesture ends up swallowing a later tap that was meant to open the card.
   const swipedAt = useRef(0);
   const kind: Aspect = aspect ?? "landscape";
+  const phone = fit === "phone" && kind === "portrait";
 
   // Compare the screens themselves rather than the array identity: the live
   // query hands back a fresh array on every write, and resetting to the first
@@ -79,7 +83,11 @@ export function ReferenceCarousel({
     [count],
   );
 
-  const ratio = variant === "card" ? CARD_RATIO[kind] : DETAIL_RATIO[kind];
+  const ratio = phone
+    ? PHONE_RATIO
+    : variant === "card"
+      ? CARD_RATIO[kind]
+      : DETAIL_RATIO[kind];
   const card = variant === "card";
   const fill = !card && bleed;
 
@@ -180,15 +188,24 @@ export function ReferenceCarousel({
               key={screen.src}
               className={cn(
                 "h-full w-full shrink-0",
-                fill && "flex items-center justify-center p-16",
+                fill &&
+                  (phone
+                    ? "flex items-center justify-center px-8 py-6"
+                    : "flex items-center justify-center p-16"),
                 card &&
                   kind === "portrait" &&
-                  "flex items-center justify-center px-5 py-6",
+                  (phone
+                    ? "flex items-center justify-center p-4"
+                    : "flex items-center justify-center px-5 py-6"),
                 card &&
                   kind === "landscape" &&
                   (fit === "dashboard"
                     ? "flex items-center justify-center px-4 py-10"
                     : "flex items-center justify-center px-6 py-12"),
+                !card &&
+                  !fill &&
+                  phone &&
+                  "flex items-center justify-center p-4",
               )}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -196,12 +213,12 @@ export function ReferenceCarousel({
                 src={screen.src}
                 alt={`${title} — ${screen.label}`}
                 className={cn(
-                  "select-none object-contain",
+                  "select-none object-contain object-center",
                   card && kind === "portrait"
                     ? "max-h-full max-w-full rounded-[22px]"
                     : card
                       ? "max-h-full max-w-full rounded-[14px]"
-                      : fill
+                      : fill || phone
                         ? "max-h-full max-w-full"
                         : "h-full w-full",
                 )}
@@ -263,6 +280,38 @@ export function ReferenceCarousel({
             >
               {index + 1}/{count}
             </div>
+
+            {phone && (
+              <div
+                className={cn(
+                  "absolute z-20 flex max-w-[80%] items-center justify-center",
+                  variant === "detail" ? "bottom-2 left-1/2 -translate-x-1/2" : "bottom-1 left-1/2 -translate-x-1/2",
+                )}
+              >
+                {screens.map((_, position) => (
+                  <button
+                    key={screens[position].src}
+                    type="button"
+                    aria-label={`Show screen ${position + 1}`}
+                    aria-current={position === index ? "true" : undefined}
+                    className="grid h-7 w-7 place-items-center"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      go(position);
+                    }}
+                  >
+                    <span
+                      className={cn(
+                        "h-1.5 rounded-full transition-[width,background-color]",
+                        position === index
+                          ? "w-4 bg-[var(--text)]"
+                          : "w-1.5 bg-[var(--text)]/25",
+                      )}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>

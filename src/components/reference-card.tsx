@@ -15,7 +15,7 @@ import { useClickOutside } from "./ui";
 interface ReferenceCardProps {
   reference: Reference;
   selected?: boolean;
-  fit?: "default" | "dashboard";
+  fit?: "default" | "dashboard" | "phone";
   onOpen: () => void;
   onEdit: () => void;
   onDelete: () => void;

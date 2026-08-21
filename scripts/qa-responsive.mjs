@@ -278,8 +278,8 @@ for (const viewport of WIDTHS) {
   const beforeBox = await firstCard.boundingBox();
   const frameBox = await firstCard.locator("div[style*='aspect-ratio']").first().boundingBox();
   check(
-    `${label}: portrait carousel uses a 3:4 preview`,
-    Boolean(frameBox) && Math.abs((frameBox.width / frameBox.height) - 3 / 4) < 0.05,
+    `${label}: portrait carousel uses a 9:19.5 phone preview`,
+    Boolean(frameBox) && Math.abs((frameBox.width / frameBox.height) - 9 / 19.5) < 0.05,
     frameBox ? `${Math.round(frameBox.width)}×${Math.round(frameBox.height)}` : "missing",
   );
   const landscapeFrame = page.locator("article div[style*='16 / 10']").first();
@@ -327,10 +327,9 @@ for (const viewport of WIDTHS) {
     );
   }
 
-  // Card carousels use arrows and n/total only.
   check(
-    `${label}: gallery cards have no pagination dots`,
-    (await firstCard.getByRole("button", { name: /Show screen \d+/ }).count()) === 0,
+    `${label}: gallery cards have pagination dots`,
+    (await firstCard.getByRole("button", { name: /Show screen \d+/ }).count()) > 1,
     "",
   );
 
@@ -455,8 +454,8 @@ for (const viewport of WIDTHS) {
       "",
     );
     check(
-      `${label}: detail has no pagination dots`,
-      (await inDetail.getByRole("button", { name: /Show screen \d+/ }).count()) === 0,
+      `${label}: detail has pagination dots`,
+      (await inDetail.getByRole("button", { name: /Show screen \d+/ }).count()) > 1,
       "",
     );
 

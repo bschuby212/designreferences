@@ -92,7 +92,11 @@ export function DetailView({
               variant="detail"
               bleed={modal}
               fit={
-                collectionNames?.includes("Dashboards") ? "dashboard" : "default"
+                collectionNames?.includes("Mobile Apps")
+                  ? "phone"
+                  : collectionNames?.includes("Dashboards")
+                    ? "dashboard"
+                    : "default"
               }
             />
           </div>
