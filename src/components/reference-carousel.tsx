@@ -83,10 +83,12 @@ export function ReferenceCarousel({
     [count],
   );
 
-  const ratio = phone
-    ? PHONE_RATIO
-    : variant === "card"
-      ? CARD_RATIO[kind]
+  // Cards keep the shared 3:4 well so product UI stays thumbnail-sized.
+  // The modal/sheet uses the natural phone ratio for inspection.
+  const ratio = card
+    ? CARD_RATIO[kind]
+    : phone
+      ? PHONE_RATIO
       : DETAIL_RATIO[kind];
   const card = variant === "card";
   const fill = !card && bleed;
@@ -194,9 +196,7 @@ export function ReferenceCarousel({
                     : "flex items-center justify-center p-16"),
                 card &&
                   kind === "portrait" &&
-                  (phone
-                    ? "flex items-center justify-center p-4"
-                    : "flex items-center justify-center px-5 py-6"),
+                  "flex items-center justify-center px-5 py-6",
                 card &&
                   kind === "landscape" &&
                   (fit === "dashboard"

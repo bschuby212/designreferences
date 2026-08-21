@@ -278,9 +278,20 @@ for (const viewport of WIDTHS) {
   const beforeBox = await firstCard.boundingBox();
   const frameBox = await firstCard.locator("div[style*='aspect-ratio']").first().boundingBox();
   check(
-    `${label}: portrait carousel uses a 9:19.5 phone preview`,
-    Boolean(frameBox) && Math.abs((frameBox.width / frameBox.height) - 9 / 19.5) < 0.05,
+    `${label}: portrait carousel uses a 3:4 thumbnail preview`,
+    Boolean(frameBox) && Math.abs((frameBox.width / frameBox.height) - 3 / 4) < 0.05,
     frameBox ? `${Math.round(frameBox.width)}×${Math.round(frameBox.height)}` : "missing",
+  );
+  const screenshotBox = await firstCard.locator("img").first().boundingBox();
+  check(
+    `${label}: phone screenshot stays smaller than the thumbnail well`,
+    Boolean(screenshotBox) &&
+      Boolean(frameBox) &&
+      screenshotBox.width < frameBox.width - 40 &&
+      Math.abs(screenshotBox.width / screenshotBox.height - 9 / 19.5) < 0.08,
+    screenshotBox
+      ? `${Math.round(screenshotBox.width)}×${Math.round(screenshotBox.height)} in ${Math.round(frameBox?.width ?? 0)}×${Math.round(frameBox?.height ?? 0)}`
+      : "missing",
   );
   const landscapeFrame = page.locator("article div[style*='16 / 10']").first();
   if ((await landscapeFrame.count()) > 0) {
