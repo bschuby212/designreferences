@@ -83,6 +83,7 @@ export function ReferenceCarousel({
     [count],
   );
 
+  const card = variant === "card";
   // Cards keep the shared 3:4 well so product UI stays thumbnail-sized.
   // The modal/sheet uses the natural phone ratio for inspection.
   const ratio = card
@@ -90,7 +91,6 @@ export function ReferenceCarousel({
     : phone
       ? PHONE_RATIO
       : DETAIL_RATIO[kind];
-  const card = variant === "card";
   const fill = !card && bleed;
 
   if (count === 0) {
