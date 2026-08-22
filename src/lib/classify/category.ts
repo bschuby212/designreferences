@@ -73,6 +73,7 @@ const CATEGORY_ALIASES: Record<string, string> = {
   "sign-up": "Web Sign-Up",
   portfolios: "Portfolios",
   portfolio: "Portfolios",
+  "cool stuff": "Cool stuff",
   "product design": "Dashboards",
   typography: "Typography",
   branding: "Branding",

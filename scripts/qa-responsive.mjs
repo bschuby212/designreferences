@@ -42,6 +42,25 @@ function check(name, pass, detail = "") {
   console.log(`  ${mark} ${name}${detail ? ` — ${detail}` : ""}`);
 }
 
+async function selectCategory(page, name, touch) {
+  const chip = page.locator(
+    `nav[aria-label='Library categories'] button[data-nav-label="${name}"]:not([aria-haspopup])`,
+  );
+  if ((await chip.count()) > 0 && (await chip.first().isVisible())) {
+    if (touch) await chip.first().tap();
+    else await chip.first().click();
+    return;
+  }
+  const menu = page.getByRole("button", { name: "Category" });
+  if (touch) await menu.tap();
+  else await menu.click();
+  const option = page.locator(
+    `nav[aria-label='Library categories'] [role='option'][data-nav-label="${name}"]`,
+  );
+  if (touch) await option.tap();
+  else await option.click();
+}
+
 async function seeded(page) {
   await page.waitForFunction(
     () => document.querySelectorAll("article").length > 0,
@@ -400,7 +419,7 @@ for (const viewport of WIDTHS) {
     };
   });
   check(`${label}: side navigation is absent`, !chrome.sidebar, "");
-  check(`${label}: horizontal chip navigation is visible`, chrome.chipNav, "");
+  check(`${label}: category navigation is visible`, chrome.chipNav, "");
   check(`${label}: no navigation drawer trigger`, chrome.hamburger === 0, "");
   check(`${label}: header width toggle is absent`, chrome.density === 0, "");
   const expectedColumns = viewport.width < 768 ? 1 : 3;
@@ -410,6 +429,10 @@ for (const viewport of WIDTHS) {
     `${chrome.columns} in first row`,
   );
   if (viewport.width < 768) {
+    const categoryMenu = await page.getByRole("button", { name: "Category" }).isVisible();
+    const sourceMenu = await page.getByRole("button", { name: "Source" }).isVisible();
+    check(`${label}: category is a dropdown like source`, categoryMenu && sourceMenu, "");
+  } else if (viewport.width === 768) {
     check(`${label}: chip row scrolls within its container`, chrome.chipScrollable, "");
   }
   if (viewport.touch) {
@@ -557,7 +580,7 @@ for (const viewport of WIDTHS) {
   }
 
   if (viewport.width >= 1280) {
-    await page.locator('[data-nav-label="Web & Landing Pages"]').click();
+    await selectCategory(page, "Web & Landing Pages", viewport.touch);
     await page.waitForTimeout(400);
     await page.waitForFunction(
       () =>
@@ -662,7 +685,7 @@ for (const viewport of WIDTHS) {
     if (SHOTS) {
       await page.screenshot({ path: `${SHOTS}/web-gallery-${viewport.width}.png` });
     }
-    await page.locator('[data-nav-label="Mobile Apps"]').click();
+    await selectCategory(page, "Mobile Apps", viewport.touch);
     await page.waitForTimeout(250);
   }
 

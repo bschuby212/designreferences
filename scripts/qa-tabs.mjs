@@ -27,6 +27,8 @@ const EXPECTED_CHIPS = [
   "Mobile Onboarding",
   "Web Sign-Up",
   "Mobile Navigation",
+  "Portfolios",
+  "Cool stuff",
 ];
 const REMOVED_NAV_ITEMS = [
   "All",
@@ -285,7 +287,7 @@ check(
   rows.map((row) => row.label).join(", "),
 );
 check(
-  "chip labels match the six canonical canvases",
+  "chip labels match the canonical canvases",
   rows.map((row) => row.label).join("|") === EXPECTED_CHIPS.join("|"),
   rows.map((row) => row.label).join(", "),
 );

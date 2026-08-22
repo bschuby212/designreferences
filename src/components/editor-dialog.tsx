@@ -14,18 +14,18 @@ import {
 import { classifyReference, exclusiveCollectionNames } from "@/lib/classify/category";
 import type { LinkPreview } from "@/lib/preview/types";
 import { detectSource } from "@/lib/preview/detectSource";
-import type {
-  Aspect,
-  CreateReferenceInput,
-  ReferenceScreen,
-  ThumbnailType,
+import {
+  CANONICAL_NAV_COLLECTIONS,
+  type Aspect,
+  type CreateReferenceInput,
+  type ReferenceScreen,
+  type ThumbnailType,
 } from "@/lib/storage/types";
 import {
   base64ToBlob,
   blobToDataUrl,
   cn,
   hostnameOf,
-  isCanonicalNavCollection,
   normalizeUrl,
 } from "@/lib/utils";
 import { useLibrary } from "./library-provider";
@@ -112,9 +112,10 @@ function EditorForm({
       ? references.find((r) => r.id === state.id)
       : undefined;
   const initialFile = state.mode === "upload" ? state.file : undefined;
-  const categoryOptions = collections.filter((collection) =>
-    isCanonicalNavCollection(collection.name),
-  );
+  const categoryOptions = CANONICAL_NAV_COLLECTIONS.flatMap((name) => {
+    const collection = collections.find((row) => row.name === name);
+    return collection ? [collection] : [];
+  });
 
   const [url, setUrl] = useState(existing?.url ?? "");
   const [title, setTitle] = useState(

@@ -130,6 +130,7 @@ export const CANONICAL_NAV_COLLECTIONS = [
   "Web Sign-Up",
   "Mobile Navigation",
   "Portfolios",
+  "Cool stuff",
 ] as const;
 
 export type CanonicalNavCollection = (typeof CANONICAL_NAV_COLLECTIONS)[number];

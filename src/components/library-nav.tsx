@@ -19,6 +19,7 @@ import {
   PenTool,
   Smartphone,
   Sparkles,
+  Star,
   Target,
   Upload,
   type LucideProps,
@@ -30,6 +31,7 @@ import {
   type SourceType,
 } from "@/lib/storage/types";
 import { cn } from "@/lib/utils";
+import { useBreakpoint } from "./hooks";
 import { useLibrary } from "./library-provider";
 import { useClickOutside } from "./ui";
 
@@ -47,6 +49,7 @@ const CATEGORY_ICONS: Record<string, Icon> = {
   "Web Sign-Up": LogIn,
   "Mobile Navigation": Compass,
   Portfolios: Briefcase,
+  "Cool stuff": Star,
   Motion: Clapperboard,
 };
 
@@ -208,6 +211,93 @@ function SourceMenu({
   );
 }
 
+function CategoryMenu({
+  view,
+  onViewChange,
+  counts,
+}: {
+  view: NavView;
+  onViewChange: (view: NavView) => void;
+  counts?: NavCounts;
+}) {
+  const { collections } = useLibrary();
+  const [open, setOpen] = useState(false);
+  const ref = useClickOutside(open, () => setOpen(false));
+  const items = CANONICAL_NAV_COLLECTIONS.flatMap((name) => {
+    const collection = collections.find((row) => row.name === name);
+    return collection ? [collection] : [];
+  });
+  const active =
+    view.type === "collection"
+      ? items.find((collection) => collection.id === view.id)
+      : undefined;
+  const ActiveIcon = active
+    ? (CATEGORY_ICONS[active.name] ?? Folder)
+    : Folder;
+  const label = active?.name ?? "Category";
+
+  return (
+    <div className="relative min-w-0 flex-1" ref={ref}>
+      <button
+        type="button"
+        aria-label="Category"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        data-nav-label={active?.name}
+        onClick={() => setOpen((value) => !value)}
+        className="inline-flex h-10 w-full min-w-0 items-center gap-1.5 px-2.5 text-[13px] font-medium !text-[var(--text)]"
+      >
+        <ActiveIcon size={14} strokeWidth={1.75} className="shrink-0" />
+        <span className="min-w-0 truncate">{label}</span>
+        {active && (
+          <span className="ml-0.5 inline-flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-[var(--preview)] px-1.5 text-[10px] font-medium tabular-nums !text-[var(--text)]">
+            {counts?.collections[active.id] ?? 0}
+          </span>
+        )}
+        <ChevronDown size={12} strokeWidth={1.75} className="ml-auto shrink-0 opacity-70" />
+      </button>
+      {open && (
+        <div
+          role="listbox"
+          aria-label="Category"
+          className="absolute top-full left-0 z-30 mt-1 max-h-[70dvh] min-w-[12rem] w-full overflow-y-auto rounded-md border border-[var(--border)] bg-[var(--surface)] py-1 shadow-sm"
+        >
+          {items.map((collection) => {
+            const selected = view.type === "collection" && view.id === collection.id;
+            const Icon = CATEGORY_ICONS[collection.name] ?? Folder;
+            return (
+              <button
+                key={collection.id}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                data-nav-label={collection.name}
+                className={cn(
+                  "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px]",
+                  selected
+                    ? "bg-[var(--hover)] text-[var(--text)]"
+                    : "text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--text)]",
+                )}
+                onClick={() => {
+                  onViewChange({ type: "collection", id: collection.id });
+                  setOpen(false);
+                }}
+              >
+                <Icon size={14} strokeWidth={1.75} className="shrink-0" />
+                <span className="min-w-0 flex-1 truncate">{collection.name}</span>
+                <span className="tabular-nums text-[11px] opacity-70">
+                  {counts?.collections[collection.id] ?? 0}
+                </span>
+                {selected && <Check size={12} strokeWidth={2} />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function LibraryNav({
   view,
   onViewChange,
@@ -216,6 +306,7 @@ export function LibraryNav({
   onSourceChange,
 }: LibraryNavProps) {
   const { collections } = useLibrary();
+  const mobile = useBreakpoint() === "mobile";
 
   return (
     <nav
@@ -223,27 +314,35 @@ export function LibraryNav({
       className="relative px-2 md:px-4"
     >
       <div className="flex min-w-0 max-w-full items-center gap-1">
-        <div className="no-scrollbar min-w-0 flex-1 overflow-x-auto">
-          <div className="flex w-max items-center gap-0.5">
-            {CANONICAL_NAV_COLLECTIONS.map((name) => {
-              const collection = collections.find((row) => row.name === name);
-              if (!collection) return null;
-              return (
-                <Chip
-                  key={collection.id}
-                  active={view.type === "collection" && view.id === collection.id}
-                  icon={CATEGORY_ICONS[collection.name] ?? Folder}
-                  count={counts?.collections[collection.id] ?? 0}
-                  onClick={() =>
-                    onViewChange({ type: "collection", id: collection.id })
-                  }
-                >
-                  {collection.name}
-                </Chip>
-              );
-            })}
+        {mobile ? (
+          <CategoryMenu
+            view={view}
+            onViewChange={onViewChange}
+            counts={counts}
+          />
+        ) : (
+          <div className="no-scrollbar min-w-0 flex-1 overflow-x-auto">
+            <div className="flex w-max items-center gap-0.5">
+              {CANONICAL_NAV_COLLECTIONS.map((name) => {
+                const collection = collections.find((row) => row.name === name);
+                if (!collection) return null;
+                return (
+                  <Chip
+                    key={collection.id}
+                    active={view.type === "collection" && view.id === collection.id}
+                    icon={CATEGORY_ICONS[collection.name] ?? Folder}
+                    count={counts?.collections[collection.id] ?? 0}
+                    onClick={() =>
+                      onViewChange({ type: "collection", id: collection.id })
+                    }
+                  >
+                    {collection.name}
+                  </Chip>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
         {onSourceChange && (
           <>
             <div className="mx-1 h-4 w-px shrink-0 bg-[var(--border)]" />
