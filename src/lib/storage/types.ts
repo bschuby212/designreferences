@@ -28,6 +28,7 @@ export type Aspect = "portrait" | "landscape";
 export type NavView =
   | { type: "all" }
   | { type: "collection"; id: string }
+  | { type: "favorites" }
   | { type: "source"; source: SourceType };
 
 /**

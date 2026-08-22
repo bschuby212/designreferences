@@ -29,10 +29,10 @@ const EXPECTED_CHIPS = [
   "Mobile Navigation",
   "Portfolios",
   "Cool stuff",
+  "Favorites",
 ];
 const REMOVED_NAV_ITEMS = [
   "All",
-  "Favorites",
   "Recent",
   "Typography",
   "Branding",
@@ -333,6 +333,26 @@ for (const category of categoryLabels) {
   const actual = report.chips[category]?.rendered;
   check(`${category}: stored membership matches gallery`, expected === actual, `${expected} vs ${actual}`);
 }
+
+await page.locator('[data-nav-label="Mobile Apps"]').click();
+await page.locator("article").first().hover();
+await page.locator("article").first().getByRole("button", { name: "Favorite" }).click();
+await page.waitForTimeout(250);
+const afterHeart = await navRows();
+check(
+  "hearting a thumbnail increases the Favorites count",
+  afterHeart.find((row) => row.label === "Favorites")?.count === 1,
+  `${afterHeart.find((row) => row.label === "Favorites")?.count}`,
+);
+await page.locator('[data-nav-label="Favorites"]').click();
+await page.waitForTimeout(300);
+const favorited = await galleryState();
+check("Favorites tab shows the hearted card", favorited.count === 1, `${favorited.count}`);
+await page.locator("article").first().hover();
+await page.locator("article").first().getByRole("button", { name: "Unfavorite" }).click();
+await page.waitForTimeout(250);
+const afterUnheart = await galleryState();
+check("unhearting clears the Favorites tab", afterUnheart.count === 0, afterUnheart.empty ?? `${afterUnheart.count}`);
 
 await page.locator('[data-nav-label="Mobile Apps"]').click();
 const search = page.getByPlaceholder("Search references…");

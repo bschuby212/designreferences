@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import {
   ExternalLink,
+  Heart,
   MoreHorizontal,
   Pencil,
   Trash2,
@@ -17,6 +18,7 @@ interface ReferenceCardProps {
   selected?: boolean;
   fit?: "default" | "dashboard" | "phone";
   onOpen: () => void;
+  onFavorite: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
@@ -26,6 +28,7 @@ export function ReferenceCard({
   selected,
   fit = "default",
   onOpen,
+  onFavorite,
   onEdit,
   onDelete,
 }: ReferenceCardProps) {
@@ -52,6 +55,16 @@ export function ReferenceCard({
       </div>
 
       <div className="pointer-events-none absolute top-1.5 right-1.5 z-30 hidden gap-0.5 rounded-md bg-[var(--surface)]/92 p-0.5 opacity-0 shadow-sm ring-1 ring-[var(--border)] transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 [@media(hover:hover)]:flex">
+        <Action
+          label={reference.favorite ? "Unfavorite" : "Favorite"}
+          onClick={onFavorite}
+        >
+          <Heart
+            size={14}
+            strokeWidth={1.75}
+            fill={reference.favorite ? "currentColor" : "none"}
+          />
+        </Action>
         {reference.url && (
           <a
             href={reference.url}
@@ -91,6 +104,18 @@ export function ReferenceCard({
         </button>
         {menu && (
           <div className="absolute right-0 top-9 z-40 w-44 overflow-hidden rounded-md border border-[var(--border)] bg-[var(--surface)] py-1 shadow-md">
+            <MenuItem
+              onClick={() => {
+                setMenu(false);
+                onFavorite();
+              }}
+            >
+              <Heart
+                size={14}
+                fill={reference.favorite ? "currentColor" : "none"}
+              />
+              {reference.favorite ? "Remove favorite" : "Add favorite"}
+            </MenuItem>
             {reference.url && (
               <a
                 href={reference.url}

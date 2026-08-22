@@ -14,6 +14,7 @@ interface GalleryProps {
   emptyTitle: string;
   emptyHint: string;
   onOpen: (id: string) => void;
+  onFavorite: (id: string) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onFiles: (files: File[]) => void;
@@ -29,6 +30,7 @@ export function Gallery({
   emptyTitle,
   emptyHint,
   onOpen,
+  onFavorite,
   onEdit,
   onDelete,
   onFiles,
@@ -82,6 +84,7 @@ export function Gallery({
                     : "default"
               }
               onOpen={() => onOpen(reference.id)}
+              onFavorite={() => onFavorite(reference.id)}
               onEdit={() => onEdit(reference.id)}
               onDelete={() => onDelete(reference.id)}
             />

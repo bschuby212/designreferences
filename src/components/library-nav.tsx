@@ -10,6 +10,7 @@ import {
   Compass,
   Folder,
   Globe,
+  Heart,
   Image,
   Layers,
   LayoutDashboard,
@@ -37,6 +38,7 @@ import { useClickOutside } from "./ui";
 
 export interface NavCounts {
   collections: Record<string, number>;
+  favorites?: number;
 }
 
 type Icon = ComponentType<LucideProps>;
@@ -228,12 +230,21 @@ function CategoryMenu({
     return collection ? [collection] : [];
   });
   const active =
-    view.type === "collection"
-      ? items.find((collection) => collection.id === view.id)
-      : undefined;
-  const ActiveIcon = active
-    ? (CATEGORY_ICONS[active.name] ?? Folder)
-    : Folder;
+    view.type === "favorites"
+      ? { name: "Favorites", count: counts?.favorites ?? 0, icon: Heart }
+      : view.type === "collection"
+        ? (() => {
+            const collection = items.find((row) => row.id === view.id);
+            return collection
+              ? {
+                  name: collection.name,
+                  count: counts?.collections[collection.id] ?? 0,
+                  icon: CATEGORY_ICONS[collection.name] ?? Folder,
+                }
+              : undefined;
+          })()
+        : undefined;
+  const ActiveIcon = active?.icon ?? Folder;
   const label = active?.name ?? "Category";
 
   return (
@@ -251,7 +262,7 @@ function CategoryMenu({
         <span className="min-w-0 truncate">{label}</span>
         {active && (
           <span className="ml-0.5 inline-flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-[var(--preview)] px-1.5 text-[10px] font-medium tabular-nums !text-[var(--text)]">
-            {counts?.collections[active.id] ?? 0}
+            {active.count}
           </span>
         )}
         <ChevronDown size={12} strokeWidth={1.75} className="ml-auto shrink-0 opacity-70" />
@@ -292,6 +303,29 @@ function CategoryMenu({
               </button>
             );
           })}
+          <button
+            type="button"
+            role="option"
+            aria-selected={view.type === "favorites"}
+            data-nav-label="Favorites"
+            className={cn(
+              "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px]",
+              view.type === "favorites"
+                ? "bg-[var(--hover)] text-[var(--text)]"
+                : "text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--text)]",
+            )}
+            onClick={() => {
+              onViewChange({ type: "favorites" });
+              setOpen(false);
+            }}
+          >
+            <Heart size={14} strokeWidth={1.75} className="shrink-0" />
+            <span className="min-w-0 flex-1 truncate">Favorites</span>
+            <span className="tabular-nums text-[11px] opacity-70">
+              {counts?.favorites ?? 0}
+            </span>
+            {view.type === "favorites" && <Check size={12} strokeWidth={2} />}
+          </button>
         </div>
       )}
     </div>
@@ -340,6 +374,14 @@ export function LibraryNav({
                   </Chip>
                 );
               })}
+              <Chip
+                active={view.type === "favorites"}
+                icon={Heart}
+                count={counts?.favorites ?? 0}
+                onClick={() => onViewChange({ type: "favorites" })}
+              >
+                Favorites
+              </Chip>
             </div>
           </div>
         )}
@@ -363,6 +405,7 @@ export function viewLabel(
   collections: { id: string; name: string }[],
 ) {
   if (view.type === "all") return "All references";
+  if (view.type === "favorites") return "Favorites";
   if (view.type === "source") return view.source;
   return collections.find((collection) => collection.id === view.id)?.name ?? "Collection";
 }

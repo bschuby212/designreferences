@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { ArrowLeft, Heart, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { exclusiveCollectionNames } from "@/lib/classify/category";
 import {
   EMPTY_FILTERS,
@@ -29,7 +29,9 @@ function matches(
   collectionNames: string[],
   viewCollectionName?: string,
 ) {
-  if (view.type === "collection") {
+  if (view.type === "favorites") {
+    if (!reference.favorite) return false;
+  } else if (view.type === "collection") {
     const visibleNames = exclusiveCollectionNames(collectionNames);
     if (viewCollectionName) {
       if (!visibleNames.includes(viewCollectionName)) return false;
@@ -113,11 +115,13 @@ export function AppShell() {
   // navigation chip agrees with the references it will render.
   const counts = useMemo(() => {
     const collectionCounts: Record<string, number> = {};
+    let favorites = 0;
     for (const reference of references) {
       const names = exclusiveCollectionNames(
         collectionNamesOf(collections, reference.collectionIds),
       );
       if (!matches(reference, { type: "all" }, search, filters, names)) continue;
+      if (reference.favorite) favorites += 1;
       for (const name of names) {
         if (!isCanonicalNavCollection(name)) continue;
         const id = collections.find((collection) => collection.name === name)?.id;
@@ -125,7 +129,7 @@ export function AppShell() {
         collectionCounts[id] = (collectionCounts[id] ?? 0) + 1;
       }
     }
-    return { collections: collectionCounts };
+    return { collections: collectionCounts, favorites };
   }, [references, collections, search, filters]);
 
   const selected = references.find((r) => r.id === selectedId) ?? null;
@@ -146,6 +150,15 @@ export function AppShell() {
       window.history.back();
     }
   }, [mobile]);
+
+  const toggleFavorite = useCallback(
+    (id: string) => {
+      const reference = references.find((item) => item.id === id);
+      if (!reference) return;
+      void updateReference(id, { favorite: !reference.favorite });
+    },
+    [references, updateReference],
+  );
 
   useEffect(() => {
     const onPop = () => setSelectedId(null);
@@ -172,6 +185,12 @@ export function AppShell() {
       return {
         title: "No references match these filters",
         hint: "Clear a filter to widen the results.",
+      };
+    }
+    if (activeView.type === "favorites") {
+      return {
+        title: "No favorites yet",
+        hint: "Tap the heart on a reference to keep it here.",
       };
     }
     if (activeView.type === "collection") {
@@ -300,6 +319,7 @@ export function AppShell() {
               emptyTitle={empty.title}
               emptyHint={empty.hint}
               onOpen={openDetail}
+              onFavorite={(id) => toggleFavorite(id)}
               onEdit={(id) => setEditor({ mode: "edit", id })}
               onDelete={(id) => void deleteReference(id)}
               onFiles={(files) =>
@@ -318,6 +338,16 @@ export function AppShell() {
           size="large"
           actions={
             <>
+              <IconButton
+                label={selected.favorite ? "Unfavorite" : "Favorite"}
+                onClick={() => toggleFavorite(selected.id)}
+              >
+                <Heart
+                  size={16}
+                  strokeWidth={1.75}
+                  fill={selected.favorite ? "currentColor" : "none"}
+                />
+              </IconButton>
               <IconButton
                 label="Edit"
                 onClick={() => setEditor({ mode: "edit", id: selected.id })}
@@ -341,6 +371,7 @@ export function AppShell() {
             collectionNames={collectionNamesOf(collections, selected.collectionIds)}
             variant="modal"
             onClose={closeDetail}
+            onFavorite={() => toggleFavorite(selected.id)}
             onEdit={() => setEditor({ mode: "edit", id: selected.id })}
             onDelete={() => {
               void deleteReference(selected.id);
@@ -364,6 +395,7 @@ export function AppShell() {
             collectionNames={collectionNamesOf(collections, selected.collectionIds)}
             variant="sheet"
             onClose={closeDetail}
+            onFavorite={() => toggleFavorite(selected.id)}
             onEdit={() => setEditor({ mode: "edit", id: selected.id })}
             onDelete={() => {
               void deleteReference(selected.id);

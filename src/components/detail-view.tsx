@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { ExternalLink, Pencil, Trash2, X } from "lucide-react";
+import { ExternalLink, Heart, Pencil, Trash2, X } from "lucide-react";
 import type { Collection, Reference } from "@/lib/storage/types";
 import { formatSavedDate, productName } from "@/lib/utils";
 import { ReferenceCarousel } from "./reference-carousel";
@@ -11,6 +11,7 @@ interface DetailViewProps {
   reference: Reference;
   collectionNames?: string[];
   onClose: () => void;
+  onFavorite: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onNotes: (notes: string) => void;
@@ -21,6 +22,7 @@ export function DetailView({
   reference,
   collectionNames,
   onClose,
+  onFavorite,
   onEdit,
   onDelete,
   onNotes,
@@ -52,6 +54,16 @@ export function DetailView({
       {!modal && (
         <div className="flex h-11 shrink-0 items-center justify-between border-b border-[var(--border)] px-2">
           <div className="flex items-center gap-0.5">
+            <IconButton
+              label={reference.favorite ? "Unfavorite" : "Favorite"}
+              onClick={onFavorite}
+            >
+              <Heart
+                size={16}
+                strokeWidth={1.75}
+                fill={reference.favorite ? "currentColor" : "none"}
+              />
+            </IconButton>
             <IconButton label="Edit" onClick={onEdit}>
               <Pencil size={16} strokeWidth={1.75} />
             </IconButton>
