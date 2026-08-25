@@ -100,6 +100,14 @@ button {
     flex-basis: 100%;
     max-width: 100%;
   }
+
+  /* Full-width mobile cards: give every thumbnail a taller, consistent gray
+     frame instead of the per-aspect ratio used on tablet/desktop. The
+     important override beats the inline aspect-ratio on the same element. */
+  .preview-frame {
+    height: clamp(280px, 76vw, 340px);
+    aspect-ratio: auto !important;
+  }
 }
 
 .no-scrollbar {
