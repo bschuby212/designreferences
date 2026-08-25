@@ -99,7 +99,7 @@ export function ReferenceCarousel({
         className={cn(
           "flex items-center justify-center text-[11px] text-[var(--muted-2)]",
           card
-            ? "rounded-[24px] bg-[var(--preview)]"
+            ? "preview-frame rounded-[24px] bg-[var(--preview)]"
             : fill
               ? "h-full w-full"
               : "rounded-[var(--radius)] bg-[var(--hover)]",
@@ -171,7 +171,7 @@ export function ReferenceCarousel({
         className={cn(
           "relative overflow-hidden",
           card
-            ? "rounded-[24px] bg-[var(--preview)]"
+            ? "preview-frame rounded-[24px] bg-[var(--preview)]"
             : fill
               ? "h-full w-full"
               : "rounded-[var(--radius)] bg-[var(--hover)]",
