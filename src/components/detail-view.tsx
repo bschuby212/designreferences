@@ -5,7 +5,7 @@ import { ExternalLink, Heart, Pencil, Trash2, X } from "lucide-react";
 import type { Collection, Reference } from "@/lib/storage/types";
 import { formatSavedDate, productName } from "@/lib/utils";
 import { ReferenceCarousel } from "./reference-carousel";
-import { areaClass, GhostButton, IconButton } from "./ui";
+import { areaClass, IconButton } from "./ui";
 
 interface DetailViewProps {
   reference: Reference;
@@ -174,17 +174,6 @@ export function DetailView({
               }}
             />
           </label>
-
-          {!modal && (
-            <div className="mt-4 flex gap-2">
-              <GhostButton className="flex-1" onClick={onEdit}>
-                Edit
-              </GhostButton>
-              <GhostButton className="flex-1 text-[var(--danger)]" onClick={onDelete}>
-                Delete
-              </GhostButton>
-            </div>
-          )}
         </section>
       </div>
     </div>
