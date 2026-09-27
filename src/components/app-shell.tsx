@@ -211,7 +211,7 @@ export function AppShell() {
   return (
     <div className="flex h-dvh min-h-0 min-w-0 flex-col overflow-hidden bg-[var(--bg)]">
         {mobile ? (
-          <header className="flex h-[var(--header-h)] items-center gap-0.5 border-b border-[var(--border)] bg-[var(--bg)] px-1 pt-[env(safe-area-inset-top)]">
+          <header className="flex h-[calc(var(--header-h)_+_var(--sat))] items-center gap-0.5 border-b border-[var(--border)] bg-[var(--bg)] px-1 pt-[var(--sat)]">
             {searchOpen ? (
               <>
                 <IconButton label="Back" onClick={() => setSearchOpen(false)}>

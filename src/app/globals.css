@@ -17,6 +17,10 @@
   --preview: #eef0f3;
   --radius: 6px;
   --header-h: 52px;
+  /* Top safe-area inset (notch / Dynamic Island). Resolves to 0 on devices
+     without one. Kept as a custom property so the header can add it to its
+     height instead of letting padding eat into a fixed height. */
+  --sat: env(safe-area-inset-top, 0px);
 }
 
 @theme inline {
